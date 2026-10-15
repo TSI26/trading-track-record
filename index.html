@@ -782,7 +782,7 @@ async function fetchTable(tb, mine) {
   while (true) {
     let q = sb.from(tb).select('*');
     if (mine) q = q.eq('user_id', state.me);
-    const {data: rows, error} = await q.order('created_at', {ascending: true}).range(from, from + 999);
+    const {data: rows, error} = await q.order(tb === 'settings' ? 'user_id' : 'created_at', {ascending: true}).range(from, from + 999);
     if (error) throw Object.assign(error, {table: tb});
     all = all.concat(rows);
     if (rows.length < 1000) break;

@@ -16,7 +16,7 @@
 <title>Trading Track-Record</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 /* Same skeleton as Tracking by Wealth: two modes (desk = sidebar + grid + spreadsheet; phone = narrow column + bottom bar + sheet).
@@ -31,7 +31,7 @@
   --shadow:0 12px 32px rgba(0,0,0,.45);
   --font-display:"Space Grotesk", "Segoe UI", system-ui, sans-serif;
   --font-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --font-num:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-num:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   color-scheme:dark;
 }
 @media (prefers-color-scheme: light){
@@ -63,7 +63,8 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.num{font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums lining-nums;font-feature-settings:'tnum' 1,'lnum' 1,'zero' 0}
+.kpi .k-val,.acc-bal,.side-bal strong,.big-amt .field,.field.n,.qf.n,.slist li strong,.cal .cell .v,.calc strong,.acc-grid strong,.show-stats div strong{font-variant-numeric:tabular-nums lining-nums}
 .pos{color:var(--win)} .neg{color:var(--loss)} .zero{color:var(--muted)}
 .brand{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.02em;display:flex;align-items:center;gap:10px;white-space:nowrap;text-transform:uppercase}
 .brand .logo{width:28px;height:28px;flex:none}
@@ -96,7 +97,7 @@ button{cursor:pointer}
 .kpis{display:grid;gap:10px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-width:0}
 .kpi .k-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
-.kpi .k-val{font-family:var(--font-num);font-weight:700;font-size:21px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em}
+.kpi .k-val{font-family:var(--font-num);font-weight:700;font-size:21px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
 .kpi .k-sub{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi.hero{background:linear-gradient(140deg,color-mix(in srgb,var(--accent) 14%,var(--surface)),var(--surface) 65%);border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
 
@@ -230,6 +231,76 @@ button{cursor:pointer}
 .m-desk.side-mini .me-card .avatar-edit .pen{display:none}
 .link-del{border:0;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:2px 0;text-decoration:underline;text-underline-offset:2px}
 .link-del:hover{color:var(--loss)}
+
+/* ===== account switcher ===== */
+.acc-sw{width:100%;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:6px 7px;text-align:left;white-space:nowrap;overflow:hidden;transition:border-color .15s,background .2s}
+.acc-sw:hover,.acc-sw[aria-expanded="true"]{border-color:var(--line-2)}
+.acc-sw-txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.acc-sw-txt b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis}
+.acc-sw-txt small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.acc-chev{width:16px;height:16px;color:var(--muted);flex:none}
+.acc-badge{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none;font-family:var(--font-display);font-weight:700;font-size:14px;color:#fff;background:var(--c,var(--muted));text-transform:uppercase;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.acc-badge.sm{width:28px;height:28px;font-size:13px}
+.acc-badge.empty{background:var(--surface);border:1px dashed var(--line-2);color:var(--muted);text-shadow:none}
+.acc-badge.all{background:var(--surface);border:1px solid var(--line-2);color:var(--fg);text-shadow:none}
+.acc-badge.all svg{width:15px;height:15px}
+.m-desk.side-mini .acc-sw{border-color:transparent;background:transparent;padding:6px 7px}
+.ptop .acc-wrap{min-width:0;flex:1}
+.ptop .acc-sw{width:auto;max-width:100%;background:transparent;border-color:transparent;padding:4px 6px 4px 2px}
+.acc-menu{position:fixed;z-index:60;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:var(--shadow);padding:6px;width:300px;max-height:min(70vh,560px);overflow:auto}
+@media (prefers-reduced-motion:no-preference){.acc-menu{animation:pop .14s ease-out}}
+.acc-menu-head{display:flex;flex-direction:column;padding:6px 8px 8px}
+.acc-menu-head span{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.acc-menu-head small{font-size:11.5px;color:var(--muted);opacity:.8}
+.acc-row{display:flex;align-items:center;gap:4px;border-radius:9px}
+.acc-row:hover{background:var(--surface-2)}
+.acc-row.arch{opacity:.6}
+.acc-pick{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:7px 8px;border-radius:9px;text-align:left}
+.acc-row-txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.acc-row-txt b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-row-txt small{font-size:11.5px;color:var(--muted)}
+.acc-tick{width:16px;height:16px;color:var(--accent);flex:none}
+.acc-pick[aria-current="true"] .acc-row-txt b{color:var(--fg)}
+.acc-chk{display:grid;place-items:center;width:36px;height:36px;flex:none;cursor:pointer;border-radius:8px}
+.acc-chk input{width:17px;height:17px;accent-color:var(--accent);margin:0;cursor:pointer}
+.acc-sep{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;padding:10px 8px 4px}
+.acc-menu hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
+.acc-foot{width:100%;display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:8px;padding:9px 10px;font-weight:600;color:var(--fg);text-align:left}
+.acc-foot:hover{background:var(--surface-2)}
+.acc-foot svg{width:17px;height:17px;color:var(--muted)}
+
+/* ===== account window ===== */
+.panel.wide{max-width:640px}
+.panel-sub{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.req{color:var(--accent);font-weight:700}
+.fsec{border-top:1px solid var(--line);padding-top:4px;margin-top:12px}
+.fsec:first-of-type{border-top:0;margin-top:2px;padding-top:0}
+.fsec[hidden]{display:none}
+.fsec-title{font-family:var(--font-display);font-weight:600;font-size:14.5px;margin:12px 0 0}
+.fsec-title em{font-style:normal;font-family:var(--font-body);font-weight:500;font-size:12px;color:var(--muted);margin-left:6px}
+.fl{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+.fl em{font-style:normal;font-weight:500;opacity:.85}
+.fhint{margin:8px 0 0;font-size:12.5px;color:var(--muted);line-height:1.45}
+.segbar{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.segbar button{flex:1;border:0;background:transparent;border-radius:7px;padding:8px 10px;font-weight:600;font-size:13.5px;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.segbar button:hover{color:var(--fg)}
+.segbar button[aria-checked="true"]{background:var(--surface-2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line-2),inset 0 -2px 0 var(--accent)}
+.segbar button b{font-weight:700;margin-right:2px}
+.cur-line{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
+.cur-seg{flex:0 1 auto}
+.cur-seg button[data-acurmore]{flex:0 0 auto;padding:8px 12px;font-size:16px;line-height:1;letter-spacing:1px}
+.cur-line select{flex:1 1 200px;width:auto}
+.inp-unit{position:relative}
+.inp-unit .field{padding-right:34px}
+.inp-unit .u{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600;font-size:13px;pointer-events:none}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;background:var(--c);padding:0;box-shadow:inset 0 0 0 2px var(--surface);transition:transform .12s}
+.swatch:hover{transform:scale(1.08)}
+.swatch[aria-checked="true"]{border-color:var(--fg)}
+.cancel{border:1px solid var(--line);background:transparent;border-radius:12px;padding:13px 18px;font-weight:700}
+.save:disabled{opacity:.6;cursor:default}
+.m-phone .row3{grid-template-columns:1fr 1fr}
+.m-phone .segbar button{padding:8px 6px;font-size:13px}
 /* account page */
 .prof-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .prof-head h2{margin:0;font-family:var(--font-display);font-size:21px}
@@ -367,7 +438,8 @@ tr.quick td:last-child{padding-right:8px}
 .inline-add{display:flex;gap:8px;max-width:420px}
 
 /* ===== panels ===== */
-.overlay{position:fixed;inset:0;background:rgba(3,5,10,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.overlay{position:fixed;inset:0;background:rgba(3,5,10,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:max(16px,6vh) 16px 16px;overflow:auto}
+.m-desk .panel{max-height:none}
 .m-phone .overlay{align-items:flex-end;padding:0}
 .panel{background:var(--surface);width:100%;max-width:560px;border-radius:16px;padding:16px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow:auto;box-shadow:var(--shadow);border:1px solid var(--line)}
 .m-phone .panel{border-radius:18px 18px 0 0;max-height:94vh}
@@ -409,8 +481,10 @@ details.more summary{cursor:pointer;color:var(--muted);font-weight:600;font-size
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:60;font-size:13.5px;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
 .m-phone .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion:no-preference){
-  .panel{animation:up .2s ease-out}
-  @keyframes up{from{transform:translateY(20px);opacity:.6}to{transform:none;opacity:1}}
+  .panel.enter{animation:up .22s cubic-bezier(.2,.8,.3,1)}
+  .overlay.enter{animation:fadein .18s ease-out}
+  @keyframes up{from{transform:translateY(16px) scale(.985);opacity:0}to{transform:none;opacity:1}}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
 }
 
 body{padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -492,12 +566,13 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <div class="app">
   <aside class="side">
     <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo"/></svg><span class="txt lbl">Track<b>-</b>Record<span class="sub">Trading</span></span></div>
+    <div class="acc-wrap" id="acc-side"></div>
     <button class="side-add" type="button" data-act="add" data-tip="Nouveau trade"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span class="lbl">Nouveau trade</span></button>
     <nav class="side-nav" aria-label="Sections">
       <div class="nav-group">
         <span class="nav-title lbl">Trading</span>
         <button type="button" data-view="dash" data-tip="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span class="lbl">Dashboard</span></button>
-        <button type="button" data-view="journal" data-tip="Journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></svg><span class="lbl">Journal</span></button>
+        <button type="button" data-view="journal" data-tip="Mes trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></svg><span class="lbl">Mes trades</span></button>
         <button type="button" data-view="stats" data-tip="Statistiques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="lbl">Statistiques</span></button>
       </div>
       <div class="nav-group">
@@ -520,7 +595,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   <div class="main-col">
     <header class="ptop">
       <div class="ptop-inner">
-        <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo"/></svg><span>Track<b>-</b>Record</span></div>
+        <div class="acc-wrap" id="acc-top"></div>
         <div class="ptop-right">
           <div class="me-wrap" id="me-top"></div>
           <div class="mode-switch" role="group" aria-label="Affichage">
@@ -540,7 +615,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <nav class="mnav" aria-label="Navigation">
   <div class="mnav-inner">
     <button class="mtab" data-view="dash" aria-selected="true" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Dashboard</button>
-    <button class="mtab" data-view="journal" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Journal</button>
+    <button class="mtab" data-view="journal" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Trades</button>
     <button class="fab" data-act="add" type="button" aria-label="Nouveau trade"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <button class="mtab" data-view="stats" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
     <button class="mtab" data-view="more" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Plus</button>
@@ -561,6 +636,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <div id="panel-root"></div>
 <div id="toast-root"></div>
 <div id="me-pop"></div>
+<div id="acc-pop"></div>
 <input id="avatar-file" type="file" accept="image/*" hidden>
 <div id="tip-root"></div>
 <datalist id="dl-assets"></datalist>
@@ -598,7 +674,11 @@ const KINDS = [
   {id:'backtest', name:'Backtest', plural:'Backtests'}
 ];
 const kindOf = id => KINDS.find(k => k.id === id) || KINDS[0];
-const CURRENCIES = ['USD','EUR','GBP','CHF','CAD','AUD','JPY','NZD'];
+const CURRENCIES = ['USD','EUR','GBP','CHF','CAD','AUD','JPY','NZD','SGD','HKD','SEK','NOK','DKK','PLN','ZAR','MXN','TRY','AED','CNH'];
+const CUR_NAMES = {USD:'Dollar américain', EUR:'Euro', GBP:'Livre sterling', CHF:'Franc suisse', CAD:'Dollar canadien', AUD:'Dollar australien', JPY:'Yen japonais', NZD:'Dollar néo-zélandais', SGD:'Dollar de Singapour', HKD:'Dollar de Hong Kong', SEK:'Couronne suédoise', NOK:'Couronne norvégienne', DKK:'Couronne danoise', PLN:'Zloty polonais', ZAR:'Rand sud-africain', MXN:'Peso mexicain', TRY:'Livre turque', AED:'Dirham des EAU', CNH:'Yuan offshore'};
+const PLATFORMS = ['MetaTrader 5', 'MetaTrader 4', 'cTrader', 'TradingView', 'NinjaTrader', 'DXtrade', 'Match-Trader', 'Autre'];
+const PROP_PHASES = [{id:'challenge', name:'Challenge'}, {id:'verification', name:'Vérification'}, {id:'funded', name:'Financé'}];
+const ACC_COLORS = ['#3987e5', '#22c55e', '#f5a524', '#d55181', '#9085e9', '#199e70', '#e5673a', '#8b94a7'];
 const ASSETS = {
   forex: ['EURUSD','GBPUSD','USDJPY','USDCHF','AUDUSD','NZDUSD','USDCAD','EURGBP','EURJPY','GBPJPY','EURCHF','EURAUD','EURCAD','EURNZD','GBPAUD','GBPCAD','GBPCHF','GBPNZD','AUDJPY','AUDCAD','AUDNZD','AUDCHF','CADJPY','CHFJPY','NZDJPY','NZDCAD'],
   matieres: ['XAUUSD','XAGUSD','XTIUSD','XBRUSD','USOIL','UKOIL','XNGUSD','XPTUSD','XPDUSD','COPPER'],
@@ -675,12 +755,12 @@ const state = {
   view: lsGet('ttr-view', 'dash'),
   period: lsGet('ttr-period', 'all'),
   unit: lsGet('ttr-unit', 'cur'),
-  acc: lsGet('ttr-acc', 'all'),
+  tmpSel: 'all',
   cy: now.getFullYear(), cm: now.getMonth(),
   calY: now.getFullYear(), calM: now.getMonth(),
   db: {accounts: [], trades: [], movements: []}, settings: {},
   demo: false, loaded: false, store: 'pending',
-  me: null, myEmail: '', user: null, isAdmin: false, menuOpen: false,
+  me: null, myEmail: '', user: null, isAdmin: false, menuOpen: false, accMenuOpen: false,
   sideMini: lsGet('ttr-side-mini', false),
   admin: {users: [], accounts: [], trades: [], movements: [], settings: {}}, adminLoaded: false, viewAs: null,
   q: '', fSide: 'all', fRes: 'all'
@@ -698,13 +778,19 @@ function data() {
 
 /* ---------- row mapping ---------- */
 const ts = v => Date.parse(v) || 0;
-const rowToAcc = r => ({id: r.id, user_id: r.user_id, name: r.name || '', broker: r.broker || '', kind: r.kind || 'reel', currency: r.currency || 'USD', capital: Number(r.capital) || 0, rmax: Number(r.rmax) || 0, archived: !!r.archived, createdAt: r.createdAt || ts(r.created_at)});
+const numOrNull = v => v == null || v === '' ? null : Number(v);
+const rowToAcc = r => ({id: r.id, user_id: r.user_id, name: r.name || '', broker: r.broker || '', kind: r.kind || 'reel', currency: r.currency || 'USD', capital: Number(r.capital) || 0, rmax: Number(r.rmax) || 0, archived: !!r.archived,
+  platform: r.platform || '', number: r.number || '', opened_on: r.opened_on ? String(r.opened_on).slice(0, 10) : '', color: r.color || '',
+  prop_phase: r.prop_phase || '', prop_target: numOrNull(r.prop_target), prop_daily_loss: numOrNull(r.prop_daily_loss), prop_max_dd: numOrNull(r.prop_max_dd),
+  createdAt: r.createdAt || ts(r.created_at)});
 const rowToTrade = r => ({id: r.id, user_id: r.user_id, account_id: r.account_id, date: String(r.date).slice(0, 10), time: r.time ? String(r.time).slice(0, 5) : '', asset: r.asset || '', asset_class: r.asset_class || 'autre', side: r.side === 'short' ? 'short' : 'long', session: r.session || 'off', risk: Number(r.risk) || 0, rmax: Number(r.rmax) || 0, pnl: Number(r.pnl) || 0, commission: Number(r.commission) || 0, swap: Number(r.swap) || 0, lots: r.lots == null || r.lots === '' ? null : Number(r.lots), setup: r.setup || '', note: r.note || '', createdAt: r.createdAt || ts(r.created_at)});
 const rowToMov = r => ({id: r.id, user_id: r.user_id, account_id: r.account_id, date: String(r.date).slice(0, 10), kind: r.kind === 'retrait' ? 'retrait' : 'depot', amount: Number(r.amount) || 0, note: r.note || '', createdAt: r.createdAt || ts(r.created_at)});
 const TABLES = ['accounts', 'trades', 'movements'];
 const MAP = {accounts: rowToAcc, trades: rowToTrade, movements: rowToMov};
 const BODY = {
-  accounts: a => ({name: a.name, broker: a.broker || '', kind: a.kind, currency: a.currency, capital: a.capital || 0, rmax: a.rmax || 0, archived: !!a.archived}),
+  accounts: a => ({name: a.name, broker: a.broker || '', kind: a.kind, currency: a.currency, capital: a.capital || 0, rmax: a.rmax || 0, archived: !!a.archived,
+    platform: a.platform || '', number: a.number || '', opened_on: a.opened_on || null, color: a.color || '',
+    prop_phase: a.kind === 'prop' ? (a.prop_phase || '') : '', prop_target: a.kind === 'prop' ? a.prop_target : null, prop_daily_loss: a.kind === 'prop' ? a.prop_daily_loss : null, prop_max_dd: a.kind === 'prop' ? a.prop_max_dd : null}),
   trades: t => ({account_id: t.account_id, date: t.date, time: t.time || null, asset: t.asset, asset_class: t.asset_class, side: t.side, session: t.session, risk: t.risk, rmax: t.rmax || 0, pnl: t.pnl, commission: t.commission || 0, swap: t.swap || 0, lots: t.lots == null ? null : t.lots, setup: t.setup || '', note: t.note || ''}),
   movements: m => ({account_id: m.account_id, date: m.date, kind: m.kind, amount: m.amount, note: m.note || ''})
 };
@@ -727,16 +813,27 @@ function enrich(t, beR) {
 }
 const chrono = (a, b) => a.date !== b.date ? (a.date < b.date ? -1 : 1) : (a.time || '') !== (b.time || '') ? ((a.time || '') < (b.time || '') ? -1 : 1) : (a.createdAt || 0) - (b.createdAt || 0);
 
-/* selection: all accounts, one type of account, or one account */
+/* Which accounts are shown: 'all', or a list of account ids. Saved with the settings, so the computer and the phone stay in step.
+   (Example data and the admin's read-only view keep their own choice, never saved.) */
+const accColor = (a, list) => a.color || ACC_COLORS[Math.max(0, (list || []).findIndex(x => x.id === a.id)) % ACC_COLORS.length];
+function viewSel() {
+  if (state.demo || state.viewAs) return state.tmpSel || 'all';
+  const s = settings().sel;
+  return Array.isArray(s) && s.length ? s : 'all';
+}
 function selAccounts(accounts) {
-  const s = state.acc;
-  if (s === 'all') return accounts;
-  if (s.startsWith('kind:')) return accounts.filter(a => a.kind === s.slice(5));
-  return accounts.filter(a => a.id === s);
+  const sel = viewSel();
+  if (sel === 'all') return accounts;
+  const set = new Set(sel);
+  const r = accounts.filter(a => set.has(a.id));
+  return r.length ? r : accounts;
+}
+function setSel(sel) {
+  if (state.demo || state.viewAs) { state.tmpSel = sel; render(); return; }
+  saveSettings({sel});
 }
 function ctx() {
   const d = data();
-  if (state.acc !== 'all' && !selAccounts(d.accounts).length) state.acc = 'all';
   const accs = selAccounts(d.accounts);
   const ids = new Set(accs.map(a => a.id));
   const beR = Number(d.settings.beR) || 0;
@@ -1208,8 +1305,8 @@ const DEMO = (() => {
   const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   const pick = arr => arr[Math.floor(rnd() * arr.length)];
   const accounts = [
-    {id: 'demo-a1', name: 'IC Markets', broker: 'IC Markets · MT5', kind: 'reel', currency: 'USD', capital: 10000, rmax: 100, archived: false, createdAt: 1},
-    {id: 'demo-a2', name: 'Prop 100K', broker: 'Challenge phase 2', kind: 'prop', currency: 'USD', capital: 100000, rmax: 500, archived: false, createdAt: 2}
+    {id: 'demo-a1', name: 'IC Markets', broker: 'IC Markets', platform: 'MetaTrader 5', number: '51234567', opened_on: '', color: '#3987e5', kind: 'reel', currency: 'USD', capital: 10000, rmax: 100, archived: false, createdAt: 1},
+    {id: 'demo-a2', name: 'Prop 100K', broker: 'FTMO', platform: 'MetaTrader 5', number: '', opened_on: '', color: '#f5a524', kind: 'prop', prop_phase: 'verification', prop_target: 5, prop_daily_loss: 5, prop_max_dd: 10, currency: 'USD', capital: 100000, rmax: 500, archived: false, createdAt: 2}
   ];
   const pool = [
     ...Array(5).fill(['EURUSD','GBPUSD','USDJPY','GBPJPY','AUDUSD','EURJPY']).flat().map(s => [s, 'forex']),
@@ -1301,7 +1398,7 @@ function renderMe() {
 document.addEventListener('mouseover', e => {
   const t = e.target.closest && e.target.closest('.side [data-tip]');
   const root = $('#tip-root');
-  if (!t || !document.body.classList.contains('side-mini') || state.mode !== 'desk' || (t.dataset.act === 'memenu' && state.menuOpen)) { root.innerHTML = ''; return; }
+  if (!t || !document.body.classList.contains('side-mini') || state.mode !== 'desk' || (t.dataset.act === 'memenu' && state.menuOpen) || (t.dataset.act === 'accmenu' && state.accMenuOpen)) { root.innerHTML = ''; return; }
   const r = t.getBoundingClientRect();
   root.innerHTML = `<div class="tip" style="left:${r.right + 12}px;top:${r.top + r.height / 2}px">${esc(t.dataset.tip)}</div>`;
 });
@@ -1319,6 +1416,7 @@ function render() {
   destroyCharts();
   const c = ctx();
   renderSideBal(c);
+  renderSwitcher(c);
   renderMe();
   fillDatalists(c);
   const v = state.view;
@@ -1350,7 +1448,7 @@ function fillDatalists(c) {
 function renderSideBal(c) {
   const el = $('#side-bal');
   if (!state.loaded || !c.accs.length) { el.innerHTML = `<span>Track record</span><small>Aucun compte</small>`; return; }
-  const label = state.acc === 'all' ? 'Tous les comptes' : state.acc.startsWith('kind:') ? kindOf(state.acc.slice(5)).plural : c.accs[0].name;
+  const label = c.cur ? 'Solde' : 'Résultat en R';
   const mr = range('month', now.getFullYear(), now.getMonth());
   const month = c.trades.filter(t => inRange(t, mr));
   if (c.cur) {
@@ -1363,17 +1461,68 @@ function renderSideBal(c) {
   }
 }
 
-/* ---------- shared header pieces ---------- */
-function accSelect(c) {
-  const d = c.d;
-  const kinds = KINDS.filter(k => d.accounts.some(a => a.kind === k.id));
-  const opt = (v, l) => `<option value="${v}" ${state.acc === v ? 'selected' : ''}>${esc(l)}</option>`;
-  return `<select id="f-acc" class="select" aria-label="Comptes affichés">
-    ${opt('all', 'Tous les comptes')}
-    ${kinds.length > 1 ? `<optgroup label="Par type">${kinds.map(k => opt('kind:' + k.id, k.plural)).join('')}</optgroup>` : ''}
-    ${d.accounts.length ? `<optgroup label="Comptes">${d.accounts.map(a => opt(a.id, `${a.name} · ${a.currency}${a.archived ? ' (archivé)' : ''}`)).join('')}</optgroup>` : ''}
-  </select>`;
+/* ---------- account switcher (which accounts the whole site shows) ---------- */
+const curSym = cur => money(0, cur).replace(/[\d\s,.  −-]/g, '') || cur;
+function selInfo(c) {
+  const all = c.d.accounts;
+  if (!all.length) return {label: 'Aucun compte', sub: 'Crée ton premier compte', kind: 'none'};
+  if (c.accs.length === 1) { const a = c.accs[0]; return {label: a.name, sub: `${kindOf(a.kind).name} · ${a.currency}`, kind: 'one', acc: a}; }
+  const isAll = c.accs.length === all.length;
+  return {label: isAll ? 'Tous les comptes' : `${c.accs.length} comptes`, sub: `${isAll ? c.accs.length + ' comptes · ' : ''}${c.cur || 'plusieurs devises'}`, kind: isAll ? 'all' : 'multi'};
 }
+function accBadge(c, info) {
+  if (info.kind === 'one') return `<span class="acc-badge" style="--c:${accColor(info.acc, c.d.accounts)}">${esc(info.acc.name.trim().charAt(0) || '?')}</span>`;
+  if (info.kind === 'none') return `<span class="acc-badge empty">+</span>`;
+  const cols = c.accs.slice(0, 3).map(a => accColor(a, c.d.accounts));
+  return `<span class="acc-badge multi" style="background:linear-gradient(135deg,${cols.join(',')}${cols.length < 2 ? ',' + cols[0] : ''})">${c.accs.length}</span>`;
+}
+function renderSwitcher(c) {
+  const info = selInfo(c);
+  const chev = '<svg class="acc-chev lbl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>';
+  const btn = `<button class="acc-sw" type="button" data-act="accmenu" aria-haspopup="dialog" aria-expanded="${state.accMenuOpen}" data-tip="${esc(info.label)}">${accBadge(c, info)}<span class="acc-sw-txt lbl"><b>${esc(info.label)}</b><small>${esc(info.sub)}</small></span>${chev}</button>`;
+  $('#acc-side').innerHTML = btn;
+  $('#acc-top').innerHTML = btn;
+  const pop = $('#acc-pop');
+  if (!state.accMenuOpen) { pop.innerHTML = ''; return; }
+  const sel = viewSel(), all = c.d.accounts;
+  const shown = new Set(c.accs.map(a => a.id));
+  const row = a => {
+    const only = c.accs.length === 1 && c.accs[0].id === a.id;
+    return `<div class="acc-row${a.archived ? ' arch' : ''}">
+      <button class="acc-pick" type="button" data-accpick="${a.id}" aria-current="${only}">
+        <span class="acc-badge sm" style="--c:${accColor(a, all)}">${esc(a.name.trim().charAt(0) || '?')}</span>
+        <span class="acc-row-txt"><b>${esc(a.name)}</b><small>${kindOf(a.kind).name}${a.kind === 'prop' && a.prop_phase ? ' · ' + (PROP_PHASES.find(p => p.id === a.prop_phase) || {}).name : ''} · ${a.currency}</small></span>
+        ${only ? '<svg class="acc-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>' : ''}
+      </button>
+      <label class="acc-chk" title="Afficher aussi ce compte"><input type="checkbox" data-acccheck="${a.id}" ${shown.has(a.id) ? 'checked' : ''} aria-label="Afficher ${esc(a.name)}"></label>
+    </div>`;
+  };
+  const act = all.filter(a => !a.archived), arch = all.filter(a => a.archived);
+  pop.innerHTML = `<div class="acc-menu" id="acc-menu" role="dialog" aria-label="Comptes affichés">
+    ${all.length ? `<div class="acc-menu-head"><span>Comptes affichés</span><small>Clic : un seul compte · Cases : plusieurs</small></div>
+    ${all.length > 1 ? `<div class="acc-row all"><button class="acc-pick" type="button" data-accall aria-current="${sel === 'all' || shown.size === all.length}"><span class="acc-badge sm all">${ic('<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>')}</span><span class="acc-row-txt"><b>Tous les comptes</b><small>${all.length} comptes</small></span></button></div>` : ''}
+    <div class="acc-list">${act.map(row).join('')}${arch.length ? `<div class="acc-sep">Archivés</div>${arch.map(row).join('')}` : ''}</div>
+    <hr>` : `<div class="acc-menu-head"><span>Aucun compte pour l’instant</span></div>`}
+    ${readOnly() ? '' : `<button class="acc-foot" type="button" data-act="newacc">${ic('<path d="M12 5v14M5 12h14"/>')}Créer un compte</button>`}
+    ${all.length ? `<button class="acc-foot" type="button" data-view="accounts">${ic('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>')}Gérer mes comptes</button>` : ''}
+  </div>`;
+  const m = $('#acc-menu');
+  const b = document.querySelector(state.mode === 'desk' ? '#acc-side .acc-sw' : '#acc-top .acc-sw');
+  if (!b) return;
+  const r = b.getBoundingClientRect();
+  if (state.mode === 'phone') { m.style.top = (r.bottom + 8) + 'px'; m.style.left = '10px'; m.style.right = '10px'; }
+  else if (document.body.classList.contains('side-mini')) { m.style.left = (r.right + 12) + 'px'; m.style.top = r.top + 'px'; }
+  else { m.style.left = r.left + 'px'; m.style.top = (r.bottom + 6) + 'px'; m.style.width = Math.max(300, r.width) + 'px'; }
+}
+function toggleAccShown(id, on, c) {
+  const all = c.d.accounts.map(a => a.id);
+  const cur = new Set(c.accs.map(a => a.id));
+  if (on) cur.add(id); else cur.delete(id);
+  if (!cur.size) { toast('Garde au moins un compte affiché.'); render(); return; }
+  setSel(cur.size === all.length ? 'all' : all.filter(x => cur.has(x)));
+}
+
+/* ---------- shared header pieces ---------- */
 function unitSeg(c) {
   return `<div class="seg" role="group" aria-label="Unité d’affichage">
     <button type="button" data-unit="cur" aria-pressed="${c.unit === 'cur'}" ${c.cur ? '' : 'disabled title="Plusieurs devises : affichage en R"'}>${c.cur || 'Devise'}</button>
@@ -1392,7 +1541,7 @@ function periodCtl(c) {
       <button type="button" data-step="1" aria-label="Période suivante"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
     </div>` : ''}`;
 }
-const filtersBar = (c, o = {}) => `<div class="filters">${accSelect(c)}${o.period === false ? '' : periodCtl(c)}${o.unit === false ? '' : unitSeg(c)}</div>`;
+const filtersBar = (c, o = {}) => `<div class="filters">${o.period === false ? '' : periodCtl(c)}${o.unit === false ? '' : unitSeg(c)}</div>`;
 const pageHead = (title, sub, right) => `<div class="page-head"><h1>${title}<small>${sub}</small></h1>${right || ''}</div>`;
 const viewFlag = () => state.viewAs ? `<div class="view-flag"><span>Tu consultes l’espace de <strong>${esc(state.viewAs.email)}</strong>, en lecture seule.</span><button type="button" data-act="stopview">Revenir à mon espace</button></div>` : '';
 const demoFlag = () => viewFlag() + (state.demo ? `<div style="margin-bottom:12px"><span class="flag">Données d’exemple, rien n’est enregistré <button type="button" data-act="nodemo">Quitter</button></span></div>` : '');
@@ -1407,7 +1556,7 @@ function baseOpts(c) {
   return {
     maintainAspectRatio: false, animation: {duration: 250},
     interaction: {mode: 'index', intersect: false},
-    plugins: {legend: {display: false}, tooltip: {backgroundColor: css('--surface-2'), borderColor: line, borderWidth: 1, titleColor: css('--fg'), bodyColor: css('--fg'), padding: 10, bodyFont: {family: 'JetBrains Mono', size: 12}, titleFont: {family: 'IBM Plex Sans', size: 12, weight: '600'}}},
+    plugins: {legend: {display: false}, tooltip: {backgroundColor: css('--surface-2'), borderColor: line, borderWidth: 1, titleColor: css('--fg'), bodyColor: css('--fg'), padding: 10, bodyFont: {family: 'IBM Plex Sans', size: 12}, titleFont: {family: 'IBM Plex Sans', size: 12, weight: '600'}}},
     scales: {
       x: {grid: {display: false}, ticks: {color: muted, font, maxRotation: 0, autoSkip: true, maxTicksLimit: 8}, border: {color: line}},
       y: {grid: {color: line}, border: {display: false}, ticks: {color: muted, font, callback: v => fVshort(v, c), maxTicksLimit: 6}}
@@ -1576,7 +1725,7 @@ function renderDash(c) {
         <div class="chart-box">${c.trades.length ? '<canvas id="ch-months" role="img" aria-label="Résultat par mois"></canvas>' : '<div class="empty-card">Pas encore de trades.</div>'}</div>
       </div>
       <div class="card s12">
-        <div class="card-head"><div><h3>Derniers trades</h3><p class="hint">Toutes périodes confondues</p></div><button class="link-btn" type="button" data-view="journal">Ouvrir le journal</button></div>
+        <div class="card-head"><div><h3>Derniers trades</h3><p class="hint">Toutes périodes confondues</p></div><button class="link-btn" type="button" data-view="journal">Voir tous mes trades</button></div>
         ${c.trades.length ? `<div class="day-list">${[...c.trades].reverse().slice(0, 6).map(t => txItem(t, c)).join('')}</div>` : `<div class="empty-card">Aucun trade pour l’instant. ${readOnly() ? '' : 'Clique sur « Nouveau trade » pour commencer.'}</div>`}
       </div>
     </section>`;
@@ -1673,13 +1822,14 @@ function renderStats(c) {
 /* ---------- JOURNAL ---------- */
 const lastPrefs = () => lsGet('ttr-last', {});
 function activeAccounts(c) { return c.d.accounts.filter(a => !a.archived); }
+// accounts a new trade can go into: the open accounts currently shown (or every open account if only archived ones are shown)
+function entryAccounts(c) { const s = c.accs.filter(a => !a.archived); return s.length ? s : activeAccounts(c); }
 function defaultAccount(c) {
-  const act = activeAccounts(c);
-  const sel = selAccounts(act);
+  const sel = entryAccounts(c);
   const last = lastPrefs().account_id;
   if (sel.length === 1) return sel[0].id;
-  if (act.some(a => a.id === last)) return last;
-  return act[0] ? act[0].id : '';
+  if (sel.some(a => a.id === last)) return last;
+  return sel[0] ? sel[0].id : '';
 }
 function riskToCur(str, mode, acc, d) {
   const v = parseNum(str);
@@ -1724,13 +1874,13 @@ function renderJournal(c) {
   const S = stats(list, c);
   const summary = `<div class="h-summary num"><span>${list.length} trade${list.length > 1 ? 's' : ''}</span><span class="${sgnCls(S.total)}">${fV(S.total, c)}</span><span>${fPct(S.winrate)} de réussite</span></div>`;
   if (!c.d.accounts.length && !state.demo && !state.viewAs) {
-    el.innerHTML = pageHead('Journal', 'Tous tes trades') + `<section class="welcome"><h2>Crée d’abord un compte de trading.</h2><p>Chaque trade est rattaché à un compte (broker, prop firm…).</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`;
+    el.innerHTML = pageHead('Mes trades', 'Tous tes trades') + `<section class="welcome"><h2>Crée d’abord un compte de trading.</h2><p>Chaque trade est rattaché à un compte (broker, prop firm…).</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`;
     return;
   }
   if (state.mode === 'desk') {
     const canQuick = !readOnly() && activeAccounts(c).length;
     el.innerHTML = `${demoFlag()}
-      ${pageHead('Journal', readOnly() ? 'Lecture seule' : 'Saisis dans la première ligne, puis Entrée pour enchaîner', filtersBar(c))}
+      ${pageHead('Mes trades', readOnly() ? 'Lecture seule' : 'Saisis dans la première ligne, puis Entrée pour enchaîner', filtersBar(c))}
       ${unitNote(c)}
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px">${summary}</div>
       ${journalTools()}
@@ -1738,13 +1888,13 @@ function renderJournal(c) {
       <p class="q-hint">${quick.err ? `<span class="q-err">${esc(quick.err)}</span>` : readOnly() ? '' : `Risque saisi en ${RISK_MODES.find(x => x.id === c.d.settings.riskMode).name.toLowerCase()} (modifiable dans Paramètres). Résultat brut : tape un signe « - » pour une perte. Clique sur une ligne pour la modifier ou la supprimer.`}</p>`;
     if (canQuick) bindQuick(c);
   } else {
-    el.innerHTML = `${demoFlag()}${pageHead('Journal', '', filtersBar(c))}${unitNote(c)}${journalTools()}<div style="margin:12px 0 0">${summary}</div>${phoneList(list, c)}`;
+    el.innerHTML = `${demoFlag()}${pageHead('Mes trades', '', filtersBar(c))}${unitNote(c)}${journalTools()}<div style="margin:12px 0 0">${summary}</div>${phoneList(list, c)}`;
   }
   bindJournalTools(list, c);
 }
 function journalTable(list, c, canQuick) {
   const mode = c.d.settings.riskMode;
-  const acts = activeAccounts(c);
+  const acts = entryAccounts(c);
   if (!quick.account_id || !acts.some(a => a.id === quick.account_id)) quick.account_id = defaultAccount(c);
   const qAcc = c.accById[quick.account_id];
   let rows = '', lastM = '';
@@ -1897,7 +2047,8 @@ function renderAccounts(c) {
     const mv = d.movements.filter(m => m.account_id === a.id).reduce((x, m) => x + (m.kind === 'depot' ? m.amount : -m.amount), 0);
     const base = a.capital + mv;
     return `<div class="acc-card ${a.archived ? 'archived' : ''}">
-      <div class="acc-top"><div><div class="acc-name">${esc(a.name)}</div><div class="acc-broker">${esc(a.broker) || '&nbsp;'}</div></div><span class="pill kind">${kindOf(a.kind).name}${a.archived ? ' · archivé' : ''}</span></div>
+      <div class="acc-top"><div style="display:flex;gap:10px;align-items:center;min-width:0"><span class="acc-badge" style="--c:${accColor(a, d.accounts)}">${esc(a.name.trim().charAt(0) || '?')}</span><div style="min-width:0"><div class="acc-name">${esc(a.name)}</div><div class="acc-broker">${[a.broker, a.platform, a.number ? 'n° ' + a.number : ''].filter(Boolean).map(esc).join(' · ') || '&nbsp;'}</div></div></div><span class="pill kind">${kindOf(a.kind).name}${a.kind === 'prop' && a.prop_phase ? ' · ' + (PROP_PHASES.find(p => p.id === a.prop_phase) || {}).name : ''}${a.archived ? ' · archivé' : ''}</span></div>
+      ${a.kind === 'prop' && (a.prop_target || a.prop_daily_loss || a.prop_max_dd) ? `<div class="acc-broker">Règles : ${[a.prop_target ? 'objectif ' + nf2.format(a.prop_target).replace(',00', '') + ' %' : '', a.prop_daily_loss ? 'perte max/jour ' + nf2.format(a.prop_daily_loss).replace(',00', '') + ' %' : '', a.prop_max_dd ? 'drawdown max ' + nf2.format(a.prop_max_dd).replace(',00', '') + ' %' : ''].filter(Boolean).join(' · ')}</div>` : ''}
       <div><div class="acc-bal num">${money(bal, a.currency)}</div><div class="k-sub num" style="font-size:12.5px;color:var(--muted)">Résultat : <span class="${sgnCls(s.total)}">${money(s.total, a.currency, true)}</span>${base > 0 ? ` · <span class="${sgnCls(s.total)}">${s.total > 0 ? '+' : ''}${fPct(s.total / base, 1)}</span>` : ''} · <span class="${sgnCls(s.sumR)}">${fR(s.sumR)}</span></div></div>
       <div class="acc-grid">
         <div><span>Capital</span><strong>${money0(a.capital, a.currency)}</strong></div>
@@ -2161,9 +2312,13 @@ function openTrade(t) {
 }
 function openAccount(a) {
   if (blockedWrite()) return;
-  form = a ? {kind: 'account', id: a.id, name: a.name, broker: a.broker, akind: a.kind, currency: a.currency, capitalStr: numStr(a.capital), rmaxStr: numStr(a.rmax), archived: a.archived, origRmax: a.rmax}
-    : {kind: 'account', name: '', broker: '', akind: 'reel', currency: 'USD', capitalStr: '', rmaxStr: '', archived: false};
-  form.err = ''; form.confirm = false;
+  const n = ctx().d.accounts.length;
+  form = a ? {kind: 'account', id: a.id, name: a.name, broker: a.broker, akind: a.kind, currency: a.currency, capitalStr: numStr(a.capital), rmaxStr: numStr(a.rmax), archived: a.archived, origRmax: a.rmax,
+      platform: a.platform, number: a.number, opened_on: a.opened_on, color: a.color || ACC_COLORS[n % ACC_COLORS.length],
+      prop_phase: a.prop_phase || 'challenge', targetStr: numStr(a.prop_target), dailyStr: numStr(a.prop_daily_loss), maxddStr: numStr(a.prop_max_dd)}
+    : {kind: 'account', name: '', broker: '', akind: 'reel', currency: 'USD', capitalStr: '', rmaxStr: '', archived: false,
+      platform: '', number: '', opened_on: '', color: ACC_COLORS[n % ACC_COLORS.length], prop_phase: 'challenge', targetStr: '', dailyStr: '', maxddStr: ''};
+  form.err = ''; form.confirm = false; form.moreCur = false;
   drawPanel(true);
 }
 function openMovement(m, accountId) {
@@ -2178,7 +2333,7 @@ function openMovement(m, accountId) {
 
 function tradePanelHtml(c) {
   const f = form, mode = c.d.settings.riskMode;
-  const acts = c.d.accounts.filter(a => !a.archived || a.id === f.account_id);
+  const acts = f.id ? c.d.accounts.filter(a => !a.archived || a.id === f.account_id) : entryAccounts(c);
   const acc = c.accById[f.account_id];
   const cur = acc ? acc.currency : 'USD';
   const sym = money(0, cur).replace(/[\d\s,.  −-]/g, '') || cur;
@@ -2232,29 +2387,100 @@ function accountPanelHtml(c) {
   const f = form;
   const nTr = f.id ? c.d.trades.filter(t => t.account_id === f.id).length : 0;
   const nMv = f.id ? c.d.movements.filter(m => m.account_id === f.id).length : 0;
-  const newR = parseNum(f.rmaxStr);
+  const req = '<span class="req" aria-hidden="true">*</span>';
+  const others = CURRENCIES.filter(x => x !== 'USD' && x !== 'EUR');
   return `
-    <div class="panel-head"><h2 id="p-title">${f.id ? 'Modifier le compte' : 'Nouveau compte de trading'}</h2><button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button></div>
-    <div class="f-label">Nom du compte</div>
-    <input id="a-name" class="field" maxlength="40" placeholder="Ex. IC Markets, FTMO 100K…" value="${esc(f.name)}">
-    <div class="f-label">Broker / précision <em>facultatif</em></div>
-    <input id="a-broker" class="field" maxlength="60" placeholder="Ex. IC Markets · MT5 · Raw spread" value="${esc(f.broker)}">
-    <div class="f-label">Type de compte</div>
-    <div class="chips">${KINDS.map(k => `<button type="button" class="chip" data-akind="${k.id}" aria-pressed="${f.akind === k.id}">${k.name}</button>`).join('')}</div>
-    <div class="f-label">Devise du compte</div>
-    <div class="chips">${CURRENCIES.map(x => `<button type="button" class="chip num" data-acur="${x}" aria-pressed="${f.currency === x}">${x}</button>`).join('')}</div>
-    <div class="row2">
-      <div><div class="f-label">Capital de départ</div><input id="a-capital" class="field n" inputmode="decimal" placeholder="10000" value="${esc(f.capitalStr)}"></div>
-      <div><div class="f-label">R-MAX <em>risque max / trade</em></div><input id="a-rmax" class="field n" inputmode="decimal" placeholder="100" value="${esc(f.rmaxStr)}"></div>
-    </div>
-    <p class="q-hint" style="margin:8px 0 0">Le R-MAX est en ${esc(f.currency)}. Exemple : R-MAX = 100 ; un trade où tu risques 50 vaut 0,5 R ; s’il gagne 250, c’est +5 R sur la position mais +2,5 R réels.${f.id && isFinite(newR) && newR !== f.origRmax ? ' <strong>Les trades déjà saisis gardent leur ancien R-MAX</strong> ; le nouveau s’applique aux prochains.' : ''}</p>
-    ${f.id ? `<label class="check" style="margin-top:14px"><input id="a-archived" type="checkbox" ${f.archived ? 'checked' : ''}>Compte archivé (fermé : il reste dans les stats mais n’est plus proposé à la saisie)</label>` : ''}
-    <div class="err">${esc(f.err)}</div>
+    <div class="panel-head"><div><h2 id="p-title">${f.id ? 'Modifier le compte' : 'Nouveau compte de trading'}</h2><p class="panel-sub">Les champs marqués ${req} sont obligatoires.</p></div><button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button></div>
+
+    <section class="fsec">
+      <label class="fl" for="a-name">Nom du compte ${req}</label>
+      <input id="a-name" class="field" maxlength="40" placeholder="Ex. IC Markets, FTMO 100K…" value="${esc(f.name)}" autocomplete="off">
+
+      <div class="fl">Type de compte ${req}</div>
+      <div class="segbar" role="radiogroup" aria-label="Type de compte">${KINDS.map(k => `<button type="button" role="radio" data-akind="${k.id}" aria-checked="${f.akind === k.id}">${k.name}</button>`).join('')}</div>
+
+      <div class="fl">Devise ${req}</div>
+      <div class="cur-line">
+        <div class="segbar cur-seg" role="radiogroup" aria-label="Devise">
+          <button type="button" role="radio" data-acur="USD" aria-checked="${f.currency === 'USD'}"><b>$</b> USD</button>
+          <button type="button" role="radio" data-acur="EUR" aria-checked="${f.currency === 'EUR'}"><b>€</b> EUR</button>
+          <button type="button" role="radio" data-acur="other" id="cur-other" aria-checked="${f.currency !== 'USD' && f.currency !== 'EUR'}" ${f.currency !== 'USD' && f.currency !== 'EUR' ? '' : 'hidden'}><b>${esc(curSym(f.currency))}</b> ${esc(f.currency)}</button>
+          <button type="button" data-acurmore aria-label="Autres devises" title="Autres devises" aria-expanded="${f.moreCur}">⋯</button>
+        </div>
+        <select id="a-cur-more" class="field" ${f.moreCur ? '' : 'hidden'} aria-label="Autres devises">
+          <option value="">Autre devise…</option>
+          ${others.map(x => `<option value="${x}" ${f.currency === x ? 'selected' : ''}>${x} · ${esc(CUR_NAMES[x] || '')}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="row2">
+        <div><label class="fl" for="a-capital">Capital de départ ${req}</label><div class="inp-unit"><input id="a-capital" class="field n" inputmode="decimal" placeholder="10 000" value="${esc(f.capitalStr)}"><span class="u">${esc(curSym(f.currency))}</span></div></div>
+        <div><label class="fl" for="a-rmax">R-MAX ${req} <em>risque max par trade</em></label><div class="inp-unit"><input id="a-rmax" class="field n" inputmode="decimal" placeholder="100" value="${esc(f.rmaxStr)}"><span class="u">${esc(curSym(f.currency))}</span></div></div>
+      </div>
+      <p class="fhint" id="a-rmax-hint"></p>
+    </section>
+
+    <section class="fsec" id="prop-sec" ${f.akind === 'prop' ? '' : 'hidden'}>
+      <div class="fsec-title">Règles de la prop firm</div>
+      <div class="fl">Phase</div>
+      <div class="segbar" role="radiogroup" aria-label="Phase">${PROP_PHASES.map(p => `<button type="button" role="radio" data-aphase="${p.id}" aria-checked="${f.prop_phase === p.id}">${p.name}</button>`).join('')}</div>
+      <div class="row3">
+        <div><label class="fl" for="a-target">Objectif de profit</label><div class="inp-unit"><input id="a-target" class="field n" inputmode="decimal" placeholder="10" value="${esc(f.targetStr)}"><span class="u">%</span></div></div>
+        <div><label class="fl" for="a-daily">Perte max / jour</label><div class="inp-unit"><input id="a-daily" class="field n" inputmode="decimal" placeholder="5" value="${esc(f.dailyStr)}"><span class="u">%</span></div></div>
+        <div><label class="fl" for="a-maxdd">Drawdown max</label><div class="inp-unit"><input id="a-maxdd" class="field n" inputmode="decimal" placeholder="10" value="${esc(f.maxddStr)}"><span class="u">%</span></div></div>
+      </div>
+      <p class="fhint">En % du capital de départ, comme les annoncent les prop firms.</p>
+    </section>
+
+    <section class="fsec">
+      <div class="fsec-title">Détails <em>facultatif</em></div>
+      <div class="row2">
+        <div><label class="fl" for="a-broker">Broker</label><input id="a-broker" class="field" maxlength="60" placeholder="Ex. IC Markets" value="${esc(f.broker)}"></div>
+        <div><label class="fl" for="a-platform">Plateforme</label><select id="a-platform" class="field"><option value="">—</option>${PLATFORMS.map(p => `<option ${f.platform === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+      </div>
+      <div class="row2">
+        <div><label class="fl" for="a-number">Numéro de compte</label><input id="a-number" class="field n" maxlength="40" placeholder="Ex. 51234567" value="${esc(f.number)}" autocomplete="off"></div>
+        <div><label class="fl" for="a-opened">Date d’ouverture</label><input id="a-opened" class="field" type="date" value="${esc(f.opened_on)}"></div>
+      </div>
+      <div class="fl">Couleur</div>
+      <div class="swatches" role="radiogroup" aria-label="Couleur du compte">${ACC_COLORS.map(col => `<button type="button" role="radio" class="swatch" data-acolor="${col}" style="--c:${col}" aria-checked="${f.color === col}" aria-label="Couleur ${col}"></button>`).join('')}</div>
+    </section>
+
+    ${f.id ? `<label class="check" style="margin-top:14px"><input id="a-archived" type="checkbox" ${f.archived ? 'checked' : ''}>Compte archivé : il reste dans l’historique mais n’est plus proposé pour saisir des trades</label>` : ''}
+    <div class="err" id="p-err" role="alert">${esc(f.err)}</div>
     <div class="panel-actions">
-      ${f.id ? `<button type="button" class="del" data-del>Supprimer</button>` : ''}
+      ${f.id ? `<button type="button" class="del" data-del>Supprimer</button>` : `<button type="button" class="cancel" data-close>Annuler</button>`}
       <button type="button" class="save" data-save>${f.id ? 'Enregistrer' : 'Créer le compte'}</button>
     </div>
-    ${f.confirm ? `<div class="confirm"><span class="grow">Supprimer ce compte <strong>et ses ${nTr} trade${nTr > 1 ? 's' : ''}${nMv ? ` et ${nMv} dépôt${nMv > 1 ? 's' : ''}/retrait${nMv > 1 ? 's' : ''}` : ''}</strong> définitivement ? Pour garder l’historique, archive-le plutôt.</span><button type="button" class="no" data-noconf>Annuler</button><button type="button" class="yes" data-yesconf>Supprimer</button></div>` : ''}`;
+    ${f.id ? `<div class="confirm" id="p-confirm" ${f.confirm ? '' : 'hidden'}><span class="grow">Supprimer ce compte <strong>et ses ${nTr} trade${nTr > 1 ? 's' : ''}${nMv ? ` et ${nMv} dépôt${nMv > 1 ? 's' : ''}/retrait${nMv > 1 ? 's' : ''}` : ''}</strong> définitivement ? Pour garder l’historique, archive-le plutôt.</span><button type="button" class="no" data-noconf>Annuler</button><button type="button" class="yes" data-yesconf>Supprimer</button></div>` : ''}`;
+}
+// Account window: every click updates the window in place, so nothing jumps.
+function syncAccountForm() {
+  const f = form; if (!f || f.kind !== 'account') return;
+  const set = (sel, attr, fn) => document.querySelectorAll(sel).forEach(b => b.setAttribute(attr, String(fn(b))));
+  set('[data-akind]', 'aria-checked', b => b.dataset.akind === f.akind);
+  set('[data-aphase]', 'aria-checked', b => b.dataset.aphase === f.prop_phase);
+  set('[data-acolor]', 'aria-checked', b => b.dataset.acolor === f.color);
+  const std = f.currency === 'USD' || f.currency === 'EUR';
+  set('[data-acur="USD"]', 'aria-checked', () => f.currency === 'USD');
+  set('[data-acur="EUR"]', 'aria-checked', () => f.currency === 'EUR');
+  const o = $('#cur-other'); if (o) { o.hidden = std; o.setAttribute('aria-checked', String(!std)); o.innerHTML = `<b>${esc(curSym(f.currency))}</b> ${esc(f.currency)}`; }
+  const sel = $('#a-cur-more'); if (sel) { sel.hidden = !f.moreCur; if (!std) sel.value = f.currency; }
+  set('[data-acurmore]', 'aria-expanded', () => f.moreCur);
+  document.querySelectorAll('.inp-unit .u').forEach(u => { if (u.textContent !== '%') u.textContent = curSym(f.currency); });
+  const ps = $('#prop-sec'); if (ps) ps.hidden = f.akind !== 'prop';
+  const pc = $('#p-confirm'); if (pc) pc.hidden = !f.confirm;
+  // live help under the R-MAX
+  const h = $('#a-rmax-hint'); if (h) {
+    const cap = parseNum(f.capitalStr), r = parseNum(f.rmaxStr), sym = curSym(f.currency);
+    let t = `Ton R-MAX est le risque maximum que tu t’autorises par trade. Tous tes R sont calculés à partir de lui.`;
+    if (isFinite(r) && r > 0) {
+      t = `Avec un R-MAX de ${nf2.format(r).replace(',00', '')} ${sym} : risquer ${nf2.format(r / 2).replace(',00', '')} ${sym} sur un trade = 0,5 R.`;
+      if (isFinite(cap) && cap > 0) t += ` Ça représente ${nf2.format(r / cap * 100).replace(',00', '')} % du capital.`;
+    }
+    if (f.id && isFinite(r) && r !== f.origRmax) t += ' Les trades déjà saisis gardent leur ancien R-MAX.';
+    h.textContent = t;
+  }
 }
 function movPanelHtml(c) {
   const f = form;
@@ -2283,7 +2509,7 @@ function drawPanel(first) {
   const old = document.querySelector('#panel-root .panel');
   const st = old ? old.scrollTop : 0;
   const html = form.kind === 'trade' ? tradePanelHtml(c) : form.kind === 'account' ? accountPanelHtml(c) : movPanelHtml(c);
-  $('#panel-root').innerHTML = `<div class="overlay" id="ov"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
+  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
   const p = document.querySelector('#panel-root .panel');
   if (!first) p.scrollTop = st;
   const bind = (id, key, after) => { const n = document.getElementById(id); if (!n) return; n.addEventListener('input', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n); }); n.addEventListener('change', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n, true); }); };
@@ -2301,9 +2527,12 @@ function drawPanel(first) {
     tradeCalc(c);
     if (first && !form.id && state.mode === 'desk') $('#p-asset').focus();
   } else if (form.kind === 'account') {
-    bind('a-name', 'name'); bind('a-broker', 'broker'); bind('a-capital', 'capitalStr');
-    bind('a-rmax', 'rmaxStr', (n, ch) => { if (ch && form.id) drawPanel(); });
+    bind('a-name', 'name'); bind('a-broker', 'broker'); bind('a-number', 'number'); bind('a-opened', 'opened_on'); bind('a-platform', 'platform');
+    bind('a-capital', 'capitalStr', syncAccountForm); bind('a-rmax', 'rmaxStr', syncAccountForm);
+    bind('a-target', 'targetStr'); bind('a-daily', 'dailyStr'); bind('a-maxdd', 'maxddStr');
+    bind('a-cur-more', '_cur', n => { if (n.value) { form.currency = n.value; syncAccountForm(); } });
     const ar = $('#a-archived'); if (ar) ar.addEventListener('change', () => { form.archived = ar.checked; });
+    syncAccountForm();
     if (first && !form.id && state.mode === 'desk') $('#a-name').focus();
   } else {
     bind('m-acc', 'account_id', (n, ch) => { if (ch) drawPanel(); });
@@ -2344,7 +2573,7 @@ function tradeCalc(c) {
 function closePanel() { $('#panel-root').innerHTML = ''; form = null; }
 async function panelSave() {
   const f = form, c = ctx();
-  const fail = msg => { f.err = msg; drawPanel(); };
+  const fail = msg => { f.err = msg; const e = document.querySelector('#panel-root .err'); if (e) { e.textContent = msg; e.scrollIntoView({block: 'nearest', behavior: 'smooth'}); } else drawPanel(); };
   if (f.kind === 'trade') {
     const v = tradeValues(c);
     const asset = String(f.asset || '').trim().toUpperCase();
@@ -2360,18 +2589,25 @@ async function panelSave() {
     catch (e) { toast('Enregistrement impossible : ' + errText(e)); }
   } else if (f.kind === 'account') {
     const name = String(f.name || '').trim();
-    const capital = String(f.capitalStr).trim() === '' ? 0 : parseNum(f.capitalStr);
-    const rmax = String(f.rmaxStr).trim() === '' ? 0 : parseNum(f.rmaxStr);
-    if (!name) return fail('Donne un nom au compte.');
-    if (!isFinite(capital) || capital < 0) return fail('Le capital doit être un nombre positif.');
-    if (!isFinite(rmax) || rmax < 0) return fail('Le R-MAX doit être un nombre positif.');
-    const a = {id: f.id, name, broker: String(f.broker || '').trim(), kind: f.akind, currency: f.currency, capital: round2(capital), rmax: round2(rmax), archived: !!f.archived};
-    closePanel();
+    const capital = parseNum(f.capitalStr), rmax = parseNum(f.rmaxStr);
+    const pct = (v, label) => { if (String(v ?? '').trim() === '') return {v: null}; const x = parseNum(v); return isFinite(x) && x > 0 && x <= 100 ? {v: round2(x)} : {err: `${label} : indique un pourcentage entre 0 et 100.`}; };
+    if (!name) { $('#a-name')?.focus(); return fail('Donne un nom au compte.'); }
+    if (!isFinite(capital) || capital <= 0) { $('#a-capital')?.focus(); return fail('Indique le capital de départ (un montant supérieur à 0).'); }
+    if (!isFinite(rmax) || rmax <= 0) { $('#a-rmax')?.focus(); return fail('Indique ton R-MAX : le risque maximum par trade, en montant.'); }
+    if (rmax > capital) { $('#a-rmax')?.focus(); return fail('Le R-MAX ne peut pas dépasser le capital.'); }
+    const tg = pct(f.targetStr, 'Objectif de profit'), dl = pct(f.dailyStr, 'Perte max par jour'), md = pct(f.maxddStr, 'Drawdown max');
+    if (f.akind === 'prop') for (const x of [tg, dl, md]) if (x.err) return fail(x.err);
+    const a = {id: f.id, name, broker: String(f.broker || '').trim(), kind: f.akind, currency: f.currency, capital: round2(capital), rmax: round2(rmax), archived: !!f.archived,
+      platform: f.platform || '', number: String(f.number || '').trim(), opened_on: f.opened_on || '', color: f.color,
+      prop_phase: f.prop_phase, prop_target: tg.v ?? null, prop_daily_loss: dl.v ?? null, prop_max_dd: md.v ?? null};
+    const btn = document.querySelector('#panel-root [data-save]'); if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
     try {
       const saved = await saveRow('accounts', a);
+      closePanel();
       toast(f.id ? 'Compte modifié' : `Compte « ${name} » créé`);
-      if (!f.id && saved && ctx().d.accounts.length === 1) { state.view = 'dash'; render(); }
-    } catch (e) { toast('Enregistrement impossible : ' + errText(e)); }
+      // a new account becomes the one on screen
+      if (!f.id && saved) { setSel([saved.id]); if (state.view === 'more') go('dash'); }
+    } catch (e) { if (btn) { btn.disabled = false; btn.textContent = f.id ? 'Enregistrer' : 'Créer le compte'; } fail('Enregistrement impossible : ' + errText(e)); }
   } else {
     const amount = parseNum(f.amountStr);
     if (!isFinite(amount) || amount <= 0) return fail('Indique un montant supérieur à 0.');
@@ -2398,14 +2634,19 @@ function toast(msg) {
 /* =====================================================================
    EVENTS
    ===================================================================== */
-const go = v => { state.menuOpen = false; state.view = v; if (v !== 'more') lsSet('ttr-view', v); render(); window.scrollTo(0, 0); };
+const go = v => { state.menuOpen = false; state.accMenuOpen = false; state.view = v; if (v !== 'more') lsSet('ttr-view', v); render(); window.scrollTo(0, 0); };
 document.addEventListener('click', async e => {
   if (state.menuOpen && !e.target.closest('.me-menu, [data-act="memenu"], #me-side [data-act="avatarpick"]')) { state.menuOpen = false; renderMe(); }
+  if (state.accMenuOpen && !e.target.closest('.acc-menu, [data-act="accmenu"]')) { state.accMenuOpen = false; renderSwitcher(ctx()); }
   const t = e.target.closest('button, .overlay, tr.row, li[data-movedit]');
   if (!t) return;
   if (t.dataset.eye) { toggleEye(t); return; }
+  if (t.dataset.act === 'accmenu') { state.accMenuOpen = !state.accMenuOpen; state.menuOpen = false; renderMe(); renderSwitcher(ctx()); return; }
+  if (t.dataset.accpick) { state.accMenuOpen = false; setSel([t.dataset.accpick]); render(); return; }
+  if (t.hasAttribute('data-accall')) { state.accMenuOpen = false; setSel('all'); render(); return; }
+  if (t.dataset.act === 'newacc') { state.accMenuOpen = false; renderSwitcher(ctx()); return openAccount(); }
   if (t.dataset.act === 'memenu') { state.menuOpen = !state.menuOpen; renderMe(); if (state.menuOpen) document.querySelector('.me-menu [role="menuitem"]')?.focus(); return; }
-  if (t.dataset.act === 'collapse') { state.sideMini = !state.sideMini; lsSet('ttr-side-mini', state.sideMini); $('#tip-root').innerHTML = ''; state.menuOpen = false; applyMode(); renderMe(); return; }
+  if (t.dataset.act === 'collapse') { state.sideMini = !state.sideMini; lsSet('ttr-side-mini', state.sideMini); $('#tip-root').innerHTML = ''; state.menuOpen = false; state.accMenuOpen = false; applyMode(); renderMe(); renderSwitcher(ctx()); return; }
   if (t.dataset.act === 'avatarpick') {
     // closed sidebar: the round is the only thing left, so it opens the menu
     if (t.closest('#me-side') && document.body.classList.contains('side-mini')) { state.menuOpen = !state.menuOpen; renderMe(); return; }
@@ -2417,14 +2658,14 @@ document.addEventListener('click', async e => {
   if (ds.mode) { state.mode = ds.mode; lsSet('ttr-mode', state.mode); render(); window.scrollTo(0, 0); return; }
   if (ds.view) { go(ds.view); if (ds.view === 'admin' && state.adminLoaded && Date.now() - (state.adminFetchedAt || 0) > 30000) fetchAdmin(); return; }
   if (ds.act === 'logout') { state.menuOpen = false; renderMe(); if (sb) await logout(); else toast('Pas de compte connecté en mode local.'); return; }
-  if (ds.act === 'stopview') { state.viewAs = null; state.acc = lsGet('ttr-acc', 'all'); go('admin'); return; }
-  if (ds.see) { const u = state.admin.users.find(x => x.id === ds.see); if (u) { state.viewAs = u.id === state.me ? null : {id: u.id, email: u.email}; state.acc = 'all'; go('dash'); } return; }
+  if (ds.act === 'stopview') { state.viewAs = null; state.tmpSel = 'all'; go('admin'); return; }
+  if (ds.see) { const u = state.admin.users.find(x => x.id === ds.see); if (u) { state.viewAs = u.id === state.me ? null : {id: u.id, email: u.email}; state.tmpSel = 'all'; go('dash'); } return; }
   if (ds.act === 'adminrefresh') { state.adminLoaded = false; render(); fetchAdmin(); return; }
   if (ds.act === 'add') return openTrade();
   if (ds.act === 'newacc') return openAccount();
   if (ds.act === 'quick') return quickSave();
-  if (ds.act === 'demo') { state.demo = true; state.acc = 'all'; render(); return; }
-  if (ds.act === 'nodemo') { state.demo = false; state.acc = 'all'; render(); return; }
+  if (ds.act === 'demo') { state.demo = true; state.tmpSel = 'all'; render(); return; }
+  if (ds.act === 'nodemo') { state.demo = false; render(); return; }
   if (ds.act === 'exportall') { const c = ctx(); const all = c.d.trades.map(x => enrich(x, Number(c.d.settings.beR) || 0)).sort(chrono); return exportTrades(all, c); }
   if (ds.act === 'exportacc') return exportMovements(ctx());
   if (ds.act === 'addsetup') { const n = $('#new-setup'); const v = n ? n.value.trim() : ''; if (!v) return; const s = settings(); if (!s.setups.includes(v)) saveSettings({setups: [...s.setups, v]}); return; }
@@ -2440,7 +2681,7 @@ document.addEventListener('click', async e => {
     render(); return;
   }
   if (ds.cal) { const d = new Date(state.calY, state.calM + +ds.cal, 1); state.calY = d.getFullYear(); state.calM = d.getMonth(); render(); return; }
-  if (ds.accview) { state.acc = ds.accview; lsSet('ttr-acc', state.acc); go('stats'); return; }
+  if (ds.accview) { setSel([ds.accview]); go('stats'); return; }
   if (ds.accedit) { const a = ctx().d.accounts.find(x => x.id === ds.accedit); if (a) openAccount(a); return; }
   if (ds.movnew != null && !form) return openMovement(null, ds.movnew);
   if (ds.movedit) { const m = ctx().d.movements.find(x => x.id === ds.movedit); if (m) { if (readOnly()) return toast('Lecture seule.'); openMovement(m); } return; }
@@ -2448,8 +2689,8 @@ document.addEventListener('click', async e => {
   if (!form) return;
   if (t.hasAttribute('data-close')) return closePanel();
   if (t.hasAttribute('data-save')) return panelSave();
-  if (t.hasAttribute('data-del')) { form.confirm = true; return drawPanel(); }
-  if (t.hasAttribute('data-noconf')) { form.confirm = false; return drawPanel(); }
+  if (t.hasAttribute('data-del')) { form.confirm = true; if (form.kind === 'account') { syncAccountForm(); $('#p-confirm')?.scrollIntoView({block: 'nearest', behavior: 'smooth'}); return; } return drawPanel(); }
+  if (t.hasAttribute('data-noconf')) { form.confirm = false; if (form.kind === 'account') return syncAccountForm(); return drawPanel(); }
   if (t.hasAttribute('data-yesconf')) return panelDelete();
   if (ds.passet) { form.asset = ds.passet; if (form.classAuto) form.asset_class = classFor(form.asset, ctx().d); return drawPanel(); }
   if (ds.pclass) { form.asset_class = ds.pclass; form.classAuto = false; return drawPanel(); }
@@ -2457,14 +2698,18 @@ document.addEventListener('click', async e => {
   if (ds.psign) { form.pnlSign = +ds.psign; return drawPanel(); }
   if (t.hasAttribute('data-pswap')) { form.swapSign = -form.swapSign; return drawPanel(); }
   if (ds.psetup != null) { form.setup = form.setup === ds.psetup ? '' : ds.psetup; return drawPanel(); }
-  if (ds.akind) { form.akind = ds.akind; return drawPanel(); }
-  if (ds.acur) { form.currency = ds.acur; return drawPanel(); }
+  if (ds.akind) { form.akind = ds.akind; return syncAccountForm(); }
+  if (ds.aphase) { form.prop_phase = ds.aphase; return syncAccountForm(); }
+  if (ds.acolor) { form.color = ds.acolor; return syncAccountForm(); }
+  if (ds.acur) { if (ds.acur !== 'other') { form.currency = ds.acur; form.moreCur = false; } return syncAccountForm(); }
+  if (t.hasAttribute('data-acurmore')) { form.moreCur = !form.moreCur; syncAccountForm(); if (form.moreCur) $('#a-cur-more')?.focus(); return; }
   if (ds.mkind) { form.mkind = ds.mkind; return drawPanel(); }
 });
 document.addEventListener('change', e => {
-  if (e.target.id === 'f-acc') { state.acc = e.target.value; if (!state.viewAs && !state.demo) lsSet('ttr-acc', state.acc); render(); }
+  if (e.target.dataset && e.target.dataset.acccheck) { toggleAccShown(e.target.dataset.acccheck, e.target.checked, ctx()); }
 });
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.accMenuOpen) { state.accMenuOpen = false; renderSwitcher(ctx()); document.querySelector('[data-act="accmenu"]')?.focus(); return; }
   if (e.key === 'Escape' && state.menuOpen) { state.menuOpen = false; renderMe(); document.querySelector('[data-act="memenu"]')?.focus(); return; }
   if (e.key === 'Escape' && form) closePanel();
   if (e.key === 'Enter' && e.target.matches) {
@@ -2478,7 +2723,7 @@ const mq = window.matchMedia('(prefers-color-scheme: dark)');
 const rerender = () => { if (['dash', 'stats'].includes(state.view)) render(); };
 mq.addEventListener?.('change', rerender);
 new MutationObserver(rerender).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
-let rz; window.addEventListener('resize', () => { if (state.menuOpen) { state.menuOpen = false; renderMe(); } clearTimeout(rz); rz = setTimeout(() => { applyMode(); if (state.view === 'dash' || state.view === 'stats') charts.forEach(ch => ch.resize()); }, 150); });
+let rz; window.addEventListener('resize', () => { if (state.menuOpen) { state.menuOpen = false; renderMe(); } if (state.accMenuOpen) { state.accMenuOpen = false; renderSwitcher(ctx()); } clearTimeout(rz); rz = setTimeout(() => { applyMode(); if (state.view === 'dash' || state.view === 'stats') charts.forEach(ch => ch.resize()); }, 150); });
 
 $('#avatar-file').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) setAvatar(f); });
 render();

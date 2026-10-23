@@ -452,6 +452,32 @@ tr.quick td:last-child{padding-right:8px}
 .acc-add{width:46px;height:46px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 35%,transparent);transition:transform .15s,filter .15s}
 .acc-add:hover{transform:scale(1.07);filter:brightness(1.05)}
 .acc-add svg{width:22px;height:22px}
+/* deposit / withdrawal window */
+.panel.mov{max-width:500px;border:1.5px solid var(--mv,var(--line));transition:border-color .25s,box-shadow .25s;box-shadow:var(--shadow),0 0 0 4px color-mix(in srgb,var(--mv) 12%,transparent)}
+.panel.mv-dep{--mv:var(--win)}
+.panel.mv-ret{--mv:var(--loss)}
+.mv-head{margin-bottom:12px}
+.mv-title{display:flex;align-items:center;gap:10px}
+.mv-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--mv) 16%,transparent);transition:background .25s}
+.mv-acc{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;background:var(--bg);border:1px solid var(--line)}
+.mv-bal{font-weight:700;font-size:14px}
+.mv-seg button[aria-checked="true"]{background:color-mix(in srgb,var(--mv) 18%,var(--surface-2));color:var(--fg);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--mv) 55%,transparent),inset 0 -2px 0 var(--mv)}
+.panel.mov .field:focus{border-color:var(--mv)}
+.mv-amount .field{font-size:24px;font-weight:700;padding:11px 44px 11px 14px}
+.mv-amount .u{font-size:18px;font-weight:700;right:14px}
+.panel.mov .save.mv-save{background:var(--mv);color:#fff;position:relative;transition:background .25s,filter .15s}
+.panel.mov.mv-dep .save.mv-save{color:var(--win-ink)}
+.mv-save:hover:not(:disabled){filter:brightness(1.06)}
+.mv-save-in{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.mv-check{width:18px;height:18px;flex:none}
+.mv-save.loading .mv-check{display:none}
+.mv-save.loading .mv-save-in::before{content:"";width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+.mv-save.done{filter:brightness(1.08)}
+.mv-save.done .mv-check path{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease-out forwards}
+.mv-save.done .mv-check{transform:scale(1.15);transition:transform .2s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.mv-save:disabled{opacity:1;cursor:default}
 /* small confirmation window */
 .panel.small{max-width:520px}
 .cf-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:var(--loss-soft);margin-bottom:10px}
@@ -2374,8 +2400,9 @@ function openMovement(m, accountId) {
   if (blockedWrite()) return;
   const c = ctx();
   if (!c.d.accounts.length) { toast('Crée d’abord un compte de trading.'); return openAccount(); }
-  form = m ? {kind: 'mov', id: m.id, account_id: m.account_id, date: m.date, mkind: m.kind, amountStr: numStr(m.amount), note: m.note}
-    : {kind: 'mov', account_id: accountId || defaultAccount(c) || c.d.accounts[0].id, date: todayStr(), mkind: 'depot', amountStr: '', note: ''};
+  // opened from an account card (or editing): the account is fixed, no need to choose it
+  form = m ? {kind: 'mov', id: m.id, account_id: m.account_id, fixedAcc: true, date: m.date, mkind: m.kind, amountStr: numStr(m.amount), note: m.note}
+    : {kind: 'mov', account_id: accountId || defaultAccount(c) || c.d.accounts[0].id, fixedAcc: !!accountId || c.d.accounts.length === 1, date: todayStr(), mkind: 'depot', amountStr: '', note: ''};
   form.err = ''; form.confirm = false;
   drawPanel(true);
 }
@@ -2534,24 +2561,52 @@ function syncAccountForm() {
 function movPanelHtml(c) {
   const f = form;
   const acc = c.accById[f.account_id];
+  const sym = acc ? curSym(acc.currency) : '';
+  const all = c.d.accounts;
   return `
-    <div class="panel-head"><h2 id="p-title">${f.id ? 'Modifier le mouvement' : 'Dépôt ou retrait'}</h2><button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button></div>
-    <div class="f-label">Compte</div>
-    <select id="m-acc" class="field">${c.d.accounts.map(a => `<option value="${a.id}" ${a.id === f.account_id ? 'selected' : ''}>${esc(a.name)} · ${a.currency}</option>`).join('')}</select>
-    <div class="f-label">Type</div>
-    <div class="toggle2"><button type="button" data-mkind="depot" class="${f.mkind === 'depot' ? 'on-w' : ''}">Dépôt</button><button type="button" data-mkind="retrait" class="${f.mkind === 'retrait' ? 'on-l' : ''}">Retrait</button></div>
+    <div class="panel-head mv-head">
+      <div class="mv-title"><span class="mv-ico" id="mv-ico" aria-hidden="true">${f.mkind === 'depot' ? '💰' : '💸'}</span><h2 id="p-title">${movTitle(f)}</h2></div>
+      <button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button>
+    </div>
+    ${f.fixedAcc && acc ? `<div class="mv-acc"><span class="acc-badge sm" style="--c:${accColor(acc, all)}">${esc(acc.name.trim().charAt(0) || '?')}</span><span class="acc-row-txt"><b>${esc(acc.name)}</b><small>${kindOf(acc.kind).name} · ${acc.currency}</small></span><span class="mv-bal num" id="mv-bal"></span></div>`
+      : `<label class="fl" for="m-acc">Compte</label><select id="m-acc" class="field">${all.map(a => `<option value="${a.id}" ${a.id === f.account_id ? 'selected' : ''}>${esc(a.name)} · ${a.currency}</option>`).join('')}</select>`}
+    <div class="segbar mv-seg" role="radiogroup" aria-label="Type de mouvement" style="margin-top:14px">
+      <button type="button" role="radio" data-mkind="depot" aria-checked="${f.mkind === 'depot'}">💰 Dépôt</button>
+      <button type="button" role="radio" data-mkind="retrait" aria-checked="${f.mkind === 'retrait'}">💸 Retrait</button>
+    </div>
+    <label class="fl" for="m-amount">Montant</label>
+    <div class="inp-unit mv-amount"><input id="m-amount" class="field n" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${esc(f.amountStr)}"><span class="u" id="m-sym">${esc(sym)}</span></div>
+    <p class="fhint" id="mv-after"></p>
     <div class="row2">
-      <div><div class="f-label">Montant <em>${acc ? acc.currency : ''}</em></div><input id="m-amount" class="field n" inputmode="decimal" placeholder="1000" value="${esc(f.amountStr)}"></div>
-      <div><div class="f-label">Date</div><input id="m-date" class="field" type="date" value="${f.date}"></div>
+      <div><label class="fl" for="m-date">Date</label><input id="m-date" class="field" type="date" value="${f.date}"></div>
+      <div><label class="fl" for="m-note">Note <em>facultatif</em></label><input id="m-note" class="field" maxlength="120" placeholder="Ex. Retrait des gains de mars" value="${esc(f.note)}"></div>
     </div>
-    <div class="f-label">Note <em>facultatif</em></div>
-    <input id="m-note" class="field" maxlength="120" placeholder="Ex. Retrait des gains de mars" value="${esc(f.note)}">
-    <div class="err">${esc(f.err)}</div>
+    <div class="err" id="p-err" role="alert">${esc(f.err)}</div>
     <div class="panel-actions">
-      ${f.id ? `<button type="button" class="del" data-del>Supprimer</button>` : ''}
-      <button type="button" class="save" data-save>${f.id ? 'Enregistrer' : f.mkind === 'depot' ? 'Ajouter le dépôt' : 'Ajouter le retrait'}</button>
-    </div>
-    ${f.confirm ? `<div class="confirm"><span class="grow">Supprimer ce mouvement définitivement ?</span><button type="button" class="no" data-noconf>Annuler</button><button type="button" class="yes" data-yesconf>Supprimer</button></div>` : ''}`;
+      ${f.id ? `<button type="button" class="del" data-movdel>🗑️</button>` : `<button type="button" class="cancel" data-close>Annuler</button>`}
+      <button type="button" class="save mv-save" data-save><span class="mv-save-in"><svg class="mv-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="mv-save-txt">${movSaveLabel(f)}</span></span></button>
+    </div>`;
+}
+const movTitle = f => f.id ? (f.mkind === 'depot' ? 'Modifier le dépôt' : 'Modifier le retrait') : (f.mkind === 'depot' ? 'Nouveau dépôt' : 'Nouveau retrait');
+const movSaveLabel = f => f.id ? 'Enregistrer' : f.mkind === 'depot' ? 'Ajouter le dépôt' : 'Ajouter le retrait';
+// Deposit / withdrawal window: colour, title and button follow the chosen type, updated in place.
+function syncMovForm() {
+  const f = form; if (!f || f.kind !== 'mov') return;
+  const c = ctx(), acc = c.accById[f.account_id];
+  const p = document.querySelector('#panel-root .panel');
+  if (p) { p.classList.toggle('mv-dep', f.mkind === 'depot'); p.classList.toggle('mv-ret', f.mkind === 'retrait'); }
+  document.querySelectorAll('[data-mkind]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.mkind === f.mkind)));
+  const t = $('#p-title'); if (t) t.textContent = movTitle(f);
+  const ic = $('#mv-ico'); if (ic) ic.textContent = f.mkind === 'depot' ? '💰' : '💸';
+  const st = $('#mv-save-txt'); if (st && !f.busy) st.textContent = movSaveLabel(f);
+  const sy = $('#m-sym'); if (sy && acc) sy.textContent = curSym(acc.currency);
+  if (!acc) return;
+  // balance now, and after this movement
+  let bal = accountBalance(acc, c.d);
+  if (f.id) { const old = c.d.movements.find(m => m.id === f.id); if (old) bal -= old.kind === 'depot' ? old.amount : -old.amount; }
+  const b = $('#mv-bal'); if (b) b.textContent = money(round2(bal), acc.currency);
+  const amt = parseNum(f.amountStr), af = $('#mv-after');
+  if (af) af.innerHTML = isFinite(amt) && amt > 0 ? `Solde après ${f.mkind === 'depot' ? 'ce dépôt' : 'ce retrait'} : <strong class="num">${money(round2(bal + (f.mkind === 'depot' ? amt : -amt)), acc.currency)}</strong>` : `Solde actuel : <strong class="num">${money(round2(bal), acc.currency)}</strong>`;
 }
 // "Are you sure?" window. buttons: [{id, label, cls}] ; onPick(id) runs the chosen action.
 function openConfirm({icon = '⚠️', title, html, buttons, onPick}) {
@@ -2586,7 +2641,7 @@ function drawPanel(first) {
   const old = document.querySelector('#panel-root .panel');
   const st = old ? old.scrollTop : 0;
   const html = form.kind === 'confirm' ? confirmPanelHtml() : form.kind === 'trade' ? tradePanelHtml(c) : form.kind === 'account' ? accountPanelHtml(c) : movPanelHtml(c);
-  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : form.kind === 'confirm' ? ' small' : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
+  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : form.kind === 'confirm' ? ' small' : form.kind === 'mov' ? ' mov ' + (form.mkind === 'depot' ? 'mv-dep' : 'mv-ret') : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
   const p = document.querySelector('#panel-root .panel');
   if (!first) p.scrollTop = st;
   const bind = (id, key, after) => { const n = document.getElementById(id); if (!n) return; n.addEventListener('input', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n); }); n.addEventListener('change', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n, true); }); };
@@ -2613,8 +2668,9 @@ function drawPanel(first) {
     syncAccountForm();
     if (first && !form.id && state.mode === 'desk') $('#a-name').focus();
   } else {
-    bind('m-acc', 'account_id', (n, ch) => { if (ch) drawPanel(); });
-    bind('m-amount', 'amountStr'); bind('m-date', 'date'); bind('m-note', 'note');
+    bind('m-acc', 'account_id', syncMovForm);
+    bind('m-amount', 'amountStr', syncMovForm); bind('m-date', 'date'); bind('m-note', 'note');
+    syncMovForm();
     if (first && !form.id && state.mode === 'desk') $('#m-amount').focus();
   }
   p.querySelectorAll('input.field').forEach(n => n.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); panelSave(); } }));
@@ -2691,9 +2747,22 @@ async function panelSave() {
     if (!isFinite(amount) || amount <= 0) return fail('Indique un montant supérieur à 0.');
     if (!f.date) return fail('Choisis une date.');
     const m = {id: f.id, account_id: f.account_id, date: f.date, kind: f.mkind, amount: round2(amount), note: String(f.note || '').trim()};
-    closePanel();
-    try { await saveRow('movements', m); toast(f.id ? 'Modifié' : m.kind === 'depot' ? 'Dépôt ajouté' : 'Retrait ajouté'); }
-    catch (e) { toast('Enregistrement impossible : ' + errText(e)); }
+    if (f.busy) return;
+    // the button spins while saving, then shows a tick, then the window closes
+    const btn = document.querySelector('#panel-root .mv-save'), txt = $('#mv-save-txt');
+    f.busy = true; if (btn) { btn.disabled = true; btn.classList.add('loading'); } if (txt) txt.textContent = 'Enregistrement…';
+    const t0 = Date.now();
+    try {
+      await saveRow('movements', m);
+      await new Promise(r => setTimeout(r, Math.max(0, 450 - (Date.now() - t0))));
+      if (btn) { btn.classList.remove('loading'); btn.classList.add('done'); }
+      if (txt) txt.textContent = f.id ? 'Enregistré' : m.kind === 'depot' ? 'Dépôt ajouté' : 'Retrait ajouté';
+      await new Promise(r => setTimeout(r, 750));
+      if (form === f) closePanel();
+    } catch (e) {
+      f.busy = false; if (btn) { btn.disabled = false; btn.classList.remove('loading'); } if (txt) txt.textContent = movSaveLabel(f);
+      fail('Enregistrement impossible : ' + errText(e));
+    }
   }
 }
 async function panelDelete() {
@@ -2788,7 +2857,11 @@ document.addEventListener('click', async e => {
   if (ds.acolor) { form.color = ds.acolor; return syncAccountForm(); }
   if (ds.acur) { if (ds.acur !== 'other') { form.currency = ds.acur; form.moreCur = false; } return syncAccountForm(); }
   if (t.hasAttribute('data-acurmore')) { form.moreCur = !form.moreCur; syncAccountForm(); if (form.moreCur) $('#a-cur-more')?.focus(); return; }
-  if (ds.mkind) { form.mkind = ds.mkind; return drawPanel(); }
+  if (ds.mkind) { if (!form.busy) form.mkind = ds.mkind; return syncMovForm(); }
+  if (t.hasAttribute('data-movdel')) { const mv = ctx().d.movements.find(x => x.id === form.id); if (!mv) return; const acc = ctx().accById[mv.account_id];
+    return openConfirm({icon: '🗑️', title: `Supprimer ce ${mv.kind === 'depot' ? 'dépôt' : 'retrait'} ?`, html: `${mv.kind === 'depot' ? 'Dépôt' : 'Retrait'} de <strong>${money(mv.amount, acc ? acc.currency : 'USD')}</strong> du ${fmtDate(mv.date)}${acc ? ' sur « ' + esc(acc.name) + ' »' : ''}. Le solde du compte sera recalculé.`,
+      buttons: [{id: 'cancel', label: 'Annuler'}, {id: 'delete', label: 'Supprimer', cls: 'danger'}],
+      onPick: async () => { try { await deleteRow('movements', mv.id); toast('Mouvement supprimé'); } catch (e) { toast('Suppression impossible : ' + errText(e)); } }}); }
 });
 document.addEventListener('change', e => {
   if (e.target.dataset && e.target.dataset.acccheck) { toggleAccShown(e.target.dataset.acccheck, e.target.checked, ctx()); }

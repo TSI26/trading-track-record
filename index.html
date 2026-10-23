@@ -2225,34 +2225,13 @@ function renderAccounts(c) {
   const sel = $('#mv-acc'); if (sel) sel.addEventListener('change', () => { state.movAcc = sel.value; render(); });
 }
 
-/* Exchange rates (European Central Bank, via frankfurter.app — free, no key). Kept 12 h on this device. */
-const FX_URL = 'https://api.frankfurter.app/latest?from=';
-function fxRates(base) {
-  const k = 'ttr-fx-' + base, cached = lsGet(k, null);
-  state.fx ||= {};
-  if (cached && Date.now() - cached.at < 12 * 3600e3) { state.fx[base] = cached; return cached; }
-  if (state.fx[base] && (state.fx[base].loading || state.fx[base].failedAt > Date.now() - 60e3)) return state.fx[base].rates ? state.fx[base] : null;
-  state.fx[base] = {...(cached || {}), loading: true};
-  fetch(FX_URL + base, {cache: 'no-store'}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(j => { const v = {rates: j.rates, date: j.date, at: Date.now()}; state.fx[base] = v; lsSet(k, v); if (state.view === 'accounts') render(); })
-    .catch(() => { state.fx[base] = {...(cached || {}), failedAt: Date.now()}; if (state.view === 'accounts') render(); });
-  return cached && cached.rates ? cached : null;
-}
-// amount in currency `from`, expressed in `to` (null if the rate is unknown)
-function convert(amount, from, to) {
-  if (from === to) return amount;
-  const fx = fxRates(to);
-  return fx && fx.rates && fx.rates[from] ? amount / fx.rates[from] : null;
-}
-
-// totals: three boxes side by side (deposited, withdrawn, net). Each shows one line per currency,
-// or everything converted into $ or € if chosen.
+// totals: three boxes (deposited, withdrawn, net), one line per currency
 function movTotals(list, c) {
   const by = {};
   let nd = 0, nr = 0;
   list.forEach(m => { const cur = accCur(c, m.account_id); const o = by[cur] ||= {dep: 0, ret: 0}; if (m.kind === 'depot') { o.dep += m.amount; nd++; } else { o.ret += m.amount; nr++; } });
   const curs = Object.keys(by).sort((a, b) => a === 'USD' ? -1 : b === 'USD' ? 1 : a === 'EUR' ? -1 : b === 'EUR' ? 1 : a.localeCompare(b));
-  const conv = curs.length > 1 ? (state.movConv || '') : '';
+  const conv = '';
   const sum = key => {
     if (!conv) return null;
     let t = 0;
@@ -2271,17 +2250,12 @@ function movTotals(list, c) {
         : curs.length === 1 ? `<div class="mvt-big num ${sign && val(curs[0]) ? 'neg' : key === 'net' && val(curs[0]) < 0 ? 'neg' : ''}">${fmt(val(curs[0]), curs[0])}</div>` : lines}
     </div>`;
   };
-  const fxInfo = conv ? (() => { const fx = state.fx && state.fx[conv]; if (fx && fx.rates) { const other = curs.find(x => x !== conv); return other && fx.rates[other] ? `Taux BCE du ${fmtDate(fx.date)} : 1 ${curSym(conv)} = ${nf2.format(fx.rates[other]).replace(/,?0+$/, '') || '0'} ${curSym(other)}` : ''; } return fx && fx.failedAt ? 'Taux de change introuvable pour l’instant (pas de connexion ?).' : 'Récupération du taux de change…'; })() : '';
   return `<div class="mvt">
     <div class="mvt-boxes">
       ${box('dep', '💰', 'Total déposé', 'dep', `${nd} dépôt${nd > 1 ? 's' : ''}`, false)}
       ${box('ret', '💸', 'Total retiré', 'ret', `${nr} retrait${nr > 1 ? 's' : ''}`, true)}
       ${box('net', '🧮', 'Net apporté', 'net', null, false)}
     </div>
-    ${curs.length > 1 ? `<div class="mvt-conv"><span>Afficher :</span><div class="seg" role="group" aria-label="Conversion">
-      <button type="button" data-movconv="" aria-pressed="${!conv}">Chaque devise</button>
-      ${['USD', 'EUR'].filter(x => curs.includes(x) || true).map(x => `<button type="button" data-movconv="${x}" aria-pressed="${conv === x}">Tout en ${curSym(x)}</button>`).join('')}
-    </div>${fxInfo ? `<small>${esc(fxInfo)}</small>` : ''}</div>` : ''}
   </div>`;
 }
 
@@ -2984,7 +2958,6 @@ document.addEventListener('click', async e => {
   if (ds.movnew != null && !form) return openMovement(null, ds.movnew);
   if (ds.movdelete) return confirmDeleteMovement(ds.movdelete);
   if (ds.movfilter) { state.movFilter = ds.movfilter; render(); return; }
-  if (ds.movconv != null && !form) { state.movConv = ds.movconv; lsSet('ttr-movconv', ds.movconv); render(); return; }
   if (ds.movedit) { const m = ctx().d.movements.find(x => x.id === ds.movedit); if (m) { if (readOnly()) return toast('Lecture seule.'); openMovement(m); } return; }
   if (ds.edit && !form) { const tr = data().trades.find(x => x.id === ds.edit); if (tr) openTrade(tr); return; }
   if (!form) return;

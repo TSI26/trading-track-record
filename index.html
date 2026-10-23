@@ -487,6 +487,26 @@ tr.quick td:last-child{padding-right:8px}
 .cf-actions button{border-radius:10px;padding:11px 15px;font-weight:700;border:1px solid var(--line);background:transparent}
 .cf-actions .danger{background:var(--loss);border-color:var(--loss);color:#fff}
 .cf-actions .soft{background:var(--surface-2)}
+/* deposits & withdrawals: aligned columns, no grid lines */
+.mv-table{display:flex;flex-direction:column;margin:0 -8px}
+.mv-tr{display:grid;grid-template-columns:110px minmax(120px,1.2fr) 120px 140px minmax(0,2fr);gap:14px;align-items:center;padding:9px 8px;border-radius:8px;font-size:13.5px}
+.mv-tr:not(.mv-th){cursor:pointer}
+.mv-tr:not(.mv-th):hover{background:var(--surface-2)}
+.mv-th{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;padding-top:2px;padding-bottom:6px}
+.mv-tr .r{text-align:right}
+.mv-accname{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.mv-accname i{width:8px;height:8px;border-radius:50%;flex:none}
+.mv-type{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.mv-type.dep{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.mv-type.ret{background:var(--win-soft);color:var(--win);border:1px solid color-mix(in srgb,var(--win) 35%,transparent)}
+.mv-amt{font-weight:700}
+.mv-note{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-phone .mv-tr{grid-template-columns:auto 1fr auto;gap:4px 10px}
+.m-phone .mv-th{display:none}
+.m-phone .mv-tr > :nth-child(2){grid-column:2}
+.m-phone .mv-tr > :nth-child(3){grid-column:1;grid-row:2}
+.m-phone .mv-tr > :nth-child(4){grid-column:3;grid-row:1}
+.m-phone .mv-tr > :nth-child(5){grid-column:2 / 4;grid-row:2;font-size:12px}
 .mov-list{list-style:none;margin:0;padding:0}
 .mov-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer}
 .mov-list li:last-child{border-bottom:0}
@@ -2145,7 +2165,16 @@ function renderAccounts(c) {
     ${d.accounts.length ? `<div class="acc-cards">${cards}${readOnly() ? '' : `<div class="acc-add-cell"><button class="acc-add" type="button" data-act="newacc" title="Nouveau compte" aria-label="Nouveau compte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>`}</div>` : `<section class="welcome"><h2>Aucun compte pour l’instant.</h2><p>Crée un compte par broker ou par prop firm : réel, démo, challenge, backtest… chacun avec sa devise.</p>${readOnly() ? '' : '<div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div>'}</section>`}
     ${d.accounts.length ? `<div class="card" style="margin-top:12px">
       <div class="card-head"><div><h3>Dépôts et retraits</h3><p class="hint">Ils changent le solde, mais pas ta performance de trading</p></div>${readOnly() ? '' : `<button class="link-btn" type="button" data-movnew="">Ajouter</button>`}</div>
-      ${movs.length ? `<ul class="mov-list">${movs.map(m => `<li data-movedit="${m.id}" tabindex="0"><span>${fmtDate(m.date)} · ${esc(accName(c, m.account_id))}${m.note ? ` · <span style="color:var(--muted)">${esc(m.note)}</span>` : ''}</span><strong class="num ${m.kind === 'depot' ? 'pos' : 'neg'}">${m.kind === 'depot' ? '+' : '−'}${money(m.amount, accCur(c, m.account_id))}</strong></li>`).join('')}</ul>` : `<div class="empty-card">Aucun dépôt ni retrait.</div>`}
+      ${movs.length ? `<div class="mv-table" role="table" aria-label="Dépôts et retraits">
+        <div class="mv-tr mv-th" role="row"><span role="columnheader">Date</span><span role="columnheader">Compte</span><span role="columnheader">Type</span><span role="columnheader" class="r">Montant</span><span role="columnheader">Note</span></div>
+        ${movs.map(m => { const a = c.accById[m.account_id] || {}; const dep = m.kind === 'depot'; return `<div class="mv-tr" role="row" data-movedit="${m.id}" tabindex="0">
+          <span role="cell" class="num">${fmtDate(m.date)}</span>
+          <span role="cell" class="mv-accname"><i style="background:${a.id ? accColor(a, d.accounts) : 'var(--muted)'}"></i>${esc(a.name || '—')}</span>
+          <span role="cell"><span class="mv-type ${dep ? 'dep' : 'ret'}">${dep ? '💰 Dépôt' : '💸 Retrait'}</span></span>
+          <span role="cell" class="r num mv-amt ${dep ? '' : 'pos'}">${dep ? '' : '+'}${money(m.amount, a.currency || 'USD')}</span>
+          <span role="cell" class="mv-note">${esc(m.note) || '—'}</span>
+        </div>`; }).join('')}
+      </div>` : `<div class="empty-card">Aucun dépôt ni retrait.</div>`}
     </div>` : ''}`;
 }
 
@@ -2790,7 +2819,7 @@ document.addEventListener('click', async e => {
   if (chk) { if (e.target.tagName !== 'INPUT') chk.querySelector('input').click(); return; }
   const one = e.target.closest && e.target.closest('[data-accone]');
   if (one) { state.accMenuOpen = false; setSel(one.dataset.accone === 'all' ? 'all' : [one.dataset.accone]); render(); return; }
-  const t = e.target.closest('button, .overlay, tr.row, li[data-movedit]');
+  const t = e.target.closest('button, .overlay, tr.row, li[data-movedit], .mv-tr[data-movedit]');
   if (!t) return;
   if (t.dataset.eye) { toggleEye(t); return; }
   if (t.dataset.act === 'accmenu') { state.accMenuOpen = !state.accMenuOpen; state.accMenuAnim = state.accMenuOpen; state.menuOpen = false; renderMe(); renderSwitcher(ctx()); return; }
@@ -2877,7 +2906,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && form) closePanel();
   if (e.key === 'Enter' && e.target.matches) {
     if (e.target.matches('tr.row')) { const tr = data().trades.find(x => x.id === e.target.dataset.edit); if (tr) openTrade(tr); }
-    if (e.target.matches('li[data-movedit], [data-accone]')) e.target.click();
+    if (e.target.matches('li[data-movedit], [data-accone], .mv-tr[data-movedit]')) e.target.click();
     if (e.target.id === 'new-setup') { e.preventDefault(); document.querySelector('[data-act="addsetup"]')?.click(); }
   }
 });

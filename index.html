@@ -232,6 +232,19 @@ button{cursor:pointer}
 .link-del{border:0;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:2px 0;text-decoration:underline;text-underline-offset:2px}
 .link-del:hover{color:var(--loss)}
 
+/* ===== top bar (computer) ===== */
+.topbar{display:none}
+.m-desk .topbar{display:flex;position:sticky;top:0;z-index:15;height:64px;align-items:center;justify-content:space-between;gap:16px;padding:0 28px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px)}
+.tb-title{font-family:var(--font-display);font-weight:700;font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tb-right{display:flex;align-items:center;gap:10px;flex:none}
+.tb-add{border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:9px 15px;border-radius:9px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tb-add:hover{filter:brightness(1.06)}
+.topbar .acc-sw{width:auto;max-width:280px;padding:5px 9px 5px 5px;background:var(--surface)}
+.m-desk .page-head h1{display:none}
+.m-desk .page-head{justify-content:flex-end}
+.m-desk .page-head:not(:has(> :nth-child(2))){display:none}
+@media (max-width:860px){.m-desk .topbar{padding:0 16px}.topbar .acc-sw-txt small{display:none}}
+
 /* ===== account switcher ===== */
 .acc-sw{width:100%;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:6px 7px;text-align:left;white-space:nowrap;overflow:hidden;transition:border-color .15s,background .2s}
 .acc-sw:hover,.acc-sw[aria-expanded="true"]{border-color:var(--line-2)}
@@ -244,7 +257,6 @@ button{cursor:pointer}
 .acc-badge.empty{background:var(--surface);border:1px dashed var(--line-2);color:var(--muted);text-shadow:none}
 .acc-badge.all{background:var(--surface);border:1px solid var(--line-2);color:var(--fg);text-shadow:none}
 .acc-badge.all svg{width:15px;height:15px}
-.m-desk.side-mini .acc-sw{border-color:transparent;background:transparent;padding:6px 7px}
 .ptop .acc-wrap{min-width:0;flex:1}
 .ptop .acc-sw{width:auto;max-width:100%;background:transparent;border-color:transparent;padding:4px 6px 4px 2px}
 .acc-menu{position:fixed;z-index:60;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:var(--shadow);padding:6px;width:300px;max-height:min(70vh,560px);overflow:auto}
@@ -566,8 +578,6 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 <div class="app">
   <aside class="side">
     <div class="brand"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo"/></svg><span class="txt lbl">Track<b>-</b>Record<span class="sub">Trading</span></span></div>
-    <div class="acc-wrap" id="acc-side"></div>
-    <button class="side-add" type="button" data-act="add" data-tip="Nouveau trade"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span class="lbl">Nouveau trade</span></button>
     <nav class="side-nav" aria-label="Sections">
       <div class="nav-group">
         <span class="nav-title lbl">Trading</span>
@@ -582,7 +592,6 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
       </div>
     </nav>
     <div class="side-foot">
-      <div class="side-bal" id="side-bal"></div>
       <div class="mode-switch" role="group" aria-label="Affichage">
         <button type="button" data-mode="desk" aria-pressed="true" data-tip="Mode ordinateur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="lbl">Ordinateur</span></button>
         <button type="button" data-mode="phone" aria-pressed="false" data-tip="Mode téléphone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg><span class="lbl">Téléphone</span></button>
@@ -593,6 +602,13 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   <button class="side-toggle" type="button" data-act="collapse" aria-label="Réduire le menu" title="Réduire le menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
 
   <div class="main-col">
+    <header class="topbar">
+      <div class="tb-title" id="tb-title"></div>
+      <div class="tb-right">
+        <div class="acc-wrap" id="acc-desk"></div>
+        <button class="tb-add" type="button" data-act="add"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Nouveau trade</button>
+      </div>
+    </header>
     <header class="ptop">
       <div class="ptop-inner">
         <div class="acc-wrap" id="acc-top"></div>
@@ -1416,6 +1432,8 @@ function render() {
   destroyCharts();
   const c = ctx();
   renderSideBal(c);
+  const TITLES = {dash: 'Dashboard', journal: 'Mes trades', stats: 'Statistiques', accounts: 'Comptes de trading', settings: 'Paramètres', admin: 'Admin', profile: 'Mon compte', more: 'Plus'};
+  $('#tb-title').textContent = TITLES[state.view] || '';
   renderSwitcher(c);
   renderMe();
   fillDatalists(c);
@@ -1446,7 +1464,7 @@ function fillDatalists(c) {
   $('#dl-setups').innerHTML = setups.map(x => `<option value="${esc(x)}">`).join('');
 }
 function renderSideBal(c) {
-  const el = $('#side-bal');
+  const el = $('#side-bal'); if (!el) return;
   if (!state.loaded || !c.accs.length) { el.innerHTML = `<span>Track record</span><small>Aucun compte</small>`; return; }
   const label = c.cur ? 'Solde' : 'Résultat en R';
   const mr = range('month', now.getFullYear(), now.getMonth());
@@ -1480,7 +1498,7 @@ function renderSwitcher(c) {
   const info = selInfo(c);
   const chev = '<svg class="acc-chev lbl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>';
   const btn = `<button class="acc-sw" type="button" data-act="accmenu" aria-haspopup="dialog" aria-expanded="${state.accMenuOpen}" data-tip="${esc(info.label)}">${accBadge(c, info)}<span class="acc-sw-txt lbl"><b>${esc(info.label)}</b><small>${esc(info.sub)}</small></span>${chev}</button>`;
-  $('#acc-side').innerHTML = btn;
+  $('#acc-desk').innerHTML = btn;
   $('#acc-top').innerHTML = btn;
   const pop = $('#acc-pop');
   if (!state.accMenuOpen) { pop.innerHTML = ''; return; }
@@ -1507,12 +1525,11 @@ function renderSwitcher(c) {
     ${all.length ? `<button class="acc-foot" type="button" data-view="accounts">${ic('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>')}Gérer mes comptes</button>` : ''}
   </div>`;
   const m = $('#acc-menu');
-  const b = document.querySelector(state.mode === 'desk' ? '#acc-side .acc-sw' : '#acc-top .acc-sw');
+  const b = document.querySelector(state.mode === 'desk' ? '#acc-desk .acc-sw' : '#acc-top .acc-sw');
   if (!b) return;
   const r = b.getBoundingClientRect();
   if (state.mode === 'phone') { m.style.top = (r.bottom + 8) + 'px'; m.style.left = '10px'; m.style.right = '10px'; }
-  else if (document.body.classList.contains('side-mini')) { m.style.left = (r.right + 12) + 'px'; m.style.top = r.top + 'px'; }
-  else { m.style.left = r.left + 'px'; m.style.top = (r.bottom + 6) + 'px'; m.style.width = Math.max(300, r.width) + 'px'; }
+  else { const w = 320; m.style.width = w + 'px'; m.style.top = (r.bottom + 6) + 'px'; m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 12)) + 'px'; }
 }
 function toggleAccShown(id, on, c) {
   const all = c.d.accounts.map(a => a.id);
@@ -2387,10 +2404,10 @@ function accountPanelHtml(c) {
   const f = form;
   const nTr = f.id ? c.d.trades.filter(t => t.account_id === f.id).length : 0;
   const nMv = f.id ? c.d.movements.filter(m => m.account_id === f.id).length : 0;
-  const req = '<span class="req" aria-hidden="true">*</span>';
+  const req = '';
   const others = CURRENCIES.filter(x => x !== 'USD' && x !== 'EUR');
   return `
-    <div class="panel-head"><div><h2 id="p-title">${f.id ? 'Modifier le compte' : 'Nouveau compte de trading'}</h2><p class="panel-sub">Les champs marqués ${req} sont obligatoires.</p></div><button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button></div>
+    <div class="panel-head"><h2 id="p-title">${f.id ? 'Modifier le compte' : 'Nouveau compte de trading'}</h2><button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button></div>
 
     <section class="fsec">
       <label class="fl" for="a-name">Nom du compte ${req}</label>

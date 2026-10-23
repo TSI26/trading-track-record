@@ -498,6 +498,20 @@ tr.quick td:last-child{padding-right:8px}
 .mv-type{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .mv-type.dep{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
 .mv-type.ret{background:var(--loss-soft);color:var(--loss);border:1px solid color-mix(in srgb,var(--loss) 35%,transparent)}
+.mv-body{display:flex;flex-direction:row-reverse;flex-wrap:wrap;gap:16px 28px;align-items:flex-start}
+.mv-body > .mv-table,.mv-body > .empty-card{flex:1 1 640px;min-width:0}
+.mv-totals{flex:0 1 300px;display:flex;flex-direction:column;gap:10px;margin-left:auto}
+.mv-tot{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column}
+.mv-tot-cur{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin-bottom:6px}
+.mv-tot-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px}
+.mv-tot-row strong{font-size:16px;font-weight:700}
+.mv-tot-sub{font-size:11.5px;color:var(--muted);margin:1px 0 9px}
+.mv-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--surface-2);gap:2px;margin:2px 0 10px}
+.mv-bar .d{background:var(--muted)}
+.mv-bar .r{background:var(--loss)}
+.mv-tot-row.net{border-top:1px solid var(--line);padding-top:9px}
+.mv-tot-row.net span{font-weight:600}
+.m-phone .mv-totals{flex:1 1 100%;margin-left:0}
 .mv-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .mv-btns{display:flex;gap:4px;justify-content:flex-end}
 .mv-btn{width:32px;height:30px;border-radius:8px;border:1px solid transparent;background:transparent;display:grid;place-items:center;font-size:14px;padding:0;opacity:.75;transition:opacity .15s,background .15s,border-color .15s}
@@ -2178,6 +2192,7 @@ function renderAccounts(c) {
           <button type="button" data-movfilter="depot" aria-pressed="${mf === 'depot'}">💰 Dépôts</button>
           <button type="button" data-movfilter="retrait" aria-pressed="${mf === 'retrait'}">💸 Retraits</button>
         </div>` : ''}${readOnly() ? '' : `<button class="link-btn" type="button" data-movnew="">+ Ajouter</button>`}</div></div>
+      ${allMovs.length ? `<div class="mv-body">${movTotals(allMovs, c)}` : ''}
       ${movs.length ? `<div class="mv-table" role="table" aria-label="Dépôts et retraits">
         <div class="mv-tr mv-th" role="row"><span role="columnheader">Date</span><span role="columnheader">Compte</span><span role="columnheader">Type</span><span role="columnheader" class="r">Montant</span><span role="columnheader">Note</span><span></span></div>
         ${movs.map(m => { const a = c.accById[m.account_id] || {}; const dep = m.kind === 'depot'; return `<div class="mv-tr" role="row">
@@ -2189,7 +2204,25 @@ function renderAccounts(c) {
           <span role="cell" class="mv-btns">${readOnly() ? '' : `<button type="button" class="mv-btn" data-movedit="${m.id}" title="Modifier" aria-label="Modifier">✏️</button><button type="button" class="mv-btn mvdel" data-movdelete="${m.id}" title="Supprimer" aria-label="Supprimer">🗑️</button>`}</span>
         </div>`; }).join('')}
       </div>` : `<div class="empty-card">${allMovs.length ? (mf === 'depot' ? 'Aucun dépôt.' : 'Aucun retrait.') : 'Aucun dépôt ni retrait.'}</div>`}
+      ${allMovs.length ? '</div>' : ''}
     </div>` : ''}`;
+}
+
+// totals beside the table: deposited, withdrawn, net — one block per currency
+function movTotals(list, c) {
+  const by = {};
+  list.forEach(m => { const cur = accCur(c, m.account_id); const o = by[cur] ||= {dep: 0, ret: 0, nd: 0, nr: 0}; if (m.kind === 'depot') { o.dep += m.amount; o.nd++; } else { o.ret += m.amount; o.nr++; } });
+  return `<div class="mv-totals">${Object.entries(by).map(([cur, o]) => {
+    const net = o.dep - o.ret, tot = o.dep + o.ret || 1;
+    return `<div class="mv-tot">
+      ${Object.keys(by).length > 1 ? `<div class="mv-tot-cur">En ${cur}</div>` : ''}
+      <div class="mv-tot-row"><span>💰 Total déposé</span><strong class="num">${money(o.dep, cur)}</strong></div>
+      <div class="mv-tot-sub">${o.nd} dépôt${o.nd > 1 ? 's' : ''}</div>
+      <div class="mv-tot-row"><span>💸 Total retiré</span><strong class="num ${o.ret ? 'neg' : ''}">${o.ret ? '−' : ''}${money(o.ret, cur)}</strong></div>
+      <div class="mv-tot-sub">${o.nr} retrait${o.nr > 1 ? 's' : ''}</div>
+      <div class="mv-bar" aria-hidden="true"><span class="d" style="width:${o.dep / tot * 100}%"></span><span class="r" style="width:${o.ret / tot * 100}%"></span></div>
+      <div class="mv-tot-row net"><span>Net apporté</span><strong class="num ${net < 0 ? 'neg' : ''}">${money(net, cur)}</strong></div>
+    </div>`; }).join('')}</div>`;
 }
 
 /* ---------- SETTINGS ---------- */
@@ -2626,7 +2659,7 @@ function movPanelHtml(c) {
     </div>
     <div class="err" id="p-err" role="alert">${esc(f.err)}</div>
     <div class="panel-actions">
-      ${f.id ? `<button type="button" class="del" data-movdel>🗑️</button>` : `<button type="button" class="cancel" data-close>Annuler</button>`}
+      <button type="button" class="cancel" data-close>Annuler</button>
       <button type="button" class="save mv-save" data-save><span class="mv-save-in"><svg class="mv-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="mv-save-txt">${movSaveLabel(f)}</span></span></button>
     </div>`;
 }

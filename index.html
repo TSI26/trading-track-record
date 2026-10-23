@@ -498,20 +498,22 @@ tr.quick td:last-child{padding-right:8px}
 .mv-type{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .mv-type.dep{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
 .mv-type.ret{background:var(--loss-soft);color:var(--loss);border:1px solid color-mix(in srgb,var(--loss) 35%,transparent)}
-.mv-body{display:flex;flex-direction:row-reverse;flex-wrap:wrap;gap:16px 28px;align-items:flex-start}
-.mv-body > .mv-table,.mv-body > .empty-card{flex:1 1 640px;min-width:0}
-.mv-totals{flex:0 1 300px;display:flex;flex-direction:column;gap:10px;margin-left:auto}
-.mv-tot{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column}
-.mv-tot-cur{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin-bottom:6px}
-.mv-tot-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px}
-.mv-tot-row strong{font-size:16px;font-weight:700}
-.mv-tot-sub{font-size:11.5px;color:var(--muted);margin:1px 0 9px}
-.mv-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--surface-2);gap:2px;margin:2px 0 10px}
-.mv-bar .d{background:var(--muted)}
-.mv-bar .r{background:var(--loss)}
-.mv-tot-row.net{border-top:1px solid var(--line);padding-top:9px}
-.mv-tot-row.net span{font-weight:600}
-.m-phone .mv-totals{flex:1 1 100%;margin-left:0}
+.mvt{margin:2px 0 14px}
+.mvt-boxes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mvt-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mvt-box.ret{border-color:color-mix(in srgb,var(--loss) 28%,var(--line))}
+.mvt-head{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.mvt-head em{margin-left:auto;font-style:normal;font-weight:500;font-size:11.5px}
+.mvt-ico{font-size:15px}
+.mvt-big{font-size:21px;font-weight:700;line-height:1.2}
+.mvt-detail{font-size:12px;color:var(--muted)}
+.mvt-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;color:var(--muted)}
+.mvt-line strong{font-size:16px;font-weight:700;color:var(--fg)}
+.mvt-line strong.neg{color:var(--loss)}
+.mvt-conv{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.mvt-conv .seg button{font-size:12.5px;padding:5px 10px}
+.mvt-conv small{font-size:12px}
+.m-phone .mvt-boxes{grid-template-columns:1fr}
 .mv-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .mv-btns{display:flex;gap:4px;justify-content:flex-end}
 .mv-btn{width:32px;height:30px;border-radius:8px;border:1px solid transparent;background:transparent;display:grid;place-items:center;font-size:14px;padding:0;opacity:.75;transition:opacity .15s,background .15s,border-color .15s}
@@ -863,7 +865,7 @@ const state = {
   view: lsGet('ttr-view', 'dash'),
   period: lsGet('ttr-period', 'all'),
   unit: lsGet('ttr-unit', 'cur'),
-  tmpSel: 'all',
+  tmpSel: 'all', movConv: lsGet('ttr-movconv', ''), movAcc: 'all', movFilter: 'all',
   cy: now.getFullYear(), cm: now.getMonth(),
   calY: now.getFullYear(), calM: now.getMonth(),
   db: {accounts: [], trades: [], movements: []}, settings: {},
@@ -2180,19 +2182,27 @@ function renderAccounts(c) {
     </div>`;
   }).join('');
   const mf = state.movFilter || 'all';
+  if (state.movAcc && state.movAcc !== 'all' && !d.accounts.some(a => a.id === state.movAcc)) state.movAcc = 'all';
+  const ma = state.movAcc || 'all';
   const allMovs = [...d.movements].sort(chrono).reverse();
-  const movs = allMovs.filter(m => mf === 'all' || m.kind === mf);
+  const accMovs = allMovs.filter(m => ma === 'all' || m.account_id === ma);
+  const movs = accMovs.filter(m => mf === 'all' || m.kind === mf);
   el.innerHTML = `${demoFlag()}
     ${pageHead('Comptes de trading', '')}
     ${d.accounts.length ? `<div class="acc-cards">${cards}${readOnly() ? '' : `<div class="acc-add-cell"><button class="acc-add" type="button" data-act="newacc" title="Nouveau compte" aria-label="Nouveau compte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>`}</div>` : `<section class="welcome"><h2>Aucun compte pour l’instant.</h2><p>Crée un compte par broker ou par prop firm : réel, démo, challenge, backtest… chacun avec sa devise.</p>${readOnly() ? '' : '<div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div>'}</section>`}
     ${d.accounts.length ? `<div class="card" style="margin-top:12px">
       <div class="card-head"><div><h3>Dépôts et retraits</h3><p class="hint">Ils changent le solde, mais pas ta performance de trading</p></div>
-        <div class="mv-tools">${allMovs.length ? `<div class="seg" role="group" aria-label="Afficher">
-          <button type="button" data-movfilter="all" aria-pressed="${mf === 'all'}">Tous</button>
-          <button type="button" data-movfilter="depot" aria-pressed="${mf === 'depot'}">💰 Dépôts</button>
-          <button type="button" data-movfilter="retrait" aria-pressed="${mf === 'retrait'}">💸 Retraits</button>
-        </div>` : ''}${readOnly() ? '' : `<button class="link-btn" type="button" data-movnew="">+ Ajouter</button>`}</div></div>
-      ${allMovs.length ? `<div class="mv-body">${movTotals(allMovs, c)}` : ''}
+        <div class="mv-tools">${allMovs.length ? `
+          <select id="mv-acc" class="select" aria-label="Compte">
+            <option value="all">Tous les comptes</option>
+            ${d.accounts.map(a => `<option value="${a.id}" ${ma === a.id ? 'selected' : ''}>${esc(a.name)} · ${a.currency}</option>`).join('')}
+          </select>
+          <div class="seg" role="group" aria-label="Type">
+            <button type="button" data-movfilter="all" aria-pressed="${mf === 'all'}">Tous</button>
+            <button type="button" data-movfilter="depot" aria-pressed="${mf === 'depot'}">💰 Dépôts</button>
+            <button type="button" data-movfilter="retrait" aria-pressed="${mf === 'retrait'}">💸 Retraits</button>
+          </div>` : ''}${readOnly() ? '' : `<button class="link-btn" type="button" data-movnew="${ma === 'all' ? '' : ma}">+ Ajouter</button>`}</div></div>
+      ${accMovs.length ? movTotals(accMovs, c) : ''}
       ${movs.length ? `<div class="mv-table" role="table" aria-label="Dépôts et retraits">
         <div class="mv-tr mv-th" role="row"><span role="columnheader">Date</span><span role="columnheader">Compte</span><span role="columnheader">Type</span><span role="columnheader" class="r">Montant</span><span role="columnheader">Note</span><span></span></div>
         ${movs.map(m => { const a = c.accById[m.account_id] || {}; const dep = m.kind === 'depot'; return `<div class="mv-tr" role="row">
@@ -2203,26 +2213,69 @@ function renderAccounts(c) {
           <span role="cell" class="mv-note">${esc(m.note) || '—'}</span>
           <span role="cell" class="mv-btns">${readOnly() ? '' : `<button type="button" class="mv-btn" data-movedit="${m.id}" title="Modifier" aria-label="Modifier">✏️</button><button type="button" class="mv-btn mvdel" data-movdelete="${m.id}" title="Supprimer" aria-label="Supprimer">🗑️</button>`}</span>
         </div>`; }).join('')}
-      </div>` : `<div class="empty-card">${allMovs.length ? (mf === 'depot' ? 'Aucun dépôt.' : 'Aucun retrait.') : 'Aucun dépôt ni retrait.'}</div>`}
-      ${allMovs.length ? '</div>' : ''}
+      </div>` : `<div class="empty-card">${allMovs.length ? 'Aucun mouvement pour ce choix.' : 'Aucun dépôt ni retrait.'}</div>`}
     </div>` : ''}`;
+  const sel = $('#mv-acc'); if (sel) sel.addEventListener('change', () => { state.movAcc = sel.value; render(); });
 }
 
-// totals beside the table: deposited, withdrawn, net — one block per currency
+/* Exchange rates (European Central Bank, via frankfurter.app — free, no key). Kept 12 h on this device. */
+const FX_URL = 'https://api.frankfurter.app/latest?from=';
+function fxRates(base) {
+  const k = 'ttr-fx-' + base, cached = lsGet(k, null);
+  state.fx ||= {};
+  if (cached && Date.now() - cached.at < 12 * 3600e3) { state.fx[base] = cached; return cached; }
+  if (state.fx[base] && (state.fx[base].loading || state.fx[base].failedAt > Date.now() - 60e3)) return state.fx[base].rates ? state.fx[base] : null;
+  state.fx[base] = {...(cached || {}), loading: true};
+  fetch(FX_URL + base, {cache: 'no-store'}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(j => { const v = {rates: j.rates, date: j.date, at: Date.now()}; state.fx[base] = v; lsSet(k, v); if (state.view === 'accounts') render(); })
+    .catch(() => { state.fx[base] = {...(cached || {}), failedAt: Date.now()}; if (state.view === 'accounts') render(); });
+  return cached && cached.rates ? cached : null;
+}
+// amount in currency `from`, expressed in `to` (null if the rate is unknown)
+function convert(amount, from, to) {
+  if (from === to) return amount;
+  const fx = fxRates(to);
+  return fx && fx.rates && fx.rates[from] ? amount / fx.rates[from] : null;
+}
+
+// totals: three boxes side by side (deposited, withdrawn, net). Each shows one line per currency,
+// or everything converted into $ or € if chosen.
 function movTotals(list, c) {
   const by = {};
-  list.forEach(m => { const cur = accCur(c, m.account_id); const o = by[cur] ||= {dep: 0, ret: 0, nd: 0, nr: 0}; if (m.kind === 'depot') { o.dep += m.amount; o.nd++; } else { o.ret += m.amount; o.nr++; } });
-  return `<div class="mv-totals">${Object.entries(by).map(([cur, o]) => {
-    const net = o.dep - o.ret, tot = o.dep + o.ret || 1;
-    return `<div class="mv-tot">
-      ${Object.keys(by).length > 1 ? `<div class="mv-tot-cur">En ${cur}</div>` : ''}
-      <div class="mv-tot-row"><span>💰 Total déposé</span><strong class="num">${money(o.dep, cur)}</strong></div>
-      <div class="mv-tot-sub">${o.nd} dépôt${o.nd > 1 ? 's' : ''}</div>
-      <div class="mv-tot-row"><span>💸 Total retiré</span><strong class="num ${o.ret ? 'neg' : ''}">${o.ret ? '−' : ''}${money(o.ret, cur)}</strong></div>
-      <div class="mv-tot-sub">${o.nr} retrait${o.nr > 1 ? 's' : ''}</div>
-      <div class="mv-bar" aria-hidden="true"><span class="d" style="width:${o.dep / tot * 100}%"></span><span class="r" style="width:${o.ret / tot * 100}%"></span></div>
-      <div class="mv-tot-row net"><span>Net apporté</span><strong class="num ${net < 0 ? 'neg' : ''}">${money(net, cur)}</strong></div>
-    </div>`; }).join('')}</div>`;
+  let nd = 0, nr = 0;
+  list.forEach(m => { const cur = accCur(c, m.account_id); const o = by[cur] ||= {dep: 0, ret: 0}; if (m.kind === 'depot') { o.dep += m.amount; nd++; } else { o.ret += m.amount; nr++; } });
+  const curs = Object.keys(by).sort((a, b) => a === 'USD' ? -1 : b === 'USD' ? 1 : a === 'EUR' ? -1 : b === 'EUR' ? 1 : a.localeCompare(b));
+  const conv = curs.length > 1 ? (state.movConv || '') : '';
+  const sum = key => {
+    if (!conv) return null;
+    let t = 0;
+    for (const cur of curs) { const v = convert(by[cur][key], cur, conv); if (v == null) return null; t += v; }
+    return t;
+  };
+  const box = (cls, icon, label, key, count, sign) => {
+    const total = key === 'net' ? (conv ? (sum('dep') == null ? null : sum('dep') - sum('ret')) : null) : sum(key);
+    const val = cur => key === 'net' ? by[cur].dep - by[cur].ret : by[cur][key];
+    const fmt = (v, cur) => (sign && v ? '−' : '') + money(v, cur);
+    const lines = curs.map(cur => `<div class="mvt-line"><span>${cur}</span><strong class="num ${sign && val(cur) ? 'neg' : key === 'net' && val(cur) < 0 ? 'neg' : ''}">${fmt(val(cur), cur)}</strong></div>`).join('');
+    return `<div class="mvt-box ${cls}">
+      <div class="mvt-head"><span class="mvt-ico">${icon}</span><span>${label}</span>${count != null ? `<em>${count}</em>` : ''}</div>
+      ${conv && total != null
+        ? `<div class="mvt-big num ${sign && total ? 'neg' : key === 'net' && total < 0 ? 'neg' : ''}">${(sign && total ? '−' : '') + money(total, conv)}</div><div class="mvt-detail">${(() => { const parts = curs.filter(cur => val(cur)).map(cur => money(key === 'net' ? val(cur) : Math.abs(val(cur)), cur)); return parts.length > 1 ? 'soit ' + parts.join(' et ') : parts.length === 1 && !(parts[0].includes(curSym(conv))) ? 'soit ' + parts[0] : '&nbsp;'; })()}</div>`
+        : curs.length === 1 ? `<div class="mvt-big num ${sign && val(curs[0]) ? 'neg' : key === 'net' && val(curs[0]) < 0 ? 'neg' : ''}">${fmt(val(curs[0]), curs[0])}</div>` : lines}
+    </div>`;
+  };
+  const fxInfo = conv ? (() => { const fx = state.fx && state.fx[conv]; if (fx && fx.rates) { const other = curs.find(x => x !== conv); return other && fx.rates[other] ? `Taux BCE du ${fmtDate(fx.date)} : 1 ${curSym(conv)} = ${nf2.format(fx.rates[other]).replace(/,?0+$/, '') || '0'} ${curSym(other)}` : ''; } return fx && fx.failedAt ? 'Taux de change introuvable pour l’instant (pas de connexion ?).' : 'Récupération du taux de change…'; })() : '';
+  return `<div class="mvt">
+    <div class="mvt-boxes">
+      ${box('dep', '💰', 'Total déposé', 'dep', `${nd} dépôt${nd > 1 ? 's' : ''}`, false)}
+      ${box('ret', '💸', 'Total retiré', 'ret', `${nr} retrait${nr > 1 ? 's' : ''}`, true)}
+      ${box('net', '🧮', 'Net apporté', 'net', null, false)}
+    </div>
+    ${curs.length > 1 ? `<div class="mvt-conv"><span>Afficher :</span><div class="seg" role="group" aria-label="Conversion">
+      <button type="button" data-movconv="" aria-pressed="${!conv}">Chaque devise</button>
+      ${['USD', 'EUR'].filter(x => curs.includes(x) || true).map(x => `<button type="button" data-movconv="${x}" aria-pressed="${conv === x}">Tout en ${curSym(x)}</button>`).join('')}
+    </div>${fxInfo ? `<small>${esc(fxInfo)}</small>` : ''}</div>` : ''}
+  </div>`;
 }
 
 /* ---------- SETTINGS ---------- */
@@ -2924,6 +2977,7 @@ document.addEventListener('click', async e => {
   if (ds.movnew != null && !form) return openMovement(null, ds.movnew);
   if (ds.movdelete) return confirmDeleteMovement(ds.movdelete);
   if (ds.movfilter) { state.movFilter = ds.movfilter; render(); return; }
+  if (ds.movconv != null && !form) { state.movConv = ds.movconv; lsSet('ttr-movconv', ds.movconv); render(); return; }
   if (ds.movedit) { const m = ctx().d.movements.find(x => x.id === ds.movedit); if (m) { if (readOnly()) return toast('Lecture seule.'); openMovement(m); } return; }
   if (ds.edit && !form) { const tr = data().trades.find(x => x.id === ds.edit); if (tr) openTrade(tr); return; }
   if (!form) return;

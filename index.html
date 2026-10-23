@@ -27,6 +27,7 @@
   --win:#22c55e; --win-soft:rgba(34,197,94,.13); --win-ink:#04210f;
   --loss:#f2545b; --loss-soft:rgba(242,84,91,.13);
   --be:#8b94a7;
+  --dep:#4b94ec; --ret:#e8b04a; --ret-ink:#2a1d04;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#9085e9;
   --shadow:0 12px 32px rgba(0,0,0,.45);
   --font-display:"Space Grotesk", "Segoe UI", system-ui, sans-serif;
@@ -41,7 +42,9 @@
     --win:#11905a; --win-soft:rgba(17,144,90,.10); --win-ink:#ffffff;
     --loss:#d93a42; --loss-soft:rgba(217,58,66,.09);
     --be:#5b6578;
-    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#6250d6;
+    --dep:#2a78d6; --ret:#b7791f; --ret-ink:#ffffff;
+    --dep:#2a78d6; --ret:#b7791f; --ret-ink:#ffffff;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#6250d6;
     --shadow:0 8px 24px rgba(20,30,60,.10);
     color-scheme:light;
   }
@@ -52,6 +55,7 @@
   --win:#11905a; --win-soft:rgba(17,144,90,.10); --win-ink:#ffffff;
   --loss:#d93a42; --loss-soft:rgba(217,58,66,.09);
   --be:#5b6578;
+  --dep:#2a78d6; --ret:#b7791f; --ret-ink:#ffffff;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#6250d6;
   --shadow:0 8px 24px rgba(20,30,60,.10);
   color-scheme:light;
@@ -454,8 +458,8 @@ tr.quick td:last-child{padding-right:8px}
 .acc-add svg{width:22px;height:22px}
 /* deposit / withdrawal window */
 .panel.mov{max-width:500px;border:1.5px solid var(--mv,var(--line));transition:border-color .25s,box-shadow .25s;box-shadow:var(--shadow),0 0 0 4px color-mix(in srgb,var(--mv) 12%,transparent)}
-.panel.mv-dep{--mv:var(--win)}
-.panel.mv-ret{--mv:var(--loss)}
+.panel.mv-dep{--mv:var(--dep)}
+.panel.mv-ret{--mv:var(--ret)}
 .mv-head{margin-bottom:12px}
 .mv-title{display:flex;align-items:center;gap:10px}
 .mv-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--mv) 16%,transparent);transition:background .25s}
@@ -466,7 +470,8 @@ tr.quick td:last-child{padding-right:8px}
 .mv-amount .field{font-size:24px;font-weight:700;padding:11px 44px 11px 14px}
 .mv-amount .u{font-size:18px;font-weight:700;right:14px}
 .panel.mov .save.mv-save{background:var(--mv);color:#fff;position:relative;transition:background .25s,filter .15s}
-.panel.mov.mv-dep .save.mv-save{color:var(--win-ink)}
+.panel.mov.mv-dep .save.mv-save{color:#fff}
+.panel.mov.mv-ret .save.mv-save{color:var(--ret-ink)}
 .mv-save:hover:not(:disabled){filter:brightness(1.06)}
 .mv-save-in{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .mv-check{width:18px;height:18px;flex:none}
@@ -496,8 +501,8 @@ tr.quick td:last-child{padding-right:8px}
 .mv-accname{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .mv-accname i{width:8px;height:8px;border-radius:50%;flex:none}
 .mv-type{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
-.mv-type.dep{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
-.mv-type.ret{background:var(--loss-soft);color:var(--loss);border:1px solid color-mix(in srgb,var(--loss) 35%,transparent)}
+.mv-type.dep{background:color-mix(in srgb,var(--dep) 14%,transparent);color:var(--dep);border:1px solid color-mix(in srgb,var(--dep) 35%,transparent)}
+.mv-type.ret{background:color-mix(in srgb,var(--ret) 14%,transparent);color:var(--ret);border:1px solid color-mix(in srgb,var(--ret) 35%,transparent)}
 .mv-body{display:flex;gap:24px;align-items:flex-start}
 .mv-body > .mv-table,.mv-body > .empty-card{flex:1 1 auto;min-width:0}
 .mvt{flex:0 0 300px;margin:0}
@@ -506,7 +511,8 @@ tr.quick td:last-child{padding-right:8px}
 .m-phone .mvt{flex:none;width:100%}
 @media (max-width:1100px){.m-desk .mv-body{flex-direction:column-reverse}.m-desk .mvt{flex:none;width:100%}.m-desk .mvt-boxes{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .mvt-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.mvt-box.ret{border-color:color-mix(in srgb,var(--loss) 28%,var(--line))}
+.mvt-box.dep{border-color:color-mix(in srgb,var(--dep) 30%,var(--line))}
+.mvt-box.ret{border-color:color-mix(in srgb,var(--ret) 35%,var(--line))}
 .mvt-head{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted)}
 .mvt-head em{margin-left:auto;font-style:normal;font-weight:500;font-size:11.5px}
 .mvt-ico{font-size:15px}
@@ -514,7 +520,7 @@ tr.quick td:last-child{padding-right:8px}
 .mvt-detail{font-size:12px;color:var(--muted)}
 .mvt-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;color:var(--muted)}
 .mvt-line strong{font-size:16px;font-weight:700;color:var(--fg)}
-.mvt-line strong.neg{color:var(--loss)}
+
 .mvt-conv{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
 .mvt-conv .seg button{font-size:12.5px;padding:5px 10px}
 .mvt-conv small{font-size:12px}
@@ -2214,7 +2220,7 @@ function renderAccounts(c) {
           <span role="cell" class="num">${fmtDate(m.date)}</span>
           <span role="cell" class="mv-accname"><i style="background:${a.id ? accColor(a, d.accounts) : 'var(--muted)'}"></i>${esc(a.name || '—')}</span>
           <span role="cell"><span class="mv-type ${dep ? 'dep' : 'ret'}">${dep ? '💰 Dépôt' : '💸 Retrait'}</span></span>
-          <span role="cell" class="r num mv-amt ${dep ? '' : 'neg'}">${dep ? '' : '−'}${money(m.amount, a.currency || 'USD')}</span>
+          <span role="cell" class="r num mv-amt">${dep ? '+' : '−'}${money(m.amount, a.currency || 'USD')}</span>
           <span role="cell" class="mv-note">${esc(m.note) || '—'}</span>
           <span role="cell" class="mv-btns">${readOnly() ? '' : `<button type="button" class="mv-btn" data-movedit="${m.id}" title="Modifier" aria-label="Modifier">✏️</button><button type="button" class="mv-btn mvdel" data-movdelete="${m.id}" title="Supprimer" aria-label="Supprimer">🗑️</button>`}</span>
         </div>`; }).join('')}
@@ -2241,13 +2247,14 @@ function movTotals(list, c) {
   const box = (cls, icon, label, key, count, sign) => {
     const total = key === 'net' ? (conv ? (sum('dep') == null ? null : sum('dep') - sum('ret')) : null) : sum(key);
     const val = cur => key === 'net' ? by[cur].dep - by[cur].ret : by[cur][key];
-    const fmt = (v, cur) => (sign && v ? '−' : '') + money(v, cur);
-    const lines = curs.map(cur => `<div class="mvt-line"><span>${cur}</span><strong class="num ${sign && val(cur) ? 'neg' : key === 'net' && val(cur) < 0 ? 'neg' : ''}">${fmt(val(cur), cur)}</strong></div>`).join('');
+    // amounts stay neutral: + for money in, − for money out (green/red are kept for trading results)
+    const fmt = (v, cur) => key === 'net' ? money(v, cur, true) : (v ? (sign ? '−' : '+') : '') + money(v, cur);
+    const lines = curs.map(cur => `<div class="mvt-line"><span>${cur}</span><strong class="num">${fmt(val(cur), cur)}</strong></div>`).join('');
     return `<div class="mvt-box ${cls}">
       <div class="mvt-head"><span class="mvt-ico">${icon}</span><span>${label}</span>${count != null ? `<em>${count}</em>` : ''}</div>
       ${conv && total != null
         ? `<div class="mvt-big num ${sign && total ? 'neg' : key === 'net' && total < 0 ? 'neg' : ''}">${(sign && total ? '−' : '') + money(total, conv)}</div><div class="mvt-detail">${(() => { const parts = curs.filter(cur => val(cur)).map(cur => money(key === 'net' ? val(cur) : Math.abs(val(cur)), cur)); return parts.length > 1 ? 'soit ' + parts.join(' et ') : parts.length === 1 && !(parts[0].includes(curSym(conv))) ? 'soit ' + parts[0] : '&nbsp;'; })()}</div>`
-        : curs.length === 1 ? `<div class="mvt-big num ${sign && val(curs[0]) ? 'neg' : key === 'net' && val(curs[0]) < 0 ? 'neg' : ''}">${fmt(val(curs[0]), curs[0])}</div>` : lines}
+        : curs.length === 1 ? `<div class="mvt-big num">${fmt(val(curs[0]), curs[0])}</div>` : lines}
     </div>`;
   };
   return `<div class="mvt">

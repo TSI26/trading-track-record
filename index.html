@@ -2233,6 +2233,7 @@ function renderAccounts(c) {
 
 // totals: three boxes (deposited, withdrawn, net), one line per currency
 function movTotals(list, c) {
+  const mf = state.movFilter || 'all'; // "Dépôts" or "Retraits" alone: only the matching box
   const by = {};
   let nd = 0, nr = 0;
   list.forEach(m => { const cur = accCur(c, m.account_id); const o = by[cur] ||= {dep: 0, ret: 0}; if (m.kind === 'depot') { o.dep += m.amount; nd++; } else { o.ret += m.amount; nr++; } });
@@ -2259,9 +2260,9 @@ function movTotals(list, c) {
   };
   return `<div class="mvt">
     <div class="mvt-boxes">
-      ${box('dep', '💰', 'Total déposé', 'dep', `${nd} dépôt${nd > 1 ? 's' : ''}`, false)}
-      ${box('ret', '💸', 'Total retiré', 'ret', `${nr} retrait${nr > 1 ? 's' : ''}`, true)}
-      ${box('net', '🧮', 'Net apporté', 'net', null, false)}
+      ${mf !== 'depot' ? box('ret', '💸', 'Total retiré', 'ret', `${nr} retrait${nr > 1 ? 's' : ''}`, true) : ''}
+      ${mf !== 'retrait' ? box('dep', '💰', 'Total déposé', 'dep', `${nd} dépôt${nd > 1 ? 's' : ''}`, false) : ''}
+      ${mf === 'all' ? box('net', '🧮', 'Net apporté', 'net', null, false) : ''}
     </div>
   </div>`;
 }

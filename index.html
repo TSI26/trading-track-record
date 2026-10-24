@@ -2174,12 +2174,11 @@ function renderAccounts(c) {
     const base = a.capital + mv;
     return `<div class="acc-card ${a.archived ? 'archived' : ''}">
       <div class="acc-top"><div style="display:flex;gap:10px;align-items:center;min-width:0"><span class="acc-badge" style="--c:${accColor(a, d.accounts)}">${esc(a.name.trim().charAt(0) || '?')}</span><div style="min-width:0"><div class="acc-name">${esc(a.name)}</div><div class="acc-broker">${[a.broker, a.platform, a.number ? 'n° ' + a.number : ''].filter(Boolean).map(esc).join(' · ') || '&nbsp;'}</div></div></div><span class="pill kind">${kindOf(a.kind).name}${a.kind === 'prop' && a.prop_phase ? ' · ' + (PROP_PHASES.find(p => p.id === a.prop_phase) || {}).name : ''}${a.archived ? ' · archivé' : ''}</span></div>
-      ${a.kind === 'prop' && (a.prop_target || a.prop_daily_loss || a.prop_max_dd) ? `<div class="acc-broker">Règles : ${[a.prop_target ? 'objectif ' + nf2.format(a.prop_target).replace(',00', '') + ' %' : '', a.prop_daily_loss ? 'perte max/jour ' + nf2.format(a.prop_daily_loss).replace(',00', '') + ' %' : '', a.prop_max_dd ? 'drawdown max ' + nf2.format(a.prop_max_dd).replace(',00', '') + ' %' : ''].filter(Boolean).join(' · ')}</div>` : ''}
       <div><div class="acc-bal num">${money(bal, a.currency)}</div><div class="k-sub num" style="font-size:12.5px;color:var(--muted)">Résultat : <span class="${sgnCls(s.total)}">${money(s.total, a.currency, true)}</span>${base > 0 ? ` · <span class="${sgnCls(s.total)}">${s.total > 0 ? '+' : ''}${fPct(s.total / base, 1)}</span>` : ''} · <span class="${sgnCls(s.sumR)}">${fR(s.sumR)}</span></div></div>
       <div class="acc-grid">
         <div><span>Capital</span><strong>${money0(a.capital, a.currency)}</strong></div>
         <div><span>R-MAX</span><strong>${a.rmax ? money(a.rmax, a.currency) : '—'}</strong></div>
-        <div><span>Dépôts nets</span><strong>${money0(mv, a.currency)}</strong></div>
+        <div title="Ce que tu as retiré, moins ce que tu as rajouté après l’ouverture (le capital de départ n’est pas compté)"><span>Retiré net</span><strong>${money0(-mv, a.currency)}</strong></div>
         <div><span>Trades</span><strong>${s.n}</strong></div>
         <div><span>Réussite</span><strong>${fPct(s.winrate)}</strong></div>
         <div><span>Profit factor</span><strong>${s.pf === Infinity ? '∞' : s.pf == null ? '—' : nf2.format(s.pf)}</strong></div>

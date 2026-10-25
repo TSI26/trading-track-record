@@ -2697,8 +2697,8 @@ function openTrade(t) {
       ptp: t.ptp, psl: t.psl, rmaxStr: numStr(t.rmax), setup: t.setup, note: t.note, lots: t.lots};
   } else {
     const lp = lastPrefs();
-    form = {kind: 'trade', account_id: defaultAccount(c), date: todayStr(), time: '', asset_class: lp.cls || 'forex', asset: '', side: '', order: lp.order || '', tf: lp.tf || '', session: guessSession() === 'off' ? '' : guessSession(), sessAuto: true, hold: '',
-      riskStr: lp.riskStr || '', conf: 0, resKind: '', pnlStr: '', commStr: '', swapSign: 1, swapStr: '', ptp: false, psl: false, rmaxStr: '', setup: '', note: ''};
+    form = {kind: 'trade', account_id: defaultAccount(c), date: todayStr(), time: '', asset_class: '', asset: '', side: '', order: '', tf: '', session: '', sessAuto: true, hold: '',
+      riskStr: '', conf: 0, resKind: '', pnlStr: '', commStr: '', swapSign: 1, swapStr: '', ptp: false, psl: false, rmaxStr: '', setup: '', note: ''};
   }
   form.err = ''; form.busy = false;
   drawPanel(true);
@@ -2747,14 +2747,14 @@ function tradePanelHtml(c) {
           <div class="order-wrap" id="t-order-wrap" ${f.side ? '' : 'hidden'}><div class="pick3" id="t-orders"></div></div>
         </section>
         <section class="tsec" style="--i:1">
-          <div class="fl">Session</div>
-          <div class="sess-grid">${SESSIONS.filter(se => se.id !== 'off').map(se => opt('data-tsess', se.id, f.session, `<span class="e">${se.emoji}</span>${se.name}`, `style="--c:${se.color}"`)).join('')}</div>
-        </section>
-        <section class="tsec" style="--i:2">
           <div class="fl">Actif</div>
-          <div class="asset-line"><input id="t-asset" class="field asset-in" autocomplete="off" spellcheck="false" placeholder="${esc(cls.ph ? 'Ex. ' + cls.ph : 'Nom de l’actif')}" value="${esc(f.asset)}"></div>
+          <div class="asset-line"><input id="t-asset" class="field asset-in" autocomplete="off" spellcheck="false" placeholder="${esc(cls.ph ? 'Ex. ' + cls.ph : f.asset_class ? 'Nom de l’actif' : 'Ex. EUR/USD, AAPL, NAS100…')}" value="${esc(f.asset)}"></div>
           <div class="cls-grid">${CLASSES.filter(k => k.id !== 'autre').map(k => opt('data-tcls', k.id, f.asset_class, `<span class="e">${k.emoji}</span>${k.one}`, `style="--c:${k.color}"`)).join('')}</div>
           <div class="chips recent" id="t-recent"></div>
+        </section>
+        <section class="tsec" style="--i:2">
+          <div class="fl">Session</div>
+          <div class="sess-grid">${SESSIONS.filter(se => se.id !== 'off').map(se => opt('data-tsess', se.id, f.session, `<span class="e">${se.emoji}</span>${se.name}`, `style="--c:${se.color}"`)).join('')}</div>
         </section>
         <section class="tsec" style="--i:3">
           <div class="row2">
@@ -2824,7 +2824,7 @@ function syncTradeForm() {
   const cl = $('#t-conf-lbl'); if (cl) cl.textContent = (f.hoverConf || f.conf) ? CONF_LABELS[f.hoverConf || f.conf] : '';
   // asset: placeholder + clean writing
   const cls = classOf(f.asset_class), ai = $('#t-asset');
-  if (ai) ai.placeholder = cls.ph ? 'Ex. ' + cls.ph : 'Nom de l’actif';
+  if (ai) ai.placeholder = cls.ph ? 'Ex. ' + cls.ph : f.asset_class ? 'Nom de l’actif' : 'Ex. EUR/USD, AAPL, NAS100…';
   const fmt = formatAsset(f.asset, f.asset_class);
   const rc = $('#t-recent'); if (rc) { const list = recentAssets(c.d, f.asset_class); const k = f.asset_class + list.join(); if (rc.dataset.k !== k) { rc.dataset.k = k; rc.innerHTML = list.map(x => `<button type="button" class="chip" data-tasset="${esc(x)}">${esc(x)}</button>`).join(''); } rc.querySelectorAll('[data-tasset]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tasset === fmt))); }
   const ow = $('#t-order-wrap'); if (ow) ow.hidden = !f.side;
@@ -3137,6 +3137,7 @@ async function panelSave() {
     if (v.err) return fail(v.err);
     if (need(f.date, 'Choisis la date du trade.', '#t-date')) return;
     if (need(asset, 'Indique l’actif (ex. ' + (classOf(f.asset_class).ph || 'EUR/USD') + ').', '#t-asset')) return;
+    if (need(f.asset_class, 'Choisis la classe d’actif (Forex, Action…).')) return;
     if (need(f.side, 'Choisis la direction : Long ou Short.')) return;
     if (need(f.order, 'Choisis le type d’ordre : Marché, Limit ou Stop.')) return;
     if (need(f.session, 'Choisis la session.')) return;

@@ -741,7 +741,29 @@ details.more summary{cursor:pointer;color:var(--muted);font-weight:600;font-size
   .overlay.enter{animation:fadein .18s ease-out}
   @keyframes up{from{transform:translateY(16px) scale(.985);opacity:0}to{transform:none;opacity:1}}
   @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .overlay.leaving{animation:fadeout .2s ease-in forwards}
+  .overlay.leaving .panel{animation:down .2s ease-in forwards}
+  @keyframes fadeout{to{opacity:0}}
+  @keyframes down{to{transform:translateY(10px) scale(.97);opacity:0}}
 }
+/* window buttons: they answer the mouse */
+.overlay .x{color:var(--muted);transition:background .18s,color .18s,transform .12s}
+.overlay .x svg{transition:transform .3s cubic-bezier(.2,.8,.3,1)}
+.overlay .x:hover{background:var(--loss-soft);color:var(--loss)}
+.overlay .x:hover svg{transform:rotate(90deg)}
+.overlay .x:active{transform:scale(.9)}
+.overlay .cancel{color:var(--muted);transition:background .18s,border-color .18s,color .18s,transform .12s}
+.overlay .cancel:hover{color:var(--fg);border-color:var(--line-2);background:var(--surface-2)}
+.overlay .cancel:active{transform:scale(.97)}
+.overlay .del{transition:background .18s,border-color .18s,transform .12s}
+.overlay .del:hover{background:var(--loss-soft);border-color:color-mix(in srgb,var(--loss) 55%,var(--line))}
+.overlay .del:active{transform:scale(.95)}
+.overlay .save{--btn-c:var(--accent);transition:filter .18s,transform .18s cubic-bezier(.2,.8,.3,1),box-shadow .18s,background .25s}
+.panel.mov .save{--btn-c:var(--mv)}
+.overlay .save:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 10px 22px -8px color-mix(in srgb,var(--btn-c) 70%,transparent)}
+.overlay .save:not(:disabled):active{transform:translateY(0) scale(.985);box-shadow:none;transition-duration:.08s}
+.tr-save-ico{display:inline-block;transition:transform .3s cubic-bezier(.2,1.4,.4,1)}
+.overlay .save:not(:disabled):hover .tr-save-ico{transform:rotate(-12deg) scale(1.2)}
 
 body{padding-bottom:env(safe-area-inset-bottom,0px)}
 .m-desk .side{padding-top:calc(20px + env(safe-area-inset-top,0px))}
@@ -3126,6 +3148,13 @@ function tradeCalc(c) {
   el.innerHTML = parts.map(p => `<span>${p}</span>`).join('');
 }
 function closePanel() { $('#panel-root').innerHTML = ''; form = null; }
+// closing by hand (cross, Annuler, Échap, click outside): the window fades away instead of vanishing
+function closePanelSoft() {
+  const ov = $('#panel-root .overlay');
+  if (!ov || matchMedia('(prefers-reduced-motion: reduce)').matches) return closePanel();
+  form = null; ov.classList.remove('enter'); ov.querySelector('.panel')?.classList.remove('enter'); ov.classList.add('leaving'); ov.style.pointerEvents = 'none';
+  setTimeout(() => { if (ov.isConnected) ov.remove(); }, 200);
+}
 async function panelSave() {
   const f = form, c = ctx();
   const fail = msg => { f.err = msg; const e = document.querySelector('#panel-root .err'); if (e) { e.textContent = msg; e.scrollIntoView({block: 'nearest', behavior: 'smooth'}); } else drawPanel(); };
@@ -3250,7 +3279,7 @@ document.addEventListener('click', async e => {
     state.menuOpen = false; renderMe(); $('#avatar-file').click(); return;
   }
   if (t.dataset.act === 'avatardel') { const s = {...settings()}; delete s.avatar; state.settings = s; saveSettings({}); toast('Photo retirée'); return; }
-  if (t.id === 'ov') { if (e.target === t) closePanel(); return; }
+  if (t.id === 'ov') { if (e.target === t) closePanelSoft(); return; }
   const ds = t.dataset;
   if (ds.mode) { state.mode = ds.mode; lsSet('ttr-mode', state.mode); render(); window.scrollTo(0, 0); return; }
   if (ds.view) { go(ds.view); if (ds.view === 'admin' && state.adminLoaded && Date.now() - (state.adminFetchedAt || 0) > 30000) fetchAdmin(); return; }
@@ -3288,7 +3317,7 @@ document.addEventListener('click', async e => {
   if (ds.edit && !form) { const tr = data().trades.find(x => x.id === ds.edit); if (tr) openTrade(tr); return; }
   if (!form) return;
   if (ds.cact && form.kind === 'confirm') { const fn = form.onPick; closePanel(); if (ds.cact !== 'cancel' && fn) await fn(ds.cact); return; }
-  if (t.hasAttribute('data-close')) return closePanel();
+  if (t.hasAttribute('data-close')) return closePanelSoft();
   if (t.hasAttribute('data-save')) return panelSave();
   if (t.hasAttribute('data-del')) { if (form.kind === 'account') { const a = ctx().d.accounts.find(x => x.id === form.id); if (a) confirmDeleteAccount(a); return; } form.confirm = true; return drawPanel(); }
   if (t.hasAttribute('data-noconf')) { form.confirm = false; if (form.kind === 'account') return syncAccountForm(); return drawPanel(); }
@@ -3325,7 +3354,7 @@ document.addEventListener('change', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && state.accMenuOpen) { state.accMenuOpen = false; renderSwitcher(ctx()); document.querySelector('[data-act="accmenu"]')?.focus(); return; }
   if (e.key === 'Escape' && state.menuOpen) { state.menuOpen = false; renderMe(); document.querySelector('[data-act="memenu"]')?.focus(); return; }
-  if (e.key === 'Escape' && form) closePanel();
+  if (e.key === 'Escape' && form) closePanelSoft();
   if (e.key === 'Enter' && e.target.matches) {
     if (e.target.matches('tr.row')) { const tr = data().trades.find(x => x.id === e.target.dataset.edit); if (tr) openTrade(tr); }
     if (e.target.matches('li[data-movedit], [data-accone]')) e.target.click();

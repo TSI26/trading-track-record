@@ -361,6 +361,79 @@ button{cursor:pointer}
 
 /* spreadsheet table */
 .sheet-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:auto;margin-top:12px;max-height:calc(100vh - 230px)}
+/* ===== Mes trades: the table ===== */
+.js-row{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
+.js-chip{display:flex;flex-direction:column;gap:3px;padding:10px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);min-width:112px}
+.js-chip small{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.js-chip b{font-size:17px;font-weight:700}
+.js-chip.open{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.js-chip.open b{color:var(--accent)}
+.jt-card{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:auto;box-shadow:0 1px 0 rgba(255,255,255,.02) inset,0 12px 30px -18px rgba(0,0,0,.45)}
+table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.jt thead th{position:sticky;top:0;z-index:2;text-align:left;font-family:var(--font-display);font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 8px 12px;background:linear-gradient(var(--surface-2),color-mix(in srgb,var(--surface-2) 55%,var(--surface)));border-bottom:1px solid var(--line);white-space:nowrap}
+.jt thead th:first-child{padding-left:17px}
+.jt th.r,.jt td.r{text-align:right}
+.jt td{padding:12px 8px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);vertical-align:middle;white-space:nowrap}
+.jt td:first-child{padding-left:17px;position:relative}
+.jt tbody tr:last-child td{border-bottom:0}
+.jt tbody tr.row{cursor:pointer;transition:background .15s}
+.jt tbody tr.row td{transition:background .15s}
+.jt tbody tr.row:hover td{background:color-mix(in srgb,var(--surface-2) 80%,transparent)}
+.jt tbody tr.row td:first-child::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:transparent;transition:background .15s}
+.jt tbody tr.row:hover td:first-child::before{background:var(--line-2)}
+.jt tr.is-open td{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.jt tr.is-open:hover td{background:color-mix(in srgb,var(--accent) 12%,transparent) !important}
+.jt tr.is-open td:first-child::before{background:var(--accent) !important}
+.jt-sep td{padding:0;height:6px;border-bottom:1px solid var(--line);background:var(--bg)}
+.jt-month td{padding:16px 22px 8px;background:transparent;border-bottom:1px solid var(--line)}
+.jt-month td{display:table-cell}
+.jt-month .jm-name{font-family:var(--font-display);font-weight:700;font-size:13px;text-transform:capitalize;margin-right:12px}
+.jt-month .num{font-size:12.5px;font-weight:600}
+.jt-date .jd{font-weight:600}
+.jt-time{color:var(--muted);margin-left:4px;font-size:12px;font-variant-numeric:tabular-nums}
+.jt-acc{color:var(--fg);max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.jt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:0}
+.jt-asset{display:flex;align-items:center;gap:8px}
+.jt-asset b{font-weight:700;letter-spacing:.02em}
+.jt-cls{flex:none;width:25px;height:25px;font-size:14px !important;border-radius:8px;display:grid;place-items:center;font-size:15px;background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent)}
+.jt-side{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px}
+.jt-side.long{color:var(--win);background:var(--win-soft)}
+.jt-side.short{color:var(--loss);background:var(--loss-soft)}
+.jt-sess{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 9px 4px 6px;border-radius:999px;color:var(--fg);background:color-mix(in srgb,var(--c) 15%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent)}
+.jt-risk{min-width:96px}
+.jr-v{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.jr-v i{width:1px;height:13px;background:var(--line-2)}
+.jr-r{color:var(--muted)}
+.jr-bar{margin-top:6px;height:3px;width:100%;max-width:104px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.jr-bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))}
+.jr-bar.over span{background:var(--loss)}
+.jt-res{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:7px;letter-spacing:.02em}
+.jt-res.win{color:var(--win);background:var(--win-soft)}
+.jt-res.loss{color:var(--loss);background:var(--loss-soft)}
+.jt-res.be{color:#d4a017;background:rgba(234,179,8,.14)}
+.jt-res.open{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.jt-net{font-weight:700;font-size:13.5px}
+.jt-rr{font-weight:700}
+.jt-na{color:var(--muted);font-weight:400}
+th.jt-acts,td.jt-acts{width:1%;text-align:right;padding-right:10px !important;position:sticky;right:0;z-index:1;background:var(--surface)}
+.jt thead th.jt-acts{z-index:3;background:color-mix(in srgb,var(--surface-2) 75%,var(--surface))}
+.jt tr.is-open td.jt-acts{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.jt tr.row:hover td.jt-acts{background:color-mix(in srgb,var(--surface-2) 80%,var(--surface))}
+.jt tr.is-open:hover td.jt-acts{background:color-mix(in srgb,var(--accent) 12%,var(--surface)) !important}
+.jt-acts{white-space:nowrap}
+.jt-btn{width:28px;height:28px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--muted);display:inline-grid;place-items:center;margin-left:2px;opacity:.55;transition:opacity .15s,background .15s,color .15s,border-color .15s,transform .12s;vertical-align:middle}
+.jt-btn svg{width:16px;height:16px}
+.jt tr.row:hover .jt-btn{opacity:1}
+.jt-btn:hover{background:var(--surface-2);border-color:var(--line);color:var(--fg)}
+.jt-btn.jt-del:hover{background:var(--loss-soft);border-color:color-mix(in srgb,var(--loss) 45%,var(--line));color:var(--loss)}
+.jt-btn.soon{opacity:.3}
+.jt tr.row:hover .jt-btn.soon{opacity:.5}
+.jt-btn:active{transform:scale(.9)}
+.jt-close{border:0;border-radius:8px;padding:7px 8px;margin-right:0;font-size:11px;font-weight:700;background:var(--accent);color:var(--accent-ink);vertical-align:middle;transition:filter .15s,transform .15s,box-shadow .15s}
+.jt-close:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 16px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+.jt-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:44px 0;color:var(--muted)}
+.jt-empty span{font-size:28px}
+.tip.up{transform:translate(-50%,-100%)}
 table.tx-table{width:100%;border-collapse:collapse;font-size:13px}
 table.journal{min-width:1380px}
 .tx-table th{position:sticky;top:0;z-index:2;background:var(--surface-2);text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;padding:10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -1764,6 +1837,13 @@ document.addEventListener('mouseover', e => {
   const r = t.getBoundingClientRect();
   root.innerHTML = `<div class="tip" style="left:${r.right + 12}px;top:${r.top + r.height / 2}px">${esc(t.dataset.tip)}</div>`;
 });
+document.addEventListener('mouseover', e => {
+  const t = e.target.closest && e.target.closest('.jt [data-tip]');
+  if (!t) { if ($('#tip-root .tip.up')) $('#tip-root').innerHTML = ''; return; }
+  const r = t.getBoundingClientRect();
+  $('#tip-root').innerHTML = `<div class="tip up" style="left:${r.left + r.width / 2}px;top:${r.top - 8}px">${esc(t.dataset.tip)}</div>`;
+});
+document.addEventListener('scroll', () => { if ($('#tip-root .tip.up')) $('#tip-root').innerHTML = ''; }, true);
 document.addEventListener('mouseout', e => { if (e.target.closest && e.target.closest('.side [data-tip]') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.side [data-tip]') === e.target.closest('.side [data-tip]'))) $('#tip-root').innerHTML = ''; });
 function render() {
   // keep focus and caret across re-renders (live sync can re-render while typing)
@@ -2246,79 +2326,93 @@ function journalTools() {
 function renderJournal(c) {
   const el = $('#view');
   const list = filteredTrades(c);
-  const S = stats(list, c);
-  const summary = `<div class="h-summary num"><span>${list.length} trade${list.length > 1 ? 's' : ''}</span><span class="${sgnCls(S.total)}">${fV(S.total, c)}</span><span>${fPct(S.winrate)} de réussite</span></div>`;
   if (!c.d.accounts.length && !state.demo && !state.viewAs) {
     el.innerHTML = pageHead('Mes trades', 'Tous tes trades') + `<section class="welcome"><h2>Crée d’abord un compte de trading.</h2><p>Chaque trade est rattaché à un compte (broker, prop firm…).</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`;
     return;
   }
   if (state.mode === 'desk') {
-    const canQuick = false; // the quick line is retired: trades now go through « + Nouveau trade » (all the new details)
     el.innerHTML = `${demoFlag()}
       ${pageHead('Mes trades', '', filtersBar(c))}
       ${unitNote(c)}
-      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px">${summary}</div>
-      ${openBox(c)}
+      ${journalSummary(list, c)}
       ${journalTools()}
-      <div class="sheet-table-wrap">${journalTable(list, c, canQuick)}</div>
-      <p class="q-hint">${quick.err ? `<span class="q-err">${esc(quick.err)}</span>` : readOnly() ? '' : 'Clique sur une ligne pour modifier ou supprimer le trade.'}</p>`;
-    if (canQuick) bindQuick(c);
+      <div class="jt-card">${journalTable(list, c)}</div>`;
   } else {
+    const S = stats(list, c);
+    const summary = `<div class="h-summary num"><span>${list.length} trade${list.length > 1 ? 's' : ''}</span><span class="${sgnCls(S.total)}">${fV(S.total, c)}</span><span>${fPct(S.winrate)} de réussite</span></div>`;
     el.innerHTML = `${demoFlag()}${pageHead('Mes trades', '', filtersBar(c))}${unitNote(c)}${openBox(c)}${journalTools()}<div style="margin:12px 0 0">${summary}</div>${phoneList(list, c)}`;
   }
   bindJournalTools(list, c);
 }
-function journalTable(list, c, canQuick) {
-  const mode = c.d.settings.riskMode;
-  const acts = entryAccounts(c);
-  if (!quick.account_id || !acts.some(a => a.id === quick.account_id)) quick.account_id = defaultAccount(c);
-  const qAcc = c.accById[quick.account_id];
-  let rows = '', lastM = '';
+// "2 novembre" / "2 novembre à 15:15" — the year only in the « Tout » view
+function longDate(t, withYear) {
+  const d = parseD(t.date);
+  const txt = d.toLocaleDateString('fr-FR', withYear ? {day: 'numeric', month: 'long', year: 'numeric'} : {day: 'numeric', month: 'long'});
+  return `<span class="jd">${txt}</span>${t.time ? `<span class="jt-time">à ${t.time.slice(0, 5)}</span>` : ''}`;
+}
+function journalSummary(list, c) {
+  const S = stats(list, c);
+  const tot = list.reduce((a, t) => a + (t.rReal || 0), 0);
+  const nOpen = openForJournal(c).length;
+  const chip = (lbl, v, cls = '') => `<div class="js-chip"><small>${lbl}</small><b class="num ${cls}">${v}</b></div>`;
+  return `<div class="js-row">
+    ${chip('Trades', list.length)}
+    ${chip('Réussite', list.length ? fPct(S.winrate) : '—')}
+    ${chip('Résultat', list.length ? fV(S.total, c) : '—', sgnCls(S.total))}
+    ${chip('Total R réel', list.length ? fR(tot) : '—', sgnCls(tot))}
+    ${nOpen ? `<div class="js-chip open"><small>En cours</small><b class="num">⏳ ${nOpen}</b></div>` : ''}
+  </div>`;
+}
+// running trades are always shown first (whatever the period), so none is forgotten
+function openForJournal(c) {
+  const q = state.q.trim().toLowerCase();
+  return c.openTrades.filter(t => (state.fSide === 'all' || t.side === state.fSide) && (state.fRes === 'all') && (!q || t.asset.toLowerCase().includes(q))).slice().reverse();
+}
+const JI = {
+  edit: ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
+  del: ic('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>'),
+  card: ic('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/>')
+};
+function journalRow(t, c, multiAcc, withYear) {
+  const a = c.accById[t.account_id] || {}, cur = a.currency || 'USD', k = classOf(t.asset_class), se = sessionOf(t.session);
+  const riskR = t.riskR != null ? t.riskR : t.rmax > 0 && t.risk > 0 ? t.risk / t.rmax : null;
+  const fill = riskR == null ? 0 : Math.min(riskR, 1) * 100;
+  const res = t.open ? `<span class="jt-res open">⏳ En cours</span>` : t.res === 'win' ? `<span class="jt-res win">Gagné</span>` : t.res === 'loss' ? `<span class="jt-res loss">Perdu</span>` : `<span class="jt-res be">BE</span>`;
+  const tip = t.open ? '' : `Brut ${money(t.pnl, cur, true)} · Com ${t.commission ? money(-t.commission, cur) : '0'} · Swap ${t.swap ? money(t.swap, cur, true) : '0'}`;
+  const ro = readOnly();
+  return `<tr class="row${t.open ? ' is-open' : ''}" data-edit="${t.id}" tabindex="0">
+    <td class="jt-date">${longDate(t, withYear)}</td>
+    ${multiAcc ? `<td class="jt-acc"><span class="jt-dot" style="background:${accColor(a)}"></span>${esc(a.name || '—')}</td>` : ''}
+    <td><div class="jt-asset"><span class="jt-cls" style="--c:${k.color}">${k.emoji}</span><b>${esc(t.asset)}</b></div></td>
+    <td><span class="jt-side ${t.side}">${t.side === 'long' ? '▲ Long' : '▼ Short'}</span></td>
+    <td><span class="jt-sess" style="--c:${se.color}"><span>${se.emoji}</span>${se.name}</span></td>
+    <td class="jt-risk num"><div class="jr-v"><span>${money(t.risk, cur)}</span><i></i><span class="jr-r">${riskR != null ? nf2.format(riskR) + ' R' : '—'}</span></div><div class="jr-bar${riskR > 1.0001 ? ' over' : ''}"><span style="width:${fill}%"></span></div></td>
+    <td>${res}</td>
+    <td class="r num jt-net ${t.open ? '' : sgnCls(t.net)}" ${tip ? `data-tip="${esc(tip)}"` : ''}>${t.open ? '<span class="jt-na">—</span>' : money(t.net, cur, true)}</td>
+    <td class="r num ${t.open ? '' : sgnCls(t.rTrade)}">${t.open ? '<span class="jt-na">—</span>' : fR(t.rTrade)}</td>
+    <td class="r num jt-rr ${t.open ? '' : sgnCls(t.rReal)}">${t.open ? '<span class="jt-na">—</span>' : fR(t.rReal)}</td>
+    <td class="jt-acts">${ro ? '' : `${t.open ? `<button type="button" class="jt-close" data-edit="${t.id}" data-tip="Noter le résultat">Clôturer</button>` : `<button type="button" class="jt-btn" data-edit="${t.id}" data-tip="Modifier" aria-label="Modifier">${JI.edit}</button>`}<button type="button" class="jt-btn jt-del" data-trdel="${t.id}" data-tip="Supprimer" aria-label="Supprimer">${JI.del}</button>`}</td>
+  </tr>`;
+}
+function journalTable(list, c) {
+  const multiAcc = c.accs.length > 1, withYear = state.period === 'all';
+  const cols = 10 + (multiAcc ? 1 : 0);
+  const open = openForJournal(c);
+  let rows = open.map(t => journalRow(t, c, multiAcc, withYear)).join('');
+  if (open.length && list.length) rows += `<tr class="jt-sep"><td colspan="${cols}"></td></tr>`;
+  let lastM = '';
   const monthTotals = {};
   list.forEach(t => { const k = t.date.slice(0, 7); monthTotals[k] = (monthTotals[k] || 0) + val(t, c); });
   list.forEach(t => {
     const k = t.date.slice(0, 7);
-    if (k !== lastM) { lastM = k; const v = monthTotals[k]; rows += `<tr class="month-row"><td colspan="14">${monthName(+k.slice(0, 4), +k.slice(5, 7) - 1)}<span class="num ${sgnCls(v)}">Résultat du mois : ${fV(v, c)}</span></td></tr>`; }
-    const cur = accCur(c, t.account_id);
-    rows += `<tr class="row" data-edit="${t.id}" tabindex="0">
-      <td class="num">${fmtDate(t.date)}${t.time ? ` <span style="color:var(--muted)">${t.time}</span>` : ''}</td>
-      <td>${esc(accName(c, t.account_id))}</td>
-      <td class="asset">${esc(t.asset)}</td>
-      <td><span class="pill ${t.side}">${t.side === 'long' ? 'Long' : 'Short'}</span></td>
-      <td>${sessionOf(t.session).name}</td>
-      <td class="r num">${money(t.risk, cur)}${t.riskR != null ? ` <span style="color:var(--muted)">${nf2.format(t.riskR)}R</span>` : ''}</td>
-      <td class="r num ${sgnCls(t.pnl)}">${money(t.pnl, cur, true)}</td>
-      <td class="r num">${t.commission ? money(-t.commission, cur) : '<span style="color:var(--muted)">—</span>'}</td>
-      <td class="r num">${t.swap ? money(t.swap, cur, true) : '<span style="color:var(--muted)">—</span>'}</td>
-      <td class="r num ${sgnCls(t.net)}" style="font-weight:700">${money(t.net, cur, true)}</td>
-      <td class="r num ${sgnCls(t.rTrade)}">${fR(t.rTrade)}</td>
-      <td class="r num ${sgnCls(t.rReal)}" style="font-weight:700">${fR(t.rReal)}</td>
-      <td>${esc(t.setup) || '<span style="color:var(--muted)">—</span>'}</td>
-      <td class="note">${esc(t.note) || '<span style="color:var(--muted)">—</span>'}</td>
-    </tr>`;
+    if (state.period !== 'month' && k !== lastM) { lastM = k; const v = monthTotals[k]; rows += `<tr class="jt-month"><td colspan="${cols}"><span class="jm-name">${monthName(+k.slice(0, 4), +k.slice(5, 7) - 1)}</span><span class="num ${sgnCls(v)}">${fV(v, c)}</span></td></tr>`; }
+    rows += journalRow(t, c, multiAcc, withYear);
   });
-  const opt = (v, l, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`;
-  return `<table class="tx-table journal">
-    <thead><tr><th>Date</th><th>Compte</th><th>Actif</th><th>Sens</th><th>Session</th><th class="r">Risque (${riskUnit(mode, qAcc && qAcc.currency)})</th><th class="r">Résultat brut</th><th class="r">Commission</th><th class="r">Swap</th><th class="r">Net</th><th class="r" title="Résultat net ÷ risque du trade">R/Trade</th><th class="r" title="Résultat net ÷ R-MAX">R réel</th><th>Setup</th><th>Note</th></tr></thead>
-    <tbody>
-      ${canQuick ? `<tr class="quick">
-        <td style="min-width:128px"><input id="q-date" class="qf" type="date" value="${quick.date}" aria-label="Date"></td>
-        <td style="min-width:120px"><select id="q-acc" class="qf" aria-label="Compte">${acts.map(a => opt(a.id, a.name, quick.account_id)).join('')}</select></td>
-        <td style="min-width:96px"><input id="q-asset" class="qf" list="dl-assets" placeholder="EURUSD" autocomplete="off" value="${esc(quick.asset)}" aria-label="Actif" style="text-transform:uppercase"></td>
-        <td style="min-width:80px"><select id="q-side" class="qf" aria-label="Sens">${opt('long', 'Long', quick.side)}${opt('short', 'Short', quick.side)}</select></td>
-        <td style="min-width:104px"><select id="q-session" class="qf" aria-label="Session">${SESSIONS.map(s => opt(s.id, s.name, quick.session)).join('')}</select></td>
-        <td style="min-width:84px"><input id="q-risk" class="qf n" inputmode="decimal" placeholder="${mode === 'r' ? '0,5' : mode === 'pct' ? '1' : '100'}" value="${esc(quick.risk)}" aria-label="Risque"></td>
-        <td style="min-width:96px"><input id="q-pnl" class="qf n" inputmode="text" placeholder="+250 / -100" value="${esc(quick.pnl)}" aria-label="Résultat brut"></td>
-        <td style="min-width:78px"><input id="q-comm" class="qf n" inputmode="decimal" placeholder="7" value="${esc(quick.comm)}" aria-label="Commission (frais)"></td>
-        <td style="min-width:70px"><input id="q-swap" class="qf n" inputmode="text" placeholder="0" value="${esc(quick.swap)}" aria-label="Swap"></td>
-        <td class="r num" id="qp-net">—</td>
-        <td class="r num" id="qp-rt">—</td>
-        <td class="r num" id="qp-rr">—</td>
-        <td style="min-width:104px"><input id="q-setup" class="qf" list="dl-setups" placeholder="Setup" value="${esc(quick.setup)}" aria-label="Setup"></td>
-        <td style="min-width:200px"><div style="display:flex;gap:6px"><input id="q-note" class="qf" maxlength="200" placeholder="Note" value="${esc(quick.note)}" aria-label="Note"><button class="q-add" type="button" data-act="quick">Ajouter</button></div></td>
-      </tr>` : ''}
-      ${rows || `<tr><td colspan="14"><div class="empty-card">${c.trades.length ? 'Aucun trade ne correspond.' : readOnly() ? 'Aucun trade.' : 'Aucun trade pour l’instant. Clique sur « + Nouveau trade » pour commencer.'}</div></td></tr>`}
-    </tbody></table>`;
+  const th = (lbl, cls = '') => `<th class="${cls}">${lbl}</th>`;
+  return `<table class="jt">
+    <thead><tr>${th('Date')}${multiAcc ? th('Compte') : ''}${th('Actif')}${th('Sens')}${th('Session')}${th('Risque')}${th('Dénouement')}${th('Résultat', 'r')}${th('R/Trade', 'r')}${th('R réel', 'r')}${th('', 'jt-acts')}</tr></thead>
+    <tbody>${rows || `<tr><td colspan="${cols}"><div class="jt-empty"><span>📭</span>${c.trades.length || c.openTrades.length ? 'Aucun trade sur cette période.' : readOnly() ? 'Aucun trade.' : 'Aucun trade pour l’instant. Clique sur « + Nouveau trade » pour commencer.'}</div></td></tr>`}</tbody>
+  </table>`;
 }
 function quickPreview(c) {
   const acc = c.accById[quick.account_id]; if (!acc) return;
@@ -3342,6 +3436,8 @@ document.addEventListener('click', async e => {
   if (ds.movdelete) return confirmDeleteMovement(ds.movdelete);
   if (ds.movfilter) { state.movFilter = ds.movfilter; render(); return; }
   if (ds.movedit) { const m = ctx().d.movements.find(x => x.id === ds.movedit); if (m) { if (readOnly()) return toast('Lecture seule.'); openMovement(m); } return; }
+  if (ds.trdel && !form) { const tr = data().trades.find(x => x.id === ds.trdel); if (tr) confirmDeleteTrade(tr); return; }
+  if (ds.trcard) { toast('La fiche du trade arrive bientôt 🙂'); return; }
   if (ds.edit && !form) { const tr = data().trades.find(x => x.id === ds.edit); if (tr) openTrade(tr); return; }
   if (!form) return;
   if (ds.cact && form.kind === 'confirm') { const fn = form.onPick; closePanel(); if (ds.cact !== 'cancel' && fn) await fn(ds.cact); return; }

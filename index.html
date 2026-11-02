@@ -385,10 +385,30 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt tr.is-open:hover td{background:color-mix(in srgb,var(--accent) 12%,transparent) !important}
 .jt tr.is-open td:first-child::before{background:var(--accent) !important}
 .jt-sep td{padding:0;height:6px;border-bottom:1px solid var(--line);background:var(--bg)}
-.jt-month td{padding:16px 22px 8px;background:transparent;border-bottom:1px solid var(--line)}
-.jt-month td{display:table-cell}
-.jt-month .jm-name{font-family:var(--font-display);font-weight:700;font-size:13px;text-transform:capitalize;margin-right:12px}
-.jt-month .num{font-size:12.5px;font-weight:600}
+.jt-month td{padding:18px 12px 8px !important;background:var(--bg);border-bottom:0}
+.jt-month:first-child td{padding-top:12px !important}
+.jm{display:flex;align-items:center;gap:14px;padding:12px 18px 12px 12px;border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 13%,var(--surface)) 0%,var(--surface) 70%);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));box-shadow:0 6px 18px -12px color-mix(in srgb,var(--accent) 60%,transparent)}
+.jm-cal{width:42px;height:44px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-2);text-align:center;flex:none}
+.jm-cal small{display:block;background:var(--accent);color:var(--accent-ink);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 0}
+.jm-cal b{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-size:16px;font-weight:700}
+.jm-txt{display:flex;flex-direction:column;gap:2px}
+.jm-name{font-family:var(--font-display);font-weight:700;font-size:17px;text-transform:capitalize;letter-spacing:-.01em}
+.jm-name em{font-style:normal;color:var(--muted);font-weight:500}
+.jm-sub{font-size:12px;color:var(--muted)}
+.jm-res{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.jm-res b{font-size:17px;font-weight:700}
+.jm-res span{font-size:12px;font-weight:600}
+.jt-month + tr.row td{border-top:0}
+.jt-hold{font-size:12.5px;color:var(--fg)}
+.jt-hold span:first-child{margin-right:5px}
+/* closing window */
+.panel.tr.tr-close{max-width:600px}
+.cl-sum{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;padding:12px 14px !important;margin-top:4px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.cl-sum .jt-cls{grid-row:1 / 3;width:38px;height:38px;font-size:19px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent)}
+.cl-main{display:flex;align-items:center;gap:10px}
+.cl-main b{font-size:17px;letter-spacing:.02em}
+.cl-meta{font-size:12.5px;color:var(--muted)}
+.tr-close .row3{margin-top:2px}
 .jt-date .jd{font-weight:600}
 .jt-time{color:var(--muted);margin-left:4px;font-size:12px;font-variant-numeric:tabular-nums}
 .jt-acc{color:var(--fg);max-width:130px;overflow:hidden;text-overflow:ellipsis}
@@ -2314,7 +2334,7 @@ function openBox(c) {
     ${c.openTrades.map(t => { const a = c.accById[t.account_id] || {}; const se = sessionOf(t.session); return `<div class="open-row">
       <span class="open-asset num">${esc(t.asset)}</span><span class="pill ${t.side}">${t.side === 'long' ? 'Long' : 'Short'}</span>
       <span class="open-meta">${parseD(t.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'})} · ${se.emoji} ${se.name}${c.d.accounts.length > 1 ? ' · ' + esc(a.name || '') : ''} · risque ${money(t.risk, a.currency || 'USD')}${t.conf ? ` · <span class="open-stars">${'★'.repeat(t.conf)}</span>` : ''}</span>
-      ${readOnly() ? '' : `<button class="open-btn" type="button" data-edit="${t.id}">Clôturer</button>`}
+      ${readOnly() ? '' : `<button class="open-btn" type="button" data-trclose="${t.id}">Clôturer</button>`}
     </div>`; }).join('')}
   </div>`;
 }
@@ -2379,6 +2399,7 @@ const JI = {
 };
 function journalRow(t, c, multiAcc, withYear) {
   const a = c.accById[t.account_id] || {}, cur = a.currency || 'USD', k = classOf(t.asset_class), se = sessionOf(t.session);
+  const ho = HOLDINGS.find(h => h.id === t.hold);
   const riskR = t.riskR != null ? t.riskR : t.rmax > 0 && t.risk > 0 ? t.risk / t.rmax : null;
   const fill = riskR == null ? 0 : Math.min(riskR, 1) * 100;
   const res = t.open ? `<span class="jt-res open">⏳ En cours</span>` : t.res === 'win' ? `<span class="jt-res win">Gagné</span>` : t.res === 'loss' ? `<span class="jt-res loss">Perdu</span>` : `<span class="jt-res be">Break-Even</span>`;
@@ -2390,32 +2411,41 @@ function journalRow(t, c, multiAcc, withYear) {
     <td><div class="jt-asset"><span class="jt-cls" style="--c:${k.color}">${k.emoji}</span><b>${esc(t.asset)}</b></div></td>
     <td><span class="jt-side ${t.side}">${t.side === 'long' ? '<span class="arw">▲</span>Long' : '<span class="arw">▼</span>Short'}</span></td>
     <td><span class="jt-sess" style="--c:${se.color}"><span>${se.emoji}</span>${se.name}</span></td>
+    <td class="jt-hold">${ho ? `<span>${ho.emoji}</span>${ho.name}` : `<span class="jt-na">${t.open ? '…' : '—'}</span>`}</td>
     <td class="jt-risk num"><div class="jr-v"><span>${money(t.risk, cur)}</span><i></i><span class="jr-r">${riskR != null ? nf2.format(riskR) + ' R' : '—'}</span></div><div class="jr-bar${riskR > 1.0001 ? ' over' : ''}"><span style="width:${fill}%"></span></div></td>
     <td>${res}</td>
     <td class="r num jt-net ${t.open ? '' : sgnCls(t.net)}" ${tip ? `data-tip="${esc(tip)}"` : ''}>${t.open ? '<span class="jt-na">—</span>' : money(t.net, cur, true)}</td>
     <td class="r num ${t.open ? '' : sgnCls(t.rTrade)}">${t.open ? '<span class="jt-na">—</span>' : fR(t.rTrade)}</td>
     <td class="r num jt-rr ${t.open ? '' : sgnCls(t.rReal)}">${t.open ? '<span class="jt-na">—</span>' : fR(t.rReal)}</td>
-    <td class="jt-acts">${ro ? '' : `${t.open ? `<button type="button" class="jt-close" data-edit="${t.id}" data-tip="Noter le résultat">Clôturer</button>` : `<button type="button" class="jt-btn" data-edit="${t.id}" data-tip="Modifier" aria-label="Modifier">${JI.edit}</button>`}<button type="button" class="jt-btn jt-del" data-trdel="${t.id}" data-tip="Supprimer" aria-label="Supprimer">${JI.del}</button>`}</td>
+    <td class="jt-acts">${ro ? '' : `${t.open ? `<button type="button" class="jt-close" data-trclose="${t.id}" data-tip="Noter le résultat">Clôturer</button>` : ''}<button type="button" class="jt-btn" data-edit="${t.id}" data-tip="Modifier" aria-label="Modifier">${JI.edit}</button><button type="button" class="jt-btn jt-del" data-trdel="${t.id}" data-tip="Supprimer" aria-label="Supprimer">${JI.del}</button>`}</td>
   </tr>`;
 }
 function journalTable(list, c) {
   const multiAcc = c.accs.length > 1, withYear = state.period === 'all';
-  const cols = 10 + (multiAcc ? 1 : 0);
+  const cols = 11 + (multiAcc ? 1 : 0);
   const open = openForJournal(c);
   let rows = open.map(t => journalRow(t, c, multiAcc, withYear)).join('');
   if (open.length && list.length) rows += `<tr class="jt-sep"><td colspan="${cols}"></td></tr>`;
   let lastM = '';
-  const monthTotals = {};
-  list.forEach(t => { const k = t.date.slice(0, 7); monthTotals[k] = (monthTotals[k] || 0) + val(t, c); });
+  const M = {};
+  list.forEach(t => { const k = t.date.slice(0, 7); const m = M[k] || (M[k] = {v: 0, r: 0, n: 0, w: 0, l: 0}); m.v += val(t, c); m.r += t.rReal || 0; m.n++; if (t.res === 'win') m.w++; if (t.res === 'loss') m.l++; });
   list.forEach(t => {
     const k = t.date.slice(0, 7);
-    if (state.period !== 'month' && k !== lastM) { lastM = k; const v = monthTotals[k]; rows += `<tr class="jt-month"><td colspan="${cols}"><span class="jm-name">${monthName(+k.slice(0, 4), +k.slice(5, 7) - 1)}</span><span class="num ${sgnCls(v)}">${fV(v, c)}</span></td></tr>`; }
+    if (state.period !== 'month' && k !== lastM) {
+      lastM = k; const m = M[k], y = +k.slice(0, 4), mo = +k.slice(5, 7) - 1, d0 = new Date(y, mo, 1);
+      const name = d0.toLocaleDateString('fr-FR', {month: 'long'});
+      rows += `<tr class="jt-month"><td colspan="${cols}"><div class="jm">
+        <div class="jm-cal"><small>${d0.toLocaleDateString('fr-FR', {month: 'short'}).replace('.', '')}</small><b>${String(y).slice(2)}</b></div>
+        <div class="jm-txt"><span class="jm-name">${name} <em>${y}</em></span><span class="jm-sub">${m.n} trade${m.n > 1 ? 's' : ''} · ${m.w + m.l ? Math.round(m.w / (m.w + m.l) * 100) : 0} % de réussite</span></div>
+        <div class="jm-res"><b class="num ${sgnCls(m.v)}">${fV(m.v, c)}</b><span class="num ${sgnCls(m.r)}">${fR(m.r)}</span></div>
+      </div></td></tr>`;
+    }
     rows += journalRow(t, c, multiAcc, withYear);
   });
   const th = (lbl, cls = '') => `<th class="${cls}">${lbl}</th>`;
   const rw = Math.max(5, ...[...open, ...list].map(t => money(t.risk, accCur(c, t.account_id)).length));
   return `<table class="jt" style="--rw:${rw}ch">
-    <thead><tr>${th('Date')}${multiAcc ? th('Compte') : ''}${th('Actif')}${th('Sens')}${th('Session')}${th('Risque')}${th('Dénouement')}${th('Résultat net', 'r')}${th('R/Trade', 'r')}${th('R réel', 'r')}${th('', 'jt-acts')}</tr></thead>
+    <thead><tr>${th('Date')}${multiAcc ? th('Compte') : ''}${th('Actif')}${th('Sens')}${th('Session')}${th('Durée')}${th('Risque')}${th('Dénouement')}${th('Résultat net', 'r')}${th('R/Trade', 'r')}${th('R réel', 'r')}${th('', 'jt-acts')}</tr></thead>
     <tbody>${rows || `<tr><td colspan="${cols}"><div class="jt-empty"><span>📭</span>${c.trades.length || c.openTrades.length ? 'Aucun trade sur cette période.' : readOnly() ? 'Aucun trade.' : 'Aucun trade pour l’instant. Clique sur « + Nouveau trade » pour commencer.'}</div></td></tr>`}</tbody>
   </table>`;
 }
@@ -2833,14 +2863,14 @@ function topAssets(d) {
   return list.length ? list : ['EURUSD', 'GBPUSD', 'XAUUSD', 'US500', 'NAS100', 'BTCUSD', 'AAPL', 'TSLA'];
 }
 
-function openTrade(t) {
+function openTrade(t, opts = {}) {
   if (blockedWrite()) return;
   const c = ctx();
   if (!activeAccounts(c).length && !t) { toast('Crée d’abord un compte de trading.'); return openAccount(); }
   const mode = c.d.settings.riskMode;
   if (t) {
     const acc = c.accById[t.account_id];
-    form = {kind: 'trade', id: t.id, wasOpen: t.open, account_id: t.account_id, date: t.date, time: t.time || '', asset_class: t.asset_class, asset: t.asset, side: t.side, order: t.order, tf: t.tf, session: t.session, sessAuto: false, hold: t.hold,
+    form = {kind: 'trade', id: t.id, wasOpen: t.open, closeOnly: !!(opts.closeOnly && t.open), account_id: t.account_id, date: t.date, time: t.time || '', asset_class: t.asset_class, asset: t.asset, side: t.side, order: t.order, tf: t.tf, session: t.session, sessAuto: false, hold: t.hold,
       riskStr: curToRiskStr(t.risk, mode, acc, c.d), conf: t.conf,
       resKind: t.open ? '' : t.resKind === 'be' ? 'be' : t.pnl < 0 ? 'loss' : 'win',
       pnlStr: t.open ? '' : t.resKind === 'be' ? numStr(t.pnl) : numStr(Math.abs(t.pnl)), commStr: t.commission ? '-' + numStr(Math.abs(t.commission)) : '', swapSign: t.swap < 0 ? -1 : 1, swapStr: t.swap ? (t.swap < 0 ? '-' : '+') + numStr(Math.abs(t.swap)) : '',
@@ -2875,7 +2905,48 @@ function openMovement(m, accountId) {
   drawPanel(true);
 }
 
+// "Clôturer": only what is needed to close the trade (result, duration, amounts)
+function closePanelHtml(c) {
+  const f = form, acc = c.accById[f.account_id] || {}, sym = curSym(acc.currency || 'USD'), k = classOf(f.asset_class), se = sessionOf(f.session);
+  const opt = (attr, val, cur, inner, extra = '') => `<button type="button" ${attr}="${val}" aria-pressed="${cur === val}" ${extra}>${inner}</button>`;
+  const risk = parseNum(f.riskStr) ? riskToCur(f.riskStr, c.d.settings.riskMode, acc, c.d).v : 0;
+  return `
+    <div class="panel-head tr-head">
+      <div class="tr-title"><span class="tr-ico" aria-hidden="true">⏳</span>
+        <div><h2 id="p-title">Clôturer le trade</h2><p class="panel-sub"><i class="dot" style="background:${accColor(acc, c.d.accounts)}"></i>${esc(acc.name || '')} · ${acc.currency || ''}</p></div></div>
+      <button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button>
+    </div>
+    <div class="cl-sum tsec" style="--i:0">
+      <span class="jt-cls" style="--c:${k.color}">${k.emoji}</span>
+      <div class="cl-main"><b>${esc(f.asset)}</b><span class="jt-side ${f.side}"><span class="arw">${f.side === 'long' ? '▲' : '▼'}</span>${f.side === 'long' ? 'Long' : 'Short'}</span></div>
+      <div class="cl-meta">${parseD(f.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'long'})}${f.time ? ' à ' + f.time.slice(0, 5) : ''} · ${se.emoji} ${se.name}${risk ? ' · risque ' + money(risk, acc.currency || 'USD') : ''}</div>
+    </div>
+    <section class="tsec" style="--i:1">
+      <div class="fl">Résultat</div>
+      <div class="res3">${opt('data-tres', 'win', f.resKind, '🟢 Gain', 'class="win"')}${opt('data-tres', 'loss', f.resKind, '🔴 Perte', 'class="loss"')}${opt('data-tres', 'be', f.resKind, '⚪ Break-Even', 'class="be"')}</div>
+    </section>
+    <section class="tsec" style="--i:2">
+      <div class="fl">Durée du trade</div>
+      <div class="hold-row">${HOLDINGS.map(h => opt('data-thold', h.id, f.hold, `<span class="e">${h.emoji}</span>${h.name}`, `title="${h.hint}"`)).join('')}</div>
+    </section>
+    <section class="tsec" style="--i:3">
+      <div class="row3">
+        <div><label class="fl" for="t-pnl" id="t-pnl-lbl">Montant</label><div class="inp-unit"><input id="t-pnl" class="field n big" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${esc(f.pnlStr)}"><span class="res-mark" id="t-res-mark" aria-hidden="true"></span><span class="u">${esc(sym)}</span></div></div>
+        <div><label class="fl" for="t-comm">Commission</label><div class="inp-unit"><input id="t-comm" class="field n fee" inputmode="decimal" autocomplete="off" placeholder="-0,00" value="${esc(f.commStr)}"><span class="u">${esc(sym)}</span></div></div>
+        <div><label class="fl" for="t-swap">Swap</label><div class="inp-unit"><input id="t-swap" class="field n fee" inputmode="decimal" autocomplete="off" placeholder="±0,00" value="${esc(f.swapStr)}"><span class="u">${esc(sym)}</span></div></div>
+      </div>
+      <div class="checks"><span class="calc" id="t-calc"></span></div>
+    </section>
+    <div class="tr-foot">
+      <div class="err" id="p-err" role="alert">${esc(f.err)}</div>
+      <div class="panel-actions">
+        <button type="button" class="cancel" data-close>Annuler</button>
+        <button type="button" class="save tr-save" data-save><span class="mv-save-in"><span class="tr-save-ico" id="t-save-ico"></span><span id="t-save-txt"></span></span></button>
+      </div>
+    </div>`;
+}
 function tradePanelHtml(c) {
+  if (form.closeOnly) return closePanelHtml(c);
   const f = form, mode = c.d.settings.riskMode;
   const acts = f.id ? c.d.accounts.filter(a => !a.archived || a.id === f.account_id) : entryAccounts(c);
   const acc = c.accById[f.account_id];
@@ -2884,8 +2955,8 @@ function tradePanelHtml(c) {
   const opt = (attr, val, cur, inner, extra = '') => `<button type="button" ${attr}="${val}" aria-pressed="${cur === val}" ${extra}>${inner}</button>`;
   return `
     <div class="panel-head tr-head">
-      <div class="tr-title"><span class="tr-ico" aria-hidden="true">${f.wasOpen ? '⏳' : f.id ? '✏️' : '📝'}</span>
-        <div><h2 id="p-title">${f.wasOpen ? 'Clôturer le trade' : f.id ? 'Modifier le trade' : 'Nouveau trade'}</h2>
+      <div class="tr-title"><span class="tr-ico" aria-hidden="true">${f.closeOnly ? '⏳' : f.id ? '✏️' : '📝'}</span>
+        <div><h2 id="p-title">${f.closeOnly ? 'Clôturer le trade' : f.id ? 'Modifier le trade' : 'Nouveau trade'}</h2>
         ${acc && acts.length <= 1 ? `<p class="panel-sub"><i class="dot" style="background:${accColor(acc, c.d.accounts)}"></i>${esc(acc.name)} · ${acc.currency}</p>` : ''}</div></div>
       ${acts.length > 1 ? `<select id="t-acc" class="field tr-acc" aria-label="Compte">${acts.map(a => `<option value="${a.id}" ${a.id === f.account_id ? 'selected' : ''}>${esc(a.name)} · ${a.currency}</option>`).join('')}</select>` : ''}
       <button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button>
@@ -2999,7 +3070,8 @@ function syncTradeForm() {
   const rm = $('#t-res-mark'); if (rm) { const k = f.resKind === 'win' ? '✓' : f.resKind === 'loss' ? '✕' : ''; if (rm.textContent !== k) rm.textContent = k; rm.className = 'res-mark ' + f.resKind; }
   tradeCalc(c);
   const st = $('#t-save-txt'), si = $('#t-save-ico');
-  if (st && !f.busy) { st.textContent = f.resKind ? (f.wasOpen ? 'Clôturer le trade' : f.id ? 'Enregistrer' : 'Enregistrer le trade') : (f.id ? 'Enregistrer (en cours)' : 'Ouvrir le trade'); if (si) si.textContent = f.resKind ? '✓' : '⏳'; }
+  if (st && !f.busy && f.closeOnly) { st.textContent = 'Clôturer le trade'; if (si) si.textContent = '✓'; }
+  else if (st && !f.busy) { st.textContent = f.resKind ? (f.wasOpen ? 'Clôturer le trade' : f.id ? 'Enregistrer' : 'Enregistrer le trade') : (f.id ? 'Enregistrer (en cours)' : 'Ouvrir le trade'); if (si) si.textContent = f.resKind ? '✓' : '⏳'; }
 }
 function accountPanelHtml(c) {
   const f = form;
@@ -3200,7 +3272,7 @@ function drawPanel(first) {
   const old = document.querySelector('#panel-root .panel');
   const st = old ? old.scrollTop : 0;
   const html = form.kind === 'confirm' ? confirmPanelHtml() : form.kind === 'trade' ? tradePanelHtml(c) : form.kind === 'account' ? accountPanelHtml(c) : movPanelHtml(c);
-  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : form.kind === 'trade' ? ' tr' : form.kind === 'confirm' ? ' small' : form.kind === 'mov' ? ' mov ' + (form.mkind === 'depot' ? 'mv-dep' : 'mv-ret') : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
+  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : form.kind === 'trade' ? ' tr' + (form.closeOnly ? ' tr-close' : '') : form.kind === 'confirm' ? ' small' : form.kind === 'mov' ? ' mov ' + (form.mkind === 'depot' ? 'mv-dep' : 'mv-ret') : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
   const p = document.querySelector('#panel-root .panel');
   if (!first) p.scrollTop = st;
   const bind = (id, key, after) => { const n = document.getElementById(id); if (!n) return; n.addEventListener('input', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n); }); n.addEventListener('change', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n, true); }); };
@@ -3291,6 +3363,7 @@ async function panelSave() {
     const asset = formatAsset(f.asset, f.asset_class);
     const need = (cond, msg, focus) => { if (cond) return false; if (focus) document.querySelector(focus)?.focus?.(); fail(msg); return true; };
     if (v.err) return fail(v.err);
+    if (f.closeOnly && need(f.resKind, 'Choisis le résultat : Gain, Perte ou Break-Even.')) return;
     if (need(f.date, 'Choisis la date du trade.', '#t-date')) return;
     if (need(asset, 'Indique l’actif (ex. ' + (classOf(f.asset_class).ph || 'EUR/USD') + ').', '#t-asset')) return;
     if (need(f.asset_class, 'Choisis la classe d’actif (Forex, Action…).')) return;
@@ -3442,6 +3515,7 @@ document.addEventListener('click', async e => {
   if (ds.movfilter) { state.movFilter = ds.movfilter; render(); return; }
   if (ds.movedit) { const m = ctx().d.movements.find(x => x.id === ds.movedit); if (m) { if (readOnly()) return toast('Lecture seule.'); openMovement(m); } return; }
   if (ds.trdel && !form) { const tr = data().trades.find(x => x.id === ds.trdel); if (tr) confirmDeleteTrade(tr); return; }
+  if (ds.trclose && !form) { const tr = data().trades.find(x => x.id === ds.trclose); if (tr) openTrade(tr, {closeOnly: true}); return; }
   if (ds.trcard) { toast('La fiche du trade arrive bientôt 🙂'); return; }
   if (ds.edit && !form) { const tr = data().trades.find(x => x.id === ds.edit); if (tr) openTrade(tr); return; }
   if (!form) return;

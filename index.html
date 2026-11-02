@@ -385,18 +385,21 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt tr.is-open:hover td{background:color-mix(in srgb,var(--accent) 12%,transparent) !important}
 .jt tr.is-open td:first-child::before{background:var(--accent) !important}
 .jt-sep td{padding:0;height:6px;border-bottom:1px solid var(--line);background:var(--bg)}
-.jt-month td{padding:18px 12px 8px !important;background:var(--bg);border-bottom:0}
-.jt-month:first-child td{padding-top:12px !important}
-.jm{display:flex;align-items:center;gap:14px;padding:12px 18px 12px 12px;border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 13%,var(--surface)) 0%,var(--surface) 70%);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));box-shadow:0 6px 18px -12px color-mix(in srgb,var(--accent) 60%,transparent)}
-.jm-cal{width:42px;height:44px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-2);text-align:center;flex:none}
-.jm-cal small{display:block;background:var(--accent);color:var(--accent-ink);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 0}
-.jm-cal b{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-size:16px;font-weight:700}
-.jm-txt{display:flex;flex-direction:column;gap:2px}
-.jm-name{font-family:var(--font-display);font-weight:700;font-size:17px;text-transform:capitalize;letter-spacing:-.01em}
+.jt-month td{padding:14px 12px 6px !important;background:var(--bg);border-bottom:0}
+.jt-month:first-child td{padding-top:10px !important}
+.jm{--mc:var(--muted);display:flex;align-items:center;gap:12px;padding:7px 16px 7px 8px;border-radius:10px;background:linear-gradient(90deg,color-mix(in srgb,var(--mc) 12%,var(--surface)) 0%,var(--surface) 65%);border:1px solid color-mix(in srgb,var(--mc) 32%,var(--line))}
+.jm.m-pos{--mc:var(--win)} .jm.m-neg{--mc:var(--loss)}
+.jm{position:sticky;left:12px;max-width:calc(var(--cw,100%) - 26px);box-sizing:border-box}
+.jm-cal{width:40px;height:36px;border-radius:7px;overflow:hidden;display:flex;flex-direction:column;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-2);text-align:center;flex:none}
+.jm-cal small{display:block;background:var(--mc);color:#fff;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:1px 0}
+.jm.m-pos .jm-cal small{color:var(--win-ink)}
+.jm-cal b{flex:1;display:grid;place-items:center;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.02em}
+.jm-txt{display:flex;align-items:baseline;gap:12px}
+.jm-name{font-family:var(--font-display);font-weight:700;font-size:15px;text-transform:capitalize;letter-spacing:-.01em}
 .jm-name em{font-style:normal;color:var(--muted);font-weight:500}
 .jm-sub{font-size:12px;color:var(--muted)}
-.jm-res{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
-.jm-res b{font-size:17px;font-weight:700}
+.jm-res{margin-left:auto;display:flex;align-items:baseline;gap:10px}
+.jm-res b{font-size:15px;font-weight:700}
 .jm-res span{font-size:12px;font-weight:600}
 .jt-month + tr.row td{border-top:0}
 .jt-hold{font-size:12.5px;color:var(--fg)}
@@ -2361,6 +2364,7 @@ function renderJournal(c) {
       ${journalSummary(list, c)}
       ${journalTools()}
       <div class="jt-card">${journalTable(list, c)}</div>`;
+    fitMonthBands();
   } else {
     const S = stats(list, c);
     const summary = `<div class="h-summary num"><span>${list.length} trade${list.length > 1 ? 's' : ''}</span><span class="${sgnCls(S.total)}">${fV(S.total, c)}</span><span>${fPct(S.winrate)} de réussite</span></div>`;
@@ -2368,6 +2372,9 @@ function renderJournal(c) {
   }
   bindJournalTools(list, c);
 }
+// month bands stay fully visible even when the table scrolls sideways
+function fitMonthBands() { const card = $('.jt-card'); if (card) card.style.setProperty('--cw', card.clientWidth + 'px'); }
+window.addEventListener('resize', fitMonthBands);
 // "2 novembre" / "2 novembre à 15:15" — the year only in the « Tout » view
 function longDate(t, withYear) {
   const d = parseD(t.date);
@@ -2434,8 +2441,8 @@ function journalTable(list, c) {
     if (state.period !== 'month' && k !== lastM) {
       lastM = k; const m = M[k], y = +k.slice(0, 4), mo = +k.slice(5, 7) - 1, d0 = new Date(y, mo, 1);
       const name = d0.toLocaleDateString('fr-FR', {month: 'long'});
-      rows += `<tr class="jt-month"><td colspan="${cols}"><div class="jm">
-        <div class="jm-cal"><small>${d0.toLocaleDateString('fr-FR', {month: 'short'}).replace('.', '')}</small><b>${String(y).slice(2)}</b></div>
+      rows += `<tr class="jt-month"><td colspan="${cols}"><div class="jm ${m.v > 0 ? 'm-pos' : m.v < 0 ? 'm-neg' : 'm-flat'}">
+        <div class="jm-cal"><small>${d0.toLocaleDateString('fr-FR', {month: 'short'}).replace('.', '')}</small><b>${y}</b></div>
         <div class="jm-txt"><span class="jm-name">${name} <em>${y}</em></span><span class="jm-sub">${m.n} trade${m.n > 1 ? 's' : ''} · ${m.w + m.l ? Math.round(m.w / (m.w + m.l) * 100) : 0} % de réussite</span></div>
         <div class="jm-res"><b class="num ${sgnCls(m.v)}">${fV(m.v, c)}</b><span class="num ${sgnCls(m.r)}">${fR(m.r)}</span></div>
       </div></td></tr>`;

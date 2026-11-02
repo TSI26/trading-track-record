@@ -370,10 +370,10 @@ button{cursor:pointer}
 .js-chip.open b{color:var(--accent)}
 .jt-card{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:auto;box-shadow:0 1px 0 rgba(255,255,255,.02) inset,0 12px 30px -18px rgba(0,0,0,.45)}
 table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
-.jt thead th{position:sticky;top:0;z-index:2;text-align:left;font-family:var(--font-display);font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 8px 12px;background:linear-gradient(var(--surface-2),color-mix(in srgb,var(--surface-2) 55%,var(--surface)));border-bottom:1px solid var(--line);white-space:nowrap}
+.jt thead th{position:sticky;top:0;z-index:2;text-align:left;font-family:var(--font-display);font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 7px 12px;background:linear-gradient(var(--surface-2),color-mix(in srgb,var(--surface-2) 55%,var(--surface)));border-bottom:1px solid var(--line);white-space:nowrap}
 .jt thead th:first-child{padding-left:17px}
 .jt th.r,.jt td.r{text-align:right}
-.jt td{padding:12px 8px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);vertical-align:middle;white-space:nowrap}
+.jt td{padding:12px 7px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);vertical-align:middle;white-space:nowrap}
 .jt td:first-child{padding-left:17px;position:relative}
 .jt tbody tr:last-child td{border-bottom:0}
 .jt tbody tr.row{cursor:pointer;transition:background .15s}
@@ -396,22 +396,26 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt-asset{display:flex;align-items:center;gap:8px}
 .jt-asset b{font-weight:700;letter-spacing:.02em}
 .jt-cls{flex:none;width:25px;height:25px;font-size:14px !important;border-radius:8px;display:grid;place-items:center;font-size:15px;background:color-mix(in srgb,var(--c) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent)}
-.jt-side{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px}
-.jt-side.long{color:var(--win);background:var(--win-soft)}
-.jt-side.short{color:var(--loss);background:var(--loss-soft)}
+.jt-side{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600}
+.jt-side .arw{font-size:9px}
+.jt-side.long{color:var(--win)}
+.jt-side.short{color:var(--loss)}
 .jt-sess{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 9px 4px 6px;border-radius:999px;color:var(--fg);background:color-mix(in srgb,var(--c) 15%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,transparent)}
 .jt-risk{min-width:96px}
-.jr-v{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.jr-v{display:grid;grid-template-columns:calc(var(--rw,8ch) * .92) 1px auto;align-items:center;gap:7px;font-size:12.5px}
+.jr-v > span:first-child{text-align:right}
 .jr-v i{width:1px;height:13px;background:var(--line-2)}
 .jr-r{color:var(--muted)}
 .jr-bar{margin-top:6px;height:3px;width:100%;max-width:104px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .jr-bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))}
 .jr-bar.over span{background:var(--loss)}
-.jt-res{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:7px;letter-spacing:.02em}
-.jt-res.win{color:var(--win);background:var(--win-soft)}
-.jt-res.loss{color:var(--loss);background:var(--loss-soft)}
-.jt-res.be{color:#d4a017;background:rgba(234,179,8,.14)}
-.jt-res.open{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.jt-res{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 11px 5px 9px;border-radius:8px;letter-spacing:.01em}
+.jt-res::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.jt-res.win{color:var(--win);background:var(--win-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--win) 40%,transparent)}
+.jt-res.loss{color:var(--loss);background:var(--loss-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--loss) 40%,transparent)}
+.jt-res.be{color:var(--muted);background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line-2)}
+.jt-res.open{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 40%,transparent)}
+.jt-res.open::before{display:none}
 .jt-net{font-weight:700;font-size:13.5px}
 .jt-rr{font-weight:700}
 .jt-na{color:var(--muted);font-weight:400}
@@ -2377,14 +2381,14 @@ function journalRow(t, c, multiAcc, withYear) {
   const a = c.accById[t.account_id] || {}, cur = a.currency || 'USD', k = classOf(t.asset_class), se = sessionOf(t.session);
   const riskR = t.riskR != null ? t.riskR : t.rmax > 0 && t.risk > 0 ? t.risk / t.rmax : null;
   const fill = riskR == null ? 0 : Math.min(riskR, 1) * 100;
-  const res = t.open ? `<span class="jt-res open">⏳ En cours</span>` : t.res === 'win' ? `<span class="jt-res win">Gagné</span>` : t.res === 'loss' ? `<span class="jt-res loss">Perdu</span>` : `<span class="jt-res be">BE</span>`;
-  const tip = t.open ? '' : `Brut ${money(t.pnl, cur, true)} · Com ${t.commission ? money(-t.commission, cur) : '0'} · Swap ${t.swap ? money(t.swap, cur, true) : '0'}`;
+  const res = t.open ? `<span class="jt-res open">⏳ En cours</span>` : t.res === 'win' ? `<span class="jt-res win">Gagné</span>` : t.res === 'loss' ? `<span class="jt-res loss">Perdu</span>` : `<span class="jt-res be">Break-Even</span>`;
+  const tip = t.open || (!t.commission && !t.swap) ? '' : `Brut ${money(t.pnl, cur, true)} · Com ${t.commission ? money(-t.commission, cur) : '0'} · Swap ${t.swap ? money(t.swap, cur, true) : '0'}`;
   const ro = readOnly();
   return `<tr class="row${t.open ? ' is-open' : ''}" data-edit="${t.id}" tabindex="0">
     <td class="jt-date">${longDate(t, withYear)}</td>
     ${multiAcc ? `<td class="jt-acc"><span class="jt-dot" style="background:${accColor(a)}"></span>${esc(a.name || '—')}</td>` : ''}
     <td><div class="jt-asset"><span class="jt-cls" style="--c:${k.color}">${k.emoji}</span><b>${esc(t.asset)}</b></div></td>
-    <td><span class="jt-side ${t.side}">${t.side === 'long' ? '▲ Long' : '▼ Short'}</span></td>
+    <td><span class="jt-side ${t.side}">${t.side === 'long' ? '<span class="arw">▲</span>Long' : '<span class="arw">▼</span>Short'}</span></td>
     <td><span class="jt-sess" style="--c:${se.color}"><span>${se.emoji}</span>${se.name}</span></td>
     <td class="jt-risk num"><div class="jr-v"><span>${money(t.risk, cur)}</span><i></i><span class="jr-r">${riskR != null ? nf2.format(riskR) + ' R' : '—'}</span></div><div class="jr-bar${riskR > 1.0001 ? ' over' : ''}"><span style="width:${fill}%"></span></div></td>
     <td>${res}</td>
@@ -2409,8 +2413,9 @@ function journalTable(list, c) {
     rows += journalRow(t, c, multiAcc, withYear);
   });
   const th = (lbl, cls = '') => `<th class="${cls}">${lbl}</th>`;
-  return `<table class="jt">
-    <thead><tr>${th('Date')}${multiAcc ? th('Compte') : ''}${th('Actif')}${th('Sens')}${th('Session')}${th('Risque')}${th('Dénouement')}${th('Résultat', 'r')}${th('R/Trade', 'r')}${th('R réel', 'r')}${th('', 'jt-acts')}</tr></thead>
+  const rw = Math.max(5, ...[...open, ...list].map(t => money(t.risk, accCur(c, t.account_id)).length));
+  return `<table class="jt" style="--rw:${rw}ch">
+    <thead><tr>${th('Date')}${multiAcc ? th('Compte') : ''}${th('Actif')}${th('Sens')}${th('Session')}${th('Risque')}${th('Dénouement')}${th('Résultat net', 'r')}${th('R/Trade', 'r')}${th('R réel', 'r')}${th('', 'jt-acts')}</tr></thead>
     <tbody>${rows || `<tr><td colspan="${cols}"><div class="jt-empty"><span>📭</span>${c.trades.length || c.openTrades.length ? 'Aucun trade sur cette période.' : readOnly() ? 'Aucun trade.' : 'Aucun trade pour l’instant. Clique sur « + Nouveau trade » pour commencer.'}</div></td></tr>`}</tbody>
   </table>`;
 }

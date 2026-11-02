@@ -2797,7 +2797,6 @@ function tradePanelHtml(c) {
           <div class="fl">Actif</div>
           <div class="asset-line"><input id="t-asset" class="field asset-in" autocomplete="off" spellcheck="false" placeholder="${esc(cls.ph ? 'Ex. ' + cls.ph : f.asset_class ? 'Nom de l’actif' : 'Ex. EUR/USD, AAPL, NAS100…')}" value="${esc(f.asset)}"></div>
           <div class="cls-grid">${CLASSES.filter(k => k.id !== 'autre').map(k => opt('data-tcls', k.id, f.asset_class, `<span class="e">${k.emoji}</span>${k.one}`, `style="--c:${k.color}"`)).join('')}</div>
-          <div class="chips recent" id="t-recent"></div>
         </section>
         <section class="tsec" style="--i:1">
           <div class="side2">${opt('data-tside', 'long', f.side, '<span class="arw">▲</span> Long', 'class="long"')}${opt('data-tside', 'short', f.side, '<span class="arw">▼</span> Short', 'class="short"')}</div>

@@ -2388,8 +2388,23 @@ function renderJournal(c) {
   bindJournalTools(list, c);
 }
 // month bands stay fully visible even when the table scrolls sideways
-function fitMonthBands() { const card = $('.jt-card'); if (!card) return; card.style.setProperty('--cw', card.clientWidth + 'px'); card.classList.toggle('scrolls', card.scrollWidth > card.clientWidth + 1); }
-window.addEventListener('resize', fitMonthBands);
+// Column widths are measured with ALL months open, then frozen: folding a month never moves the other columns.
+function fitMonthBands() {
+  const card = $('.jt-card'); if (!card) return;
+  const table = card.querySelector('table.jt'), hidden = [...card.querySelectorAll('tr.jt-hide')];
+  if (table) {
+    table.style.tableLayout = ''; table.style.width = ''; table.querySelectorAll('thead th').forEach(th => { th.style.width = ''; });
+    hidden.forEach(tr => tr.classList.remove('jt-hide'));
+    const ws = [...table.querySelectorAll('thead th')].map(th => th.getBoundingClientRect().width);
+    const total = table.getBoundingClientRect().width;
+    table.querySelectorAll('thead th').forEach((th, i) => { th.style.width = ws[i] + 'px'; });
+    table.style.width = total + 'px'; table.style.tableLayout = 'fixed';
+    hidden.forEach(tr => tr.classList.add('jt-hide'));
+  }
+  card.style.setProperty('--cw', card.clientWidth + 'px');
+  card.classList.toggle('scrolls', card.scrollWidth > card.clientWidth + 1);
+}
+let fitT; window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitMonthBands, 80); });
 // "2 novembre" / "2 novembre à 15:15" — the year only in the « Tout » view
 function longDate(t, withYear) {
   const d = parseD(t.date);

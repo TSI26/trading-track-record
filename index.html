@@ -372,6 +372,7 @@ button{cursor:pointer}
 .pm{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:9px 2px 8px;border-radius:11px;border:1px solid var(--line);background:var(--bg);cursor:pointer;user-select:none;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s}
 .pm b{font-size:13px;font-weight:700}
 .pm small{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.pm small.pos{color:var(--win)} .pm small.neg{color:var(--loss)}
 .pm:hover{border-color:var(--line-2);background:var(--surface-2)}
 .pm:active{transform:scale(.97)}
 .pm.empty b{color:var(--muted);font-weight:600}
@@ -3169,7 +3170,7 @@ function openTrade(t, opts = {}) {
     form = {kind: 'trade', id: t.id, wasOpen: t.open, closeOnly: !!(opts.closeOnly && t.open), account_id: t.account_id, date: t.date, time: t.time || '', asset_class: t.asset_class, asset: t.asset, side: t.side, order: t.order, tf: t.tf, session: t.session, sessAuto: false, hold: t.hold,
       riskStr: curToRiskStr(t.risk, mode, acc, c.d), conf: t.conf,
       resKind: t.open ? '' : t.resKind === 'be' ? 'be' : t.pnl < 0 ? 'loss' : 'win',
-      pnlStr: t.open ? '' : t.resKind === 'be' ? numStr(t.pnl) : numStr(Math.abs(t.pnl)), commStr: t.commission ? '-' + numStr(Math.abs(t.commission)) : '', swapSign: t.swap < 0 ? -1 : 1, swapStr: t.swap ? (t.swap < 0 ? '-' : '+') + numStr(Math.abs(t.swap)) : '',
+      pnlStr: t.open ? '' : t.resKind === 'be' ? numStr(t.pnl) : (t.pnl < 0 ? '-' : '') + numStr(Math.abs(t.pnl)), commStr: t.commission ? '-' + numStr(Math.abs(t.commission)) : '', swapSign: t.swap < 0 ? -1 : 1, swapStr: t.swap ? (t.swap < 0 ? '-' : '+') + numStr(Math.abs(t.swap)) : '',
       ptp: t.ptp, psl: t.psl, rmaxStr: numStr(t.rmax), setup: t.setup, note: t.note, lots: t.lots};
   } else {
     const lp = lastPrefs();
@@ -3586,7 +3587,9 @@ function drawPanel(first) {
       if (n.value !== v) { n.value = v; try { n.setSelectionRange(v.length, v.length); } catch (x) {} }
       form.asset = v; syncTradeForm();
     });
-    ['risk', 'pnl'].forEach(k => bind('t-' + k, k + 'Str', syncTradeForm));
+    bind('t-risk', 'riskStr', syncTradeForm);
+    // a loss is written with its minus sign by itself: 28 → -28 (a gain has no sign, a break-even keeps what you type)
+    const pn = $('#t-pnl'); if (pn) pn.addEventListener('input', () => { if (!form || !pn.isConnected) return; const v = pnlFix(pn.value, form.resKind); if (pn.value !== v) { pn.value = v; try { pn.setSelectionRange(v.length, v.length); } catch (x) {} } form.pnlStr = v; syncTradeForm(); });
     // commission is always negative: 0.23 shows -0.23. Swap: no sign = positive (+), type "-" yourself for a negative swap
     const feeFix = (n, kind) => { const raw = n.value, neg = /[-−]/.test(raw), num = raw.replace(/[^0-9.,]/g, ''); const v = kind === 'comm' ? (num ? '-' + num : '') : num ? (neg ? '-' : '+') + num : neg ? '-' : ''; if (raw !== v) { n.value = v; try { n.setSelectionRange(v.length, v.length); } catch (x) {} } return v; };
     ['comm', 'swap'].forEach(k => { const n = $('#t-' + k); if (n) n.addEventListener('input', () => { form[k + 'Str'] = feeFix(n, k); syncTradeForm(); }); });
@@ -3620,6 +3623,12 @@ function setRiskPct(p) {
   form.riskStr = p > 0 ? curToRiskStr(amount, c.d.settings.riskMode, acc, c.d) || String(amount).replace('.', ',') : '';
   const ri = $('#t-risk'); if (ri) ri.value = form.riskStr;
   syncTradeForm();
+}
+function pnlFix(raw, kind) {
+  const num = String(raw).replace(/[^0-9.,]/g, '');
+  if (kind === 'loss') return num ? '-' + num : (/[-−]/.test(raw) ? '-' : '');
+  if (kind === 'win') return num;
+  return String(raw).replace(/[^0-9.,\-−]/g, '');
 }
 function tradeValues(c) {
   const f = form, acc = c.accById[f.account_id];
@@ -3895,7 +3904,7 @@ document.addEventListener('click', async e => {
     if (ds.thold) { form.hold = ds.thold; return syncTradeForm(); }
     if (ds.trisk) { setRiskPct(+ds.trisk); return; }
     if (ds.tconf) { form.conf = +ds.tconf; return syncTradeForm(); }
-    if (ds.tres) { form.resKind = form.resKind === ds.tres ? '' : ds.tres; syncTradeForm(); if (form.resKind) setTimeout(() => $('#t-pnl')?.focus(), 30); return; }
+    if (ds.tres) { form.resKind = form.resKind === ds.tres ? '' : ds.tres; if (form.pnlStr && form.resKind !== 'be') { form.pnlStr = pnlFix(String(form.pnlStr).replace(/[-−]/g, ''), form.resKind); const pi = $('#t-pnl'); if (pi) pi.value = form.pnlStr; } syncTradeForm(); if (form.resKind) setTimeout(() => $('#t-pnl')?.focus(), 30); return; }
     if (t.hasAttribute('data-tdel')) { const tr = ctx().d.trades.find(x => x.id === form.id); if (tr) confirmDeleteTrade(tr); return; }
   }
   if (ds.akind) { form.akind = ds.akind; return syncAccountForm(); }

@@ -409,6 +409,8 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt tr.row.jt-hide{display:none}
 @media (prefers-reduced-motion:no-preference){.jt tr.row.jt-in td{animation:jtIn .28s cubic-bezier(.2,.8,.3,1) both;animation-delay:var(--d,0ms)}}
 @keyframes jtIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.jt tr.row.jt-out td{animation:jtOut .2s cubic-bezier(.4,0,.8,.4) both;animation-delay:var(--d,0ms);pointer-events:none}
+@keyframes jtOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-4px)}}
 .jm-res{margin-left:auto;display:flex;align-items:baseline;gap:10px}
 .jm-res b{font-size:15px;font-weight:700}
 .jm-res span{font-size:12px;font-weight:600}
@@ -2559,10 +2561,22 @@ function toggleMonth(el) {
   if (closing) set.add(k); else set.delete(k);
   lsSet('ttr-jt-closed', [...set]);
   el.classList.toggle('closed', closing); el.setAttribute('aria-expanded', String(!closing)); el.title = (closing ? 'Déplier' : 'Replier') + ' le mois';
-  document.querySelectorAll(`.jt tr.row[data-m="${k}"]`).forEach((tr, i) => {
-    tr.classList.toggle('jt-hide', closing);
-    if (!closing) { tr.classList.remove('jt-in'); void tr.offsetWidth; tr.style.setProperty('--d', Math.min(i, 12) * 25 + 'ms'); tr.classList.add('jt-in'); }
-  });
+  const rows = [...document.querySelectorAll(`.jt tr.row[data-m="${k}"]`)];
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  clearTimeout(el._t);
+  if (closing) {
+    // the rows leave one after the other, from the bottom up, then disappear
+    if (calm) { rows.forEach(tr => tr.classList.add('jt-hide')); return; }
+    const n = Math.min(rows.length, 13);
+    rows.forEach((tr, i) => { tr.classList.remove('jt-in'); tr.style.setProperty('--d', Math.max(0, Math.min(rows.length - 1 - i, 12)) * 20 + 'ms'); tr.classList.add('jt-out'); });
+    el._t = setTimeout(() => rows.forEach(tr => { tr.classList.remove('jt-out'); tr.classList.add('jt-hide'); }), 200 + n * 20);
+  } else {
+    rows.forEach((tr, i) => {
+      tr.classList.remove('jt-hide', 'jt-out', 'jt-in'); void tr.offsetWidth;
+      if (calm) return;
+      tr.style.setProperty('--d', Math.min(i, 12) * 25 + 'ms'); tr.classList.add('jt-in');
+    });
+  }
 }
 function bindJournalTools(list, c) {
   document.querySelectorAll('[data-mtog]').forEach(el => {

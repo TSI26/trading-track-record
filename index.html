@@ -421,6 +421,29 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt-month + tr.row td{border-top:0}
 .jt-hold{font-size:12.5px;color:var(--fg)}
 .jt-hold span:first-child{margin-right:5px}
+/* import window */
+.panel.imp{max-width:560px}
+.imp-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.imp-box{display:flex;flex-direction:column;gap:2px;padding:11px 13px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line)}
+.imp-box b{font-size:21px;font-weight:700}
+.imp-box small{font-size:11.5px;color:var(--muted)}
+.imp-box.ok{border-color:color-mix(in srgb,var(--win) 45%,var(--line));background:color-mix(in srgb,var(--win) 8%,var(--surface-2))}
+.imp-box.ok b{color:var(--win)}
+.imp-span{margin:10px 0 0;font-size:13px;color:var(--muted);text-transform:none}
+.imp-span::first-letter{text-transform:uppercase}
+.imp-warn,.imp-fail{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:13px;background:color-mix(in srgb,var(--accent) 9%,transparent);border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--line))}
+.imp-fail{margin:14px 0 16px;border-style:solid;border-color:color-mix(in srgb,var(--loss) 45%,var(--line));background:var(--loss-soft)}
+.imp-bad{margin-top:10px;font-size:13px;color:var(--muted)}
+.imp-bad summary{cursor:pointer;font-weight:600}
+.imp-bad ul{margin:6px 0 0;padding-left:18px;max-height:120px;overflow:auto}
+.imp-prev{border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.imp-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);font-size:13px}
+.imp-row:last-child{border-bottom:0}
+.imp-row .jt-cls{width:24px;height:24px;font-size:13px;border-radius:7px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--c) 16%,transparent)}
+.imp-d{color:var(--muted);margin-left:auto}
+.imp-v{min-width:92px;text-align:right;font-weight:700}
+.imp-more{margin:0;padding:7px 12px;font-size:12px;color:var(--muted);background:var(--surface-2)}
+.imp-save:disabled{opacity:.55}
 /* closing window */
 .panel.tr.tr-close{max-width:600px}
 .cl-sum{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-items:center;padding:12px 14px !important;margin-top:4px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
@@ -1596,6 +1619,25 @@ async function saveRow(tb, obj) {
   state.db[tb] = list.map(MAP[tb]); render();
   return MAP[tb](row);
 }
+// many rows at once (import): sent in packs of 200
+async function saveMany(tb, objs) {
+  if (readOnly()) throw new Error('lecture seule');
+  const bodies = objs.map(BODY[tb]);
+  if (state.store === 'cloud') {
+    for (let i = 0; i < bodies.length; i += 200) {
+      localWriteUntil = Date.now() + 6000;
+      const pack = bodies.slice(i, i + 200);
+      const res = await withAuth(() => sb.from(tb).insert(pack).select());
+      if (res.error) throw Object.assign(res.error, {done: i});
+      res.data.forEach(r => upsertLocal(tb, r));
+    }
+    return;
+  }
+  const list = lsGet(localKey(tb), []);
+  bodies.forEach((b, i) => list.push({id: 'l' + Date.now() + i + Math.random().toString(36).slice(2, 6), createdAt: Date.now() + i, ...b}));
+  lsSet(localKey(tb), list);
+  state.db[tb] = list.map(MAP[tb]); render();
+}
 async function deleteRow(tb, id) {
   if (readOnly()) throw new Error('lecture seule');
   if (state.store === 'cloud') {
@@ -2367,6 +2409,7 @@ function journalTools() {
     <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="h-q" type="search" placeholder="Rechercher un actif…" autocomplete="off" spellcheck="false" value="${esc(state.q)}"></label>
     <select id="h-res" class="select" aria-label="Résultat"><option value="all">Tous les résultats</option><option value="win" ${state.fRes === 'win' ? 'selected' : ''}>Gagnants</option><option value="loss" ${state.fRes === 'loss' ? 'selected' : ''}>Perdants</option><option value="be" ${state.fRes === 'be' ? 'selected' : ''}>Break-even</option></select>
+    ${readOnly() ? '' : `<button class="ghost desk-only" id="h-import" type="button">Importer (CSV)</button><input type="file" id="h-import-file" accept=".csv,text/csv" hidden>`}
     <button class="ghost desk-only" id="h-export" type="button">Exporter (CSV)</button>
   </div>`;
 }
@@ -2592,7 +2635,12 @@ function bindJournalTools(list, c) {
     state.q = up; clearTimeout(qi._t); qi._t = setTimeout(() => { render(); const n = $('#h-q'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 200);
   });
   $('#h-res').addEventListener('change', e => { state.fRes = e.target.value; render(); });
-  const ex = $('#h-export'); if (ex) ex.addEventListener('click', () => exportTrades([...list].reverse(), c));
+  const ex = $('#h-export'); if (ex) ex.addEventListener('click', () => exportTrades([...list, ...openForJournal(c)].sort(chrono), c));
+  const ib = $('#h-import'), fi = $('#h-import-file');
+  if (ib && fi) {
+    ib.addEventListener('click', () => { if (!blockedWrite()) fi.click(); });
+    fi.addEventListener('change', async () => { const file = fi.files && fi.files[0]; fi.value = ''; if (file) openImport(file); });
+  }
 }
 
 /* ---------- CSV export (backup: the free Supabase plan has no automatic backup) ---------- */
@@ -2606,10 +2654,90 @@ function downloadCsv(rows, name) {
 }
 function exportTrades(list, c) {
   if (!list.length) return toast('Rien à exporter.');
-  const rows = [['Date', 'Heure', 'Compte', 'Devise', 'Actif', 'Marché', 'Sens', 'Session', 'Risque', 'R-MAX', 'Risque (R)', 'Résultat brut', 'Commission', 'Swap', 'Net', 'R/Trade', 'R réel', 'Lots', 'Setup', 'Note']].concat(
-    list.map(t => [t.date, t.time, accName(c, t.account_id), accCur(c, t.account_id), t.asset, classOf(t.asset_class).name, t.side === 'long' ? 'Long' : 'Short', sessionOf(t.session).name, csvNum(t.risk), csvNum(t.rmax), csvNum(t.riskR), csvNum(t.pnl), csvNum(t.commission), csvNum(t.swap), csvNum(t.net), csvNum(t.rTrade), csvNum(t.rReal), csvNum(t.lots), t.setup, t.note]));
+  const hold = id => (HOLDINGS.find(h => h.id === id) || {}).name || '';
+  const tf = id => (TIMEFRAMES.find(x => x.id === id) || {}).name || '';
+  const ord = t => t.order ? (t.order === 'market' ? 'Au marché' : orderLabel(t.order, t.side)) : '';
+  const rows = [['Date', 'Heure', 'Compte', 'Devise', 'Actif', 'Marché', 'Sens', 'Type d’ordre', 'Session', 'UT d’entrée', 'Durée', 'Confiance', 'Statut', 'Issue', 'Risque', 'R-MAX', 'Risque (R)', 'Résultat brut', 'Commission', 'Swap', 'Net', 'R/Trade', 'R réel', 'Lots', 'Setup', 'Note']].concat(
+    list.map(t => [t.date, t.time, accName(c, t.account_id), accCur(c, t.account_id), t.asset, classOf(t.asset_class).name, t.side === 'long' ? 'Long' : 'Short', ord(t), sessionOf(t.session).name, tf(t.tf), hold(t.hold), t.conf || '',
+      t.open ? 'En cours' : 'Clôturé', t.open ? '' : t.resKind === 'be' || t.res === 'be' ? 'Break-Even' : t.pnl < 0 ? 'Perdu' : 'Gagné',
+      csvNum(t.risk), csvNum(t.rmax), csvNum(t.riskR != null ? t.riskR : t.rmax ? t.risk / t.rmax : null), csvNum(t.pnl), csvNum(t.commission), csvNum(t.swap),
+      t.open ? '' : csvNum(t.net), t.open ? '' : csvNum(t.rTrade), t.open ? '' : csvNum(t.rReal), csvNum(t.lots), t.setup, t.note]));
   downloadCsv(rows, `track-record-trades-${todayStr()}.csv`);
   toast('Sauvegarde des trades téléchargée');
+}
+
+/* ---------- CSV import (the file made by « Exporter », or a similar one) ---------- */
+const nrm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, "'").replace(/[–—]/g, '-').toLowerCase().replace(/\s+/g, ' ').trim();
+function parseCsv(text) {
+  text = String(text).replace(/^﻿/, '');
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const sep = [';', ',', '\t'].map(s => [s, first.split(s).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; continue; }
+    if (ch === '"') q = true;
+    else if (ch === sep) { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += ch;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => String(x).trim() !== ''));
+}
+const IMP_COLS = {date: ['date'], time: ['heure', 'time'], asset: ['actif', 'asset', 'symbole', 'symbol'], cls: ['marche', 'classe', 'classe d\'actif', 'asset', 'type'], side: ['sens', 'long/short', 'direction'],
+  order: ['type d\'ordre', 'ordre'], session: ['session'], tf: ['ut d\'entree', 'unite de temps', 'ut'], hold: ['duree', 'style', 'duree du trade'], conf: ['confiance'], status: ['statut'], issue: ['issue', 'denouement', 'gagne / perdu'],
+  risk: ['risque', 'risque($)', 'risque ($)'], rmax: ['r-max'], pnl: ['resultat brut', 'p&l', 'p&l en $', 'resultat'], comm: ['commission', 'com'], swap: ['swap'], lots: ['lots'], setup: ['setup'], note: ['note'], cur: ['devise']};
+function impDate(s) {
+  s = String(s || '').trim(); let m;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  if ((m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/))) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
+  return '';
+}
+const impPick = (list, v, keys) => { const n = nrm(v).replace(/\s/g, ''); if (!n) return null; return list.find(x => keys.some(k => nrm(x[k]).replace(/\s/g, '') === n)) || null; };
+function readImport(text, d) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return {err: 'Le fichier est vide ou illisible.'};
+  const head = rows[0].map(nrm), col = {};
+  Object.entries(IMP_COLS).forEach(([k, names]) => { const i = head.findIndex(h => names.includes(h)); if (i > -1) col[k] = i; });
+  if (col.cls === col.asset) delete col.cls;
+  if (col.date == null || col.asset == null || col.side == null) return {err: 'Colonnes introuvables : le fichier doit contenir au moins « Date », « Actif » et « Sens » (comme le fichier créé par « Exporter »).'};
+  const trades = [], bad = [], curs = new Set();
+  rows.slice(1).forEach((r, i) => {
+    const g = k => col[k] == null ? '' : String(r[col[k]] ?? '').trim();
+    const line = i + 2, num = k => parseNum(g(k));
+    const date = impDate(g('date'));
+    const side = /^s/i.test(g('side')) || /sell|vente/i.test(g('side')) ? 'short' : /^l|buy|achat/i.test(g('side')) ? 'long' : '';
+    const CLS_ALIAS = {fx: 'forex', devises: 'forex', stock: 'actions', stocks: 'actions', action: 'actions', equity: 'actions', equities: 'actions', shares: 'actions', commodity: 'matieres', commodities: 'matieres', commodite: 'matieres', matiere: 'matieres', 'matieres premieres': 'matieres', metal: 'matieres', metals: 'matieres', index: 'indices', indice: 'indices', indexes: 'indices', cryptos: 'crypto', cryptomonnaie: 'crypto'};
+    const k = impPick(CLASSES, g('cls'), ['id', 'name', 'one']) || (CLS_ALIAS[nrm(g('cls'))] ? classOf(CLS_ALIAS[nrm(g('cls'))]) : null);
+    const raw = g('asset');
+    const cls = k ? k.id : (detectClass(raw, d) || 'autre');
+    const asset = formatAsset(raw, cls);
+    const open = /^en cours/i.test(nrm(g('status')));
+    const issue = nrm(g('issue'));
+    const risk = Math.abs(num('risk')), pnl = num('pnl');
+    if (!date) return bad.push({line, why: 'date illisible'});
+    if (!asset) return bad.push({line, why: 'actif manquant'});
+    if (!side) return bad.push({line, why: 'sens manquant (Long ou Short)'});
+    if (!(risk > 0)) return bad.push({line, why: 'risque manquant'});
+    if (!open && !isFinite(pnl)) return bad.push({line, why: 'résultat manquant'});
+    if (g('cur')) curs.add(g('cur').toUpperCase());
+    const se = impPick(SESSIONS, g('session'), ['id', 'name']) || (/^l/i.test(g('session')) ? sessionOf('london') : /^n/i.test(g('session')) ? sessionOf('ny') : /^a/i.test(g('session')) ? sessionOf('asia') : null);
+    const on = nrm(g('order'));
+    const tf = impPick(TIMEFRAMES, g('tf'), ['id', 'name']), ho = impPick(HOLDINGS, g('hold'), ['id', 'name']) || (/^intrad/.test(nrm(g('hold'))) ? {id: 'day'} : null);
+    const time = (g('time').match(/^(\d{1,2}):(\d{2})/) || []).slice(1).map((x, j) => j ? x : x.padStart(2, '0')).join(':');
+    trades.push({line, date, time, asset, asset_class: cls, side, session: se ? se.id : 'off', risk: round2(risk), rmaxIn: num('rmax'),
+      pnl: open ? 0 : round2(pnl), commission: round2(Math.abs(num('comm')) || 0), swap: round2(num('swap') || 0), lots: isFinite(num('lots')) ? num('lots') : null,
+      setup: g('setup'), note: g('note'), order: /limit/.test(on) ? 'limit' : /stop/.test(on) ? 'stop' : /march|market/.test(on) ? 'market' : '',
+      tf: tf ? tf.id : '', hold: ho ? ho.id : '', conf: Math.max(0, Math.min(5, parseInt(g('conf'), 10) || 0)), open, resKind: !open && /^b/.test(issue) ? 'be' : ''});
+  });
+  return {trades, bad, curs: [...curs]};
+}
+const impKey = t => [t.date, t.time || '', t.asset, t.side, Math.round((t.pnl || 0) * 100), Math.round((t.risk || 0) * 100)].join('|');
+function importPlan(f, d) {
+  const have = new Set(d.trades.filter(t => t.account_id === f.account_id).map(impKey)), seen = new Set();
+  const fresh = [], dup = [];
+  f.read.trades.forEach(t => { const k = impKey(t); if (have.has(k) || seen.has(k)) dup.push(t); else { seen.add(k); fresh.push(t); } });
+  return {fresh, dup};
 }
 function exportMovements(c) {
   const d = c.d;
@@ -3350,12 +3478,13 @@ function drawPanel(first) {
   const c = ctx();
   const old = document.querySelector('#panel-root .panel');
   const st = old ? old.scrollTop : 0;
-  const html = form.kind === 'confirm' ? confirmPanelHtml() : form.kind === 'trade' ? tradePanelHtml(c) : form.kind === 'account' ? accountPanelHtml(c) : movPanelHtml(c);
-  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : form.kind === 'trade' ? ' tr' + (form.closeOnly ? ' tr-close' : '') : form.kind === 'confirm' ? ' small' : form.kind === 'mov' ? ' mov ' + (form.mkind === 'depot' ? 'mv-dep' : 'mv-ret') : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
+  const html = form.kind === 'import' ? importPanelHtml(c) : form.kind === 'confirm' ? confirmPanelHtml() : form.kind === 'trade' ? tradePanelHtml(c) : form.kind === 'account' ? accountPanelHtml(c) : movPanelHtml(c);
+  $('#panel-root').innerHTML = `<div class="overlay${first ? ' enter' : ''}" id="ov"><div class="panel${first ? ' enter' : ''}${form.kind === 'account' ? ' wide' : form.kind === 'trade' ? ' tr' + (form.closeOnly ? ' tr-close' : '') : form.kind === 'confirm' ? ' small' : form.kind === 'import' ? ' imp' : form.kind === 'mov' ? ' mov ' + (form.mkind === 'depot' ? 'mv-dep' : 'mv-ret') : ''}" role="dialog" aria-modal="true" aria-labelledby="p-title">${html}</div></div>`;
   const p = document.querySelector('#panel-root .panel');
   if (!first) p.scrollTop = st;
   const bind = (id, key, after) => { const n = document.getElementById(id); if (!n) return; n.addEventListener('input', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n); }); n.addEventListener('change', () => { if (!form || !n.isConnected) return; form[key] = n.value; if (after) after(n, true); }); };
   if (form.kind === 'confirm') return;
+  if (form.kind === 'import') { const s = $('#imp-acc'); if (s) s.addEventListener('change', () => { if (!form || form.busy) return; form.account_id = s.value; drawPanel(); }); return; }
   if (form.kind === 'trade') {
     bind('t-acc', 'account_id', (n, ch) => { if (ch) drawPanel(); });
     bind('t-date', 'date');
@@ -3425,6 +3554,68 @@ function tradeCalc(c) {
   if (v.rmax) parts.push(`R réel : <strong class="${sgnCls(net)}">${fR(net / v.rmax)}</strong>`);
   el.innerHTML = parts.map(p => `<span>${p}</span>`).join('');
 }
+/* ---------- import window ---------- */
+async function openImport(file) {
+  const c = ctx();
+  if (!activeAccounts(c).length) { toast('Crée d’abord un compte de trading.'); return openAccount(); }
+  let text = '';
+  try { text = await file.text(); } catch (e) { return toast('Impossible de lire ce fichier.'); }
+  const read = readImport(text, c.d);
+  form = {kind: 'import', fileName: file.name, read, account_id: defaultAccount(c), err: read.err || ''};
+  drawPanel(true);
+}
+function importPanelHtml(c) {
+  const f = form, acts = c.d.accounts.filter(a => !a.archived), acc = c.accById[f.account_id] || {};
+  const head = `<div class="panel-head tr-head"><div class="tr-title"><span class="tr-ico" aria-hidden="true">📥</span><div><h2 id="p-title">Importer des trades</h2><p class="panel-sub">${esc(f.fileName)}</p></div></div><button class="x" type="button" data-close aria-label="Fermer">${X_ICON}</button></div>`;
+  if (f.read.err) return head + `<div class="imp-fail">⚠️ ${esc(f.read.err)}</div><div class="panel-actions"><button type="button" class="cancel" data-close style="flex:1">Fermer</button></div>`;
+  const plan = importPlan(f, c.d), n = plan.fresh.length, bad = f.read.bad;
+  const curWarn = f.read.curs.length && acc.currency && !f.read.curs.includes(acc.currency) ? `<div class="imp-warn">💱 Les montants du fichier sont en <b>${esc(f.read.curs.join(', '))}</b>, et ce compte est en <b>${esc(acc.currency)}</b> : ils seront importés tels quels, sans conversion.</div>` : '';
+  const dates = plan.fresh.map(t => t.date).sort();
+  const span = n ? `${parseD(dates[0]).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'})}${dates[0].slice(0, 7) !== dates[n - 1].slice(0, 7) ? ' → ' + parseD(dates[n - 1]).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}) : ''}` : '';
+  const prev = plan.fresh.slice().sort((a, b) => chrono(b, a)).slice(0, 5);
+  const box = (cls, v, l) => `<div class="imp-box ${cls}"><b class="num">${v}</b><small>${l}</small></div>`;
+  return head + `
+    <section class="tsec" style="--i:0">
+      <label class="fl" for="imp-acc">Dans quel compte ?</label>
+      <select id="imp-acc" class="field">${acts.map(a => `<option value="${a.id}" ${a.id === f.account_id ? 'selected' : ''}>${esc(a.name)} · ${a.currency}</option>`).join('')}</select>
+    </section>
+    <section class="tsec" style="--i:1">
+      <div class="imp-boxes">${box('ok', n, n > 1 ? 'trades à importer' : 'trade à importer')}${box('dup', plan.dup.length, 'déjà présents, ignorés')}${box('bad', bad.length, bad.length > 1 ? 'lignes illisibles' : 'ligne illisible')}</div>
+      ${span ? `<p class="imp-span">📅 ${span}${plan.fresh.some(t => t.open) ? ` · dont ⏳ ${plan.fresh.filter(t => t.open).length} en cours` : ''}</p>` : ''}
+      ${curWarn}
+      ${bad.length ? `<details class="imp-bad"><summary>Voir les lignes illisibles</summary><ul>${bad.slice(0, 30).map(b => `<li>Ligne ${b.line} : ${esc(b.why)}</li>`).join('')}${bad.length > 30 ? `<li>… et ${bad.length - 30} autres</li>` : ''}</ul></details>` : ''}
+    </section>
+    ${prev.length ? `<section class="tsec" style="--i:2"><div class="fl">Aperçu</div><div class="imp-prev">${prev.map(t => { const k = classOf(t.asset_class); return `<div class="imp-row"><span class="jt-cls" style="--c:${k.color}">${k.emoji}</span><b>${esc(t.asset)}</b><span class="jt-side ${t.side}"><span class="arw">${t.side === 'long' ? '▲' : '▼'}</span>${t.side === 'long' ? 'Long' : 'Short'}</span><span class="imp-d">${parseD(t.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short', year: 'numeric'})}</span><span class="num imp-v ${t.open ? '' : sgnCls(t.pnl - t.commission + t.swap)}">${t.open ? '⏳ En cours' : money(round2(t.pnl - t.commission + t.swap), acc.currency || 'USD', true)}</span></div>`; }).join('')}${n > prev.length ? `<p class="imp-more">… et ${n - prev.length} autre${n - prev.length > 1 ? 's' : ''}</p>` : ''}</div></section>` : ''}
+    <div class="tr-foot">
+      <div class="err" id="p-err" role="alert">${esc(f.err)}</div>
+      <div class="panel-actions">
+        <button type="button" class="cancel" data-close>Annuler</button>
+        <button type="button" class="save tr-save imp-save" data-save ${n ? '' : 'disabled'}><span class="mv-save-in"><span class="tr-save-ico" id="t-save-ico">📥</span><span id="imp-save-txt">${n ? `Importer ${n} trade${n > 1 ? 's' : ''}` : 'Rien de nouveau à importer'}</span></span></button>
+      </div>
+    </div>`;
+}
+async function importSave() {
+  const f = form, c = ctx(); if (f.busy) return;
+  const acc = c.accById[f.account_id]; if (!acc) return;
+  const {fresh} = importPlan(f, c.d); if (!fresh.length) return;
+  const objs = fresh.map(t => ({...t, account_id: acc.id, rmax: isFinite(t.rmaxIn) && t.rmaxIn > 0 ? round2(t.rmaxIn) : acc.rmax || 0}));
+  const btn = document.querySelector('#panel-root .imp-save'), txt = $('#imp-save-txt'), ico = $('#t-save-ico');
+  f.busy = true; if (btn) { btn.disabled = true; btn.classList.add('loading'); } if (txt) txt.textContent = 'Import en cours…';
+  const t0 = Date.now();
+  try {
+    await saveMany('trades', objs);
+    await new Promise(r => setTimeout(r, Math.max(0, 500 - (Date.now() - t0))));
+    if (btn) { btn.classList.remove('loading'); btn.classList.add('done'); } if (ico) ico.textContent = '✓';
+    if (txt) txt.textContent = `${objs.length} trade${objs.length > 1 ? 's' : ''} importé${objs.length > 1 ? 's' : ''}`;
+    await new Promise(r => setTimeout(r, 850));
+    if (form === f) closePanel();
+    toast(`${objs.length} trade${objs.length > 1 ? 's' : ''} importé${objs.length > 1 ? 's' : ''} dans « ${acc.name} »`);
+  } catch (e) {
+    f.busy = false; if (btn) { btn.disabled = false; btn.classList.remove('loading'); } if (txt) txt.textContent = `Importer ${fresh.length} trades`;
+    const msg = 'Import impossible : ' + errText(e) + (e.done ? ` (${e.done} trades ont quand même été importés)` : '');
+    const el = $('#p-err'); if (el) el.textContent = msg;
+  }
+}
 function closePanel() { $('#panel-root').innerHTML = ''; form = null; }
 // closing by hand (cross, Annuler, Échap, click outside): the window fades away instead of vanishing
 function closePanelSoft() {
@@ -3434,6 +3625,7 @@ function closePanelSoft() {
   setTimeout(() => { if (ov.isConnected) ov.remove(); }, 200);
 }
 async function panelSave() {
+  if (form && form.kind === 'import') return importSave();
   const f = form, c = ctx();
   const fail = msg => { f.err = msg; const e = document.querySelector('#panel-root .err'); if (e) { e.textContent = msg; e.scrollIntoView({block: 'nearest', behavior: 'smooth'}); } else drawPanel(); };
   if (f.kind === 'trade') {

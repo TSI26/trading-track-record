@@ -399,6 +399,16 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jm-name em{font-style:normal;color:var(--muted);font-weight:500}
 .jm-sub{font-size:12px;color:var(--muted)}
 .jm-open{color:var(--accent);font-weight:600}
+.jm{cursor:pointer;user-select:none;transition:border-color .2s,filter .2s}
+.jm:hover{border-color:color-mix(in srgb,var(--mc) 55%,var(--line));filter:brightness(1.06)}
+.jm:focus-visible{outline:2px solid var(--mc);outline-offset:2px}
+.jm-chev{width:22px;height:22px;flex:none;display:grid;place-items:center;border-radius:6px;color:var(--muted);transition:transform .25s cubic-bezier(.2,.8,.3,1),color .15s,background .15s;margin-right:-4px}
+.jm-chev svg{width:15px;height:15px}
+.jm:hover .jm-chev{color:var(--fg);background:var(--surface-2)}
+.jm.closed .jm-chev{transform:rotate(-90deg)}
+.jt tr.row.jt-hide{display:none}
+@media (prefers-reduced-motion:no-preference){.jt tr.row.jt-in td{animation:jtIn .28s cubic-bezier(.2,.8,.3,1) both;animation-delay:var(--d,0ms)}}
+@keyframes jtIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .jm-res{margin-left:auto;display:flex;align-items:baseline;gap:10px}
 .jm-res b{font-size:15px;font-weight:700}
 .jm-res span{font-size:12px;font-weight:600}
@@ -2419,7 +2429,8 @@ function journalRow(t, c, multiAcc, withYear) {
   const res = t.open ? `<span class="jt-res open">⏳ En cours</span>` : t.res === 'win' ? `<span class="jt-res win">Gagné</span>` : t.res === 'loss' ? `<span class="jt-res loss">Perdu</span>` : `<span class="jt-res be">Break-Even</span>`;
   const tip = t.open || (!t.commission && !t.swap) ? '' : `Brut ${money(t.pnl, cur, true)} · Com ${t.commission ? money(-t.commission, cur) : '0'} · Swap ${t.swap ? money(t.swap, cur, true) : '0'}`;
   const ro = readOnly();
-  return `<tr class="row${t.open ? ' is-open' : ''}" data-edit="${t.id}" tabindex="0">
+  const mk = t.date.slice(0, 7), hide = state.period !== 'month' && jtClosed().has(mk);
+  return `<tr class="row${t.open ? ' is-open' : ''}${hide ? ' jt-hide' : ''}" data-edit="${t.id}" data-m="${mk}" tabindex="0">
     <td class="jt-date">${longDate(t, withYear)}</td>
     ${multiAcc ? `<td class="jt-acc"><span class="jt-dot" style="background:${accColor(a)}"></span>${esc(a.name || '—')}</td>` : ''}
     <td><div class="jt-asset"><span class="jt-cls" style="--c:${k.color}">${k.emoji}</span><b>${esc(t.asset)}</b></div></td>
@@ -2450,7 +2461,9 @@ function journalTable(list, c) {
     if (state.period !== 'month' && k !== lastM) {
       lastM = k; const m = M[k], y = +k.slice(0, 4), mo = +k.slice(5, 7) - 1, d0 = new Date(y, mo, 1);
       const name = d0.toLocaleDateString('fr-FR', {month: 'long'});
-      rows += `<tr class="jt-month"><td colspan="${cols}"><div class="jm ${m.v > 0 ? 'm-pos' : m.v < 0 ? 'm-neg' : 'm-flat'}">
+      const closed = jtClosed().has(k);
+      rows += `<tr class="jt-month"><td colspan="${cols}"><div class="jm ${m.v > 0 ? 'm-pos' : m.v < 0 ? 'm-neg' : 'm-flat'}${closed ? ' closed' : ''}" data-mtog="${k}" role="button" tabindex="0" aria-expanded="${!closed}" title="${closed ? 'Déplier' : 'Replier'} le mois">
+        <span class="jm-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         <div class="jm-cal"><small>${d0.toLocaleDateString('fr-FR', {month: 'short'}).replace('.', '')}</small><b>${y}</b></div>
         <div class="jm-txt"><span class="jm-name">${name} <em>${y}</em></span><span class="jm-sub">${m.n} trade${m.n > 1 ? 's' : ''}${m.n ? ` · ${m.w + m.l ? Math.round(m.w / (m.w + m.l) * 100) : 0} % de réussite` : ''}${m.o ? ` · <span class="jm-open">⏳ ${m.o} en cours</span>` : ''}</span></div>
         <div class="jm-res"><b class="num ${sgnCls(m.v)}">${fV(m.v, c)}</b><span class="num ${sgnCls(m.r)}">${fR(m.r)}</span></div>
@@ -2524,7 +2537,23 @@ function phoneList(list, c) {
     </div>`;
   }).join('');
 }
+// folded months are remembered on this device
+function jtClosed() { if (!state.jtClosed) state.jtClosed = new Set(lsGet('ttr-jt-closed', [])); return state.jtClosed; }
+function toggleMonth(el) {
+  const k = el.dataset.mtog, set = jtClosed(), closing = !set.has(k);
+  if (closing) set.add(k); else set.delete(k);
+  lsSet('ttr-jt-closed', [...set]);
+  el.classList.toggle('closed', closing); el.setAttribute('aria-expanded', String(!closing)); el.title = (closing ? 'Déplier' : 'Replier') + ' le mois';
+  document.querySelectorAll(`.jt tr.row[data-m="${k}"]`).forEach((tr, i) => {
+    tr.classList.toggle('jt-hide', closing);
+    if (!closing) { tr.classList.remove('jt-in'); void tr.offsetWidth; tr.style.setProperty('--d', Math.min(i, 12) * 25 + 'ms'); tr.classList.add('jt-in'); }
+  });
+}
 function bindJournalTools(list, c) {
+  document.querySelectorAll('[data-mtog]').forEach(el => {
+    el.addEventListener('click', () => toggleMonth(el));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMonth(el); } });
+  });
   const qi = $('#h-q');
   qi.addEventListener('input', () => { state.q = qi.value; clearTimeout(qi._t); qi._t = setTimeout(render, 200); });
   $('#h-side').addEventListener('change', e => { state.fSide = e.target.value; render(); });

@@ -361,6 +361,44 @@ button{cursor:pointer}
 
 /* spreadsheet table */
 .sheet-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:auto;margin-top:12px;max-height:calc(100vh - 230px)}
+/* ===== Mes trades: the period bar ===== */
+.pbar{display:flex;align-items:stretch;gap:14px;padding:10px;border-radius:16px;background:var(--surface);border:1px solid var(--line);margin-bottom:14px}
+.py{display:flex;align-items:center;gap:4px;padding:0 4px 0 2px;border-right:1px solid var(--line);padding-right:12px}
+.py button{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--muted);display:grid;place-items:center;transition:color .15s,border-color .15s,background .15s}
+.py button:hover:not(:disabled){color:var(--fg);border-color:var(--line-2)}
+.py button:disabled{opacity:.35;cursor:default}
+.py-y{font-family:var(--font-display);font-weight:700;font-size:19px;min-width:54px;text-align:center}
+.pms{flex:1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+.pm{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:9px 2px 8px;border-radius:11px;border:1px solid var(--line);background:var(--bg);cursor:pointer;user-select:none;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s}
+.pm b{font-size:13px;font-weight:700}
+.pm small{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.pm:hover{border-color:var(--line-2);background:var(--surface-2)}
+.pm:active{transform:scale(.97)}
+.pm.empty b{color:var(--muted);font-weight:600}
+.pm.now::after{content:"";position:absolute;top:6px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.pm.on{background:color-mix(in srgb,var(--accent) 16%,var(--bg));border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset,0 6px 16px -10px color-mix(in srgb,var(--accent) 80%,transparent)}
+.pm.on b{color:var(--fg)}
+.pms.all .pm.on{box-shadow:none;border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent) 9%,var(--bg))}
+.pm-chk{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line-2);background:var(--surface);display:grid;place-items:center;color:transparent;opacity:0;transition:opacity .15s,background .15s,border-color .15s,color .15s,transform .12s}
+.pm-chk svg{width:11px;height:11px}
+.pm:hover .pm-chk,.pm.on .pm-chk,.pm:focus-visible .pm-chk{opacity:1}
+.pm-chk:hover{border-color:var(--accent);transform:scale(1.12)}
+.pm.on .pm-chk{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pq{display:flex;flex-direction:column;gap:6px;justify-content:center;border-left:1px solid var(--line);padding-left:12px}
+.pq button{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:600;white-space:nowrap;transition:all .15s}
+.pq button:hover{color:var(--fg);border-color:var(--line-2)}
+.pq button[aria-pressed="true"]{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+.jt-head2{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.jt-head2 .h-tools{margin-top:0;flex:1 1 460px;justify-content:flex-end}
+.jt-head2 .search{flex:0 1 280px}
+.m-phone .pbar{flex-wrap:wrap;gap:10px}
+.m-phone .py{border-right:0;padding-right:0}
+.m-phone .pms{flex-basis:100%;grid-template-columns:repeat(4,minmax(0,1fr));order:3}
+.m-phone .pm{padding:17px 2px 8px}
+.m-phone .pm-chk{top:4px;right:4px;width:15px;height:15px}
+.m-phone .pm.now::after{top:8px;left:12px;margin-left:0}
+.m-phone .pq{flex-direction:row;border-left:0;padding-left:0;margin-left:auto}
+.m-phone .pm-chk{opacity:1}
 /* ===== Mes trades: the table ===== */
 .js-row{display:flex;gap:10px;flex-wrap:wrap;margin:0}
 .m-desk .page-head.jt-head{justify-content:space-between;align-items:center}
@@ -2383,10 +2421,47 @@ function classFor(asset, d) {
   return prev ? prev.asset_class : guessClass(asset);
 }
 const quick = {date: todayStr(), account_id: '', asset: '', side: 'long', session: guessSession(), risk: lastPrefs().riskStr || '', pnl: '', comm: '', swap: '', setup: '', note: '', err: ''};
+/* ---------- which months « Mes trades » shows (its own choice, kept on this device) ---------- */
+function jtSel() {
+  if (!state.jsel) { const n = new Date(), s = lsGet('ttr-jt-sel', null); state.jsel = s && Array.isArray(s.months) && s.months.length ? s : {y: n.getFullYear(), months: [n.getMonth()], all: false}; }
+  return state.jsel;
+}
+function setJtSel(patch) { state.jsel = {...jtSel(), ...patch}; state.jsel.months = [...new Set(state.jsel.months)].sort((a, b) => a - b); lsSet('ttr-jt-sel', state.jsel); render(); }
+const jtIn = t => { const s = jtSel(); return s.all || (+t.date.slice(0, 4) === s.y && s.months.includes(+t.date.slice(5, 7) - 1)); };
+const jtMulti = () => { const s = jtSel(); return s.all || s.months.length > 1; };
+const MONTHS_FR = ['Janv.', 'Févr.', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+function periodBar(c) {
+  const s = jtSel(), n = new Date();
+  const res = Array(12).fill(null), cnt = Array(12).fill(0), open = Array(12).fill(0);
+  c.trades.forEach(t => { if (+t.date.slice(0, 4) !== s.y) return; const m = +t.date.slice(5, 7) - 1; res[m] = (res[m] || 0) + val(t, c); cnt[m]++; });
+  c.openTrades.forEach(t => { if (+t.date.slice(0, 4) === s.y) open[+t.date.slice(5, 7) - 1]++; });
+  const years = [...new Set([...c.trades, ...c.openTrades].map(t => +t.date.slice(0, 4)))];
+  const minY = Math.min(n.getFullYear(), ...years), maxY = Math.max(n.getFullYear(), ...years);
+  const fullYear = !s.all && s.months.length === 12;
+  const cell = m => {
+    const on = s.all || s.months.includes(m), empty = !cnt[m] && !open[m], now = s.y === n.getFullYear() && m === n.getMonth();
+    return `<div class="pm${on ? ' on' : ''}${empty ? ' empty' : ''}${now ? ' now' : ''}" data-jm="${m}" role="button" tabindex="0" aria-pressed="${on}">
+      <span class="pm-chk" data-jmadd="${m}" role="checkbox" aria-checked="${on}" aria-label="Ajouter ${MONTHS_FR[m]} à la sélection" title="${on ? 'Retirer de' : 'Ajouter à'} la sélection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <b>${MONTHS_FR[m]}</b>
+      <small class="num ${res[m] == null ? '' : sgnCls(res[m])}">${res[m] == null ? (open[m] ? '⏳' : '—') : fV(res[m], c)}</small>
+    </div>`;
+  };
+  return `<div class="pbar">
+    <div class="py">
+      <button type="button" data-jy="-1" aria-label="Année précédente" ${s.y <= minY ? 'disabled' : ''}><svg width="14" height="14" viewBox="0 0 14 14"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+      <span class="py-y num">${s.y}</span>
+      <button type="button" data-jy="1" aria-label="Année suivante" ${s.y >= maxY ? 'disabled' : ''}><svg width="14" height="14" viewBox="0 0 14 14"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="pms${s.all ? ' all' : ''}">${Array.from({length: 12}, (_, m) => cell(m)).join('')}</div>
+    <div class="pq">
+      <button type="button" data-jyear aria-pressed="${fullYear}">Toute l’année</button>
+      <button type="button" data-jall aria-pressed="${!!s.all}">Tout l’historique</button>
+    </div>
+  </div>`;
+}
 function filteredTrades(c) {
-  const r = range(state.period, state.cy, state.cm);
   const q = state.q.trim().toLowerCase();
-  return c.trades.filter(t => inRange(t, r) &&
+  return c.trades.filter(t => jtIn(t) &&
     (state.fSide === 'all' || t.side === state.fSide) &&
     (state.fRes === 'all' || t.res === state.fRes) &&
     (!q || t.asset.toLowerCase().includes(q) || (t.setup || '').toLowerCase().includes(q) || (t.note || '').toLowerCase().includes(q) || accName(c, t.account_id).toLowerCase().includes(q))
@@ -2415,6 +2490,7 @@ function journalTools() {
 }
 function renderJournal(c) {
   const el = $('#view');
+  if (state.unit === 'R') { state.unit = 'cur'; lsSet('ttr-unit', 'cur'); c = ctx(); } // amounts only on this page (the R columns are there)
   const list = filteredTrades(c);
   if (!c.d.accounts.length && !state.demo && !state.viewAs) {
     el.innerHTML = pageHead('Mes trades', 'Tous tes trades') + `<section class="welcome"><h2>Crée d’abord un compte de trading.</h2><p>Chaque trade est rattaché à un compte (broker, prop firm…).</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`;
@@ -2422,15 +2498,15 @@ function renderJournal(c) {
   }
   if (state.mode === 'desk') {
     el.innerHTML = `${demoFlag()}
-      <div class="page-head jt-head">${journalSummary(list, c)}${filtersBar(c)}</div>
+      ${periodBar(c)}
+      <div class="jt-head2">${journalSummary(list, c)}${journalTools()}</div>
       ${unitNote(c)}
-      ${journalTools()}
       <div class="jt-card">${journalTable(list, c)}</div>`;
     fitMonthBands();
   } else {
     const S = stats(list, c);
     const summary = `<div class="h-summary num"><span>${list.length} trade${list.length > 1 ? 's' : ''}</span><span class="${sgnCls(S.total)}">${fV(S.total, c)}</span><span>${fPct(S.winrate)} de réussite</span></div>`;
-    el.innerHTML = `${demoFlag()}${pageHead('Mes trades', '', filtersBar(c))}${unitNote(c)}${openBox(c)}${journalTools()}<div style="margin:12px 0 0">${summary}</div>${phoneList(list, c)}`;
+    el.innerHTML = `${demoFlag()}${periodBar(c)}${unitNote(c)}${openBox(c)}${journalTools()}<div style="margin:12px 0 0">${summary}</div>${phoneList(list, c)}`;
   }
   bindJournalTools(list, c);
 }
@@ -2475,8 +2551,7 @@ function journalSummary(list, c) {
 // running trades sit in the month they were opened (their result will count for that month)
 function openForJournal(c) {
   const q = state.q.trim().toLowerCase();
-  const r = range(state.period, state.cy, state.cm);
-  return c.openTrades.filter(t => inRange(t, r) && (state.fSide === 'all' || t.side === state.fSide) && (state.fRes === 'all') && (!q || t.asset.toLowerCase().includes(q))).slice().reverse();
+  return c.openTrades.filter(t => jtIn(t) && (state.fSide === 'all' || t.side === state.fSide) && (state.fRes === 'all') && (!q || t.asset.toLowerCase().includes(q))).slice().reverse();
 }
 const JI = {
   edit: ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
@@ -2491,7 +2566,7 @@ function journalRow(t, c, multiAcc, withYear) {
   const res = t.open ? `<span class="jt-res open">⏳ En cours</span>` : t.res === 'win' ? `<span class="jt-res win">Gagné</span>` : t.res === 'loss' ? `<span class="jt-res loss">Perdu</span>` : `<span class="jt-res be">Break-Even</span>`;
   const tip = t.open || (!t.commission && !t.swap) ? '' : `Brut ${money(t.pnl, cur, true)} · Com ${t.commission ? money(-t.commission, cur) : '0'} · Swap ${t.swap ? money(t.swap, cur, true) : '0'}`;
   const ro = readOnly();
-  const mk = t.date.slice(0, 7), hide = state.period !== 'month' && jtClosed().has(mk);
+  const mk = t.date.slice(0, 7), hide = jtMulti() && jtClosed().has(mk);
   return `<tr class="row${t.open ? ' is-open' : ''}${hide ? ' jt-hide' : ''}" data-m="${mk}">
     <td class="jt-date">${longDate(t, withYear)}</td>
     ${multiAcc ? `<td class="jt-acc"><span class="jt-dot" style="background:${accColor(a)}"></span>${esc(a.name || '—')}</td>` : ''}
@@ -2508,7 +2583,7 @@ function journalRow(t, c, multiAcc, withYear) {
   </tr>`;
 }
 function journalTable(list, c) {
-  const multiAcc = c.accs.length > 1, withYear = state.period === 'all';
+  const multiAcc = c.accs.length > 1, withYear = !!jtSel().all;
   const cols = 11 + (multiAcc ? 1 : 0);
   const open = openForJournal(c);
   let rows = '';
@@ -2520,7 +2595,7 @@ function journalTable(list, c) {
   const all = [...list, ...open].sort((a, b) => chrono(b, a));
   all.forEach(t => {
     const k = t.date.slice(0, 7);
-    if (state.period !== 'month' && k !== lastM) {
+    if (jtMulti() && k !== lastM) {
       lastM = k; const m = M[k], y = +k.slice(0, 4), mo = +k.slice(5, 7) - 1, d0 = new Date(y, mo, 1);
       const name = d0.toLocaleDateString('fr-FR', {month: 'long'});
       const closed = jtClosed().has(k);
@@ -2624,6 +2699,20 @@ function toggleMonth(el) {
   }
 }
 function bindJournalTools(list, c) {
+  const onKey = (el, fn) => { el.addEventListener('click', fn); el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(e); } }); };
+  document.querySelectorAll('.pbar [data-jm]').forEach(el => onKey(el, e => {
+    const m = +el.dataset.jm, s = jtSel();
+    if (e.target.closest('[data-jmadd]')) { // the little box: add or remove this month
+      if (s.all) return setJtSel({all: false, months: [m]});
+      const has = s.months.includes(m);
+      if (has && s.months.length === 1) return;
+      return setJtSel({months: has ? s.months.filter(x => x !== m) : [...s.months, m]});
+    }
+    setJtSel({all: false, months: [m]}); // the month itself: only this month
+  }));
+  document.querySelectorAll('.pbar [data-jy]').forEach(b => b.addEventListener('click', () => { const s = jtSel(); setJtSel({y: s.y + +b.dataset.jy, all: false}); }));
+  const by = document.querySelector('.pbar [data-jyear]'); if (by) by.addEventListener('click', () => setJtSel({all: false, months: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]}));
+  const ba = document.querySelector('.pbar [data-jall]'); if (ba) ba.addEventListener('click', () => { const s = jtSel(); if (s.all) setJtSel({all: false}); else setJtSel({all: true}); });
   document.querySelectorAll('[data-mtog]').forEach(el => {
     el.addEventListener('click', () => toggleMonth(el));
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMonth(el); } });

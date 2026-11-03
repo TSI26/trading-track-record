@@ -3363,7 +3363,8 @@ function syncTradeForm() {
   // result
   const rb = $('#res-body'), on = $('#open-note'); if (rb) rb.hidden = !f.resKind; if (on) on.hidden = !!f.resKind;
   const pl = $('#t-pnl-lbl'); if (pl) pl.textContent = f.resKind === 'win' ? 'Gain' : f.resKind === 'loss' ? 'Perte' : 'Montant';
-  const pi = $('#t-pnl'); if (pi) pi.classList.toggle('win', f.resKind === 'win'), pi.classList.toggle('loss', f.resKind === 'loss'), pi.classList.toggle('be', f.resKind === 'be');
+  const pi = $('#t-pnl'); if (pi) pi.placeholder = f.resKind === 'loss' ? '-0,00' : '0,00';
+  if (pi) pi.classList.toggle('win', f.resKind === 'win'), pi.classList.toggle('loss', f.resKind === 'loss'), pi.classList.toggle('be', f.resKind === 'be');
   const rm = $('#t-res-mark'); if (rm) { const k = f.resKind === 'win' ? '✓' : f.resKind === 'loss' ? '✕' : ''; if (rm.textContent !== k) rm.textContent = k; rm.className = 'res-mark ' + f.resKind; }
   tradeCalc(c);
   const st = $('#t-save-txt'), si = $('#t-save-ico');

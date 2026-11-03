@@ -398,6 +398,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jm-name{font-family:var(--font-display);font-weight:700;font-size:15px;text-transform:capitalize;letter-spacing:-.01em}
 .jm-name em{font-style:normal;color:var(--muted);font-weight:500}
 .jm-sub{font-size:12px;color:var(--muted)}
+.jm-open{color:var(--accent);font-weight:600}
 .jm-res{margin-left:auto;display:flex;align-items:baseline;gap:10px}
 .jm-res b{font-size:15px;font-weight:700}
 .jm-res span{font-size:12px;font-weight:600}
@@ -413,8 +414,10 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .cl-meta{font-size:12.5px;color:var(--muted)}
 .tr-close .row3{margin-top:2px}
 .jt-wd{color:var(--fg);font-weight:600;margin-right:4px}
+.jt td.jt-date{white-space:normal;min-width:11.5em;line-height:1.35}
+.jt-date .jd,.jt-date .jt-wd,.jt-date .jt-time{white-space:nowrap}
 .jt-date .jd{font-weight:600}
-.jt-time{color:var(--muted);margin-left:4px;font-size:12px;font-variant-numeric:tabular-nums}
+.jt-time{color:var(--muted);margin-left:0;font-size:12px;font-variant-numeric:tabular-nums}
 .jt-acc{color:var(--fg);max-width:130px;overflow:hidden;text-overflow:ellipsis}
 .jt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:0}
 .jt-asset{display:flex;align-items:center;gap:8px}
@@ -444,6 +447,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt-rr{font-weight:700}
 .jt-na{color:var(--muted);font-weight:400}
 th.jt-acts,td.jt-acts{width:1%;text-align:right;padding-right:10px !important;position:sticky;right:0;z-index:1;background:var(--surface)}
+.jt-card.scrolls td.jt-acts,.jt-card.scrolls th.jt-acts{box-shadow:-10px 0 14px -10px rgba(0,0,0,.55)}
 .jt thead th.jt-acts{z-index:3;background:color-mix(in srgb,var(--surface-2) 75%,var(--surface))}
 .jt tr.is-open td.jt-acts{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
 .jt tr.row:hover td.jt-acts{background:color-mix(in srgb,var(--surface-2) 80%,var(--surface))}
@@ -2374,14 +2378,14 @@ function renderJournal(c) {
   bindJournalTools(list, c);
 }
 // month bands stay fully visible even when the table scrolls sideways
-function fitMonthBands() { const card = $('.jt-card'); if (card) card.style.setProperty('--cw', card.clientWidth + 'px'); }
+function fitMonthBands() { const card = $('.jt-card'); if (!card) return; card.style.setProperty('--cw', card.clientWidth + 'px'); card.classList.toggle('scrolls', card.scrollWidth > card.clientWidth + 1); }
 window.addEventListener('resize', fitMonthBands);
 // "2 novembre" / "2 novembre à 15:15" — the year only in the « Tout » view
 function longDate(t, withYear) {
   const d = parseD(t.date);
   const txt = d.toLocaleDateString('fr-FR', withYear ? {day: 'numeric', month: 'long', year: 'numeric'} : {day: 'numeric', month: 'long'});
   const wd = d.toLocaleDateString('fr-FR', {weekday: 'long'});
-  return `<span class="jt-wd">${wd.charAt(0).toUpperCase() + wd.slice(1)}</span><span class="jd">${txt}</span>${t.time ? `<span class="jt-time">à ${t.time.slice(0, 5)}</span>` : ''}`;
+  return `<span class="jt-wd">${wd.charAt(0).toUpperCase() + wd.slice(1)}</span><span class="jd">${txt}</span>${t.time ? ` <span class="jt-time">à ${t.time.slice(0, 5)}</span>` : ''}`;
 }
 function journalSummary(list, c) {
   const S = stats(list, c);
@@ -2396,10 +2400,11 @@ function journalSummary(list, c) {
     ${nOpen ? `<div class="js-chip open"><small>En cours</small><b class="num">⏳ ${nOpen}</b></div>` : ''}
   </div>`;
 }
-// running trades are always shown first (whatever the period), so none is forgotten
+// running trades sit in the month they were opened (their result will count for that month)
 function openForJournal(c) {
   const q = state.q.trim().toLowerCase();
-  return c.openTrades.filter(t => (state.fSide === 'all' || t.side === state.fSide) && (state.fRes === 'all') && (!q || t.asset.toLowerCase().includes(q))).slice().reverse();
+  const r = range(state.period, state.cy, state.cm);
+  return c.openTrades.filter(t => inRange(t, r) && (state.fSide === 'all' || t.side === state.fSide) && (state.fRes === 'all') && (!q || t.asset.toLowerCase().includes(q))).slice().reverse();
 }
 const JI = {
   edit: ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
@@ -2433,19 +2438,21 @@ function journalTable(list, c) {
   const multiAcc = c.accs.length > 1, withYear = state.period === 'all';
   const cols = 11 + (multiAcc ? 1 : 0);
   const open = openForJournal(c);
-  let rows = open.map(t => journalRow(t, c, multiAcc, withYear)).join('');
-  if (open.length && list.length) rows += `<tr class="jt-sep"><td colspan="${cols}"></td></tr>`;
+  let rows = '';
   let lastM = '';
   const M = {};
-  list.forEach(t => { const k = t.date.slice(0, 7); const m = M[k] || (M[k] = {v: 0, r: 0, n: 0, w: 0, l: 0}); m.v += val(t, c); m.r += t.rReal || 0; m.n++; if (t.res === 'win') m.w++; if (t.res === 'loss') m.l++; });
-  list.forEach(t => {
+  const mk = k => M[k] || (M[k] = {v: 0, r: 0, n: 0, w: 0, l: 0, o: 0});
+  list.forEach(t => { const m = mk(t.date.slice(0, 7)); m.v += val(t, c); m.r += t.rReal || 0; m.n++; if (t.res === 'win') m.w++; if (t.res === 'loss') m.l++; });
+  open.forEach(t => { mk(t.date.slice(0, 7)).o++; });
+  const all = [...list, ...open].sort((a, b) => chrono(b, a));
+  all.forEach(t => {
     const k = t.date.slice(0, 7);
     if (state.period !== 'month' && k !== lastM) {
       lastM = k; const m = M[k], y = +k.slice(0, 4), mo = +k.slice(5, 7) - 1, d0 = new Date(y, mo, 1);
       const name = d0.toLocaleDateString('fr-FR', {month: 'long'});
       rows += `<tr class="jt-month"><td colspan="${cols}"><div class="jm ${m.v > 0 ? 'm-pos' : m.v < 0 ? 'm-neg' : 'm-flat'}">
         <div class="jm-cal"><small>${d0.toLocaleDateString('fr-FR', {month: 'short'}).replace('.', '')}</small><b>${y}</b></div>
-        <div class="jm-txt"><span class="jm-name">${name} <em>${y}</em></span><span class="jm-sub">${m.n} trade${m.n > 1 ? 's' : ''} · ${m.w + m.l ? Math.round(m.w / (m.w + m.l) * 100) : 0} % de réussite</span></div>
+        <div class="jm-txt"><span class="jm-name">${name} <em>${y}</em></span><span class="jm-sub">${m.n} trade${m.n > 1 ? 's' : ''}${m.n ? ` · ${m.w + m.l ? Math.round(m.w / (m.w + m.l) * 100) : 0} % de réussite` : ''}${m.o ? ` · <span class="jm-open">⏳ ${m.o} en cours</span>` : ''}</span></div>
         <div class="jm-res"><b class="num ${sgnCls(m.v)}">${fV(m.v, c)}</b><span class="num ${sgnCls(m.r)}">${fR(m.r)}</span></div>
       </div></td></tr>`;
     }

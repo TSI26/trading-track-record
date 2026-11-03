@@ -362,7 +362,11 @@ button{cursor:pointer}
 /* spreadsheet table */
 .sheet-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:auto;margin-top:12px;max-height:calc(100vh - 230px)}
 /* ===== Mes trades: the table ===== */
-.js-row{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
+.js-row{display:flex;gap:10px;flex-wrap:wrap;margin:0}
+.m-desk .page-head.jt-head{justify-content:space-between;align-items:center}
+.jt-head .filters{margin-left:auto}
+#h-q{text-transform:uppercase;letter-spacing:.02em}
+#h-q::placeholder{text-transform:none;letter-spacing:0}
 .js-chip{display:flex;flex-direction:column;gap:3px;padding:10px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);min-width:112px}
 .js-chip small{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .js-chip b{font-size:17px;font-weight:700}
@@ -376,7 +380,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt td{padding:12px 7px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);vertical-align:middle;white-space:nowrap}
 .jt td:first-child{padding-left:17px;position:relative}
 .jt tbody tr:last-child td{border-bottom:0}
-.jt tbody tr.row{cursor:pointer;transition:background .15s}
+.jt tbody tr.row{cursor:default;transition:background .15s}
 .jt tbody tr.row td{transition:background .15s}
 .jt tbody tr.row:hover td{background:color-mix(in srgb,var(--surface-2) 80%,transparent)}
 .jt tbody tr.row td:first-child::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:transparent;transition:background .15s}
@@ -2361,8 +2365,7 @@ function openBox(c) {
 function journalTools() {
   return `<div class="h-tools">
     <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="h-q" type="search" placeholder="Actif, setup, note…" value="${esc(state.q)}"></label>
-    <select id="h-side" class="select" aria-label="Sens"><option value="all">Long et Short</option><option value="long" ${state.fSide === 'long' ? 'selected' : ''}>Long</option><option value="short" ${state.fSide === 'short' ? 'selected' : ''}>Short</option></select>
+      <input id="h-q" type="search" placeholder="Rechercher un actif…" autocomplete="off" spellcheck="false" value="${esc(state.q)}"></label>
     <select id="h-res" class="select" aria-label="Résultat"><option value="all">Tous les résultats</option><option value="win" ${state.fRes === 'win' ? 'selected' : ''}>Gagnants</option><option value="loss" ${state.fRes === 'loss' ? 'selected' : ''}>Perdants</option><option value="be" ${state.fRes === 'be' ? 'selected' : ''}>Break-even</option></select>
     <button class="ghost desk-only" id="h-export" type="button">Exporter (CSV)</button>
   </div>`;
@@ -2376,9 +2379,8 @@ function renderJournal(c) {
   }
   if (state.mode === 'desk') {
     el.innerHTML = `${demoFlag()}
-      ${pageHead('Mes trades', '', filtersBar(c))}
+      <div class="page-head jt-head">${journalSummary(list, c)}${filtersBar(c)}</div>
       ${unitNote(c)}
-      ${journalSummary(list, c)}
       ${journalTools()}
       <div class="jt-card">${journalTable(list, c)}</div>`;
     fitMonthBands();
@@ -2447,7 +2449,7 @@ function journalRow(t, c, multiAcc, withYear) {
   const tip = t.open || (!t.commission && !t.swap) ? '' : `Brut ${money(t.pnl, cur, true)} · Com ${t.commission ? money(-t.commission, cur) : '0'} · Swap ${t.swap ? money(t.swap, cur, true) : '0'}`;
   const ro = readOnly();
   const mk = t.date.slice(0, 7), hide = state.period !== 'month' && jtClosed().has(mk);
-  return `<tr class="row${t.open ? ' is-open' : ''}${hide ? ' jt-hide' : ''}" data-edit="${t.id}" data-m="${mk}" tabindex="0">
+  return `<tr class="row${t.open ? ' is-open' : ''}${hide ? ' jt-hide' : ''}" data-m="${mk}">
     <td class="jt-date">${longDate(t, withYear)}</td>
     ${multiAcc ? `<td class="jt-acc"><span class="jt-dot" style="background:${accColor(a)}"></span>${esc(a.name || '—')}</td>` : ''}
     <td><div class="jt-asset"><span class="jt-cls" style="--c:${k.color}">${k.emoji}</span><b>${esc(t.asset)}</b></div></td>
@@ -2584,8 +2586,11 @@ function bindJournalTools(list, c) {
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMonth(el); } });
   });
   const qi = $('#h-q');
-  qi.addEventListener('input', () => { state.q = qi.value; clearTimeout(qi._t); qi._t = setTimeout(render, 200); });
-  $('#h-side').addEventListener('change', e => { state.fSide = e.target.value; render(); });
+  qi.addEventListener('input', () => {
+    const up = qi.value.toUpperCase();
+    if (qi.value !== up) { const p = qi.selectionStart; qi.value = up; try { qi.setSelectionRange(p, p); } catch (x) {} }
+    state.q = up; clearTimeout(qi._t); qi._t = setTimeout(() => { render(); const n = $('#h-q'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 200);
+  });
   $('#h-res').addEventListener('change', e => { state.fRes = e.target.value; render(); });
   const ex = $('#h-export'); if (ex) ex.addEventListener('click', () => exportTrades([...list].reverse(), c));
 }

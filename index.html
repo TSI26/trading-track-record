@@ -2433,7 +2433,7 @@ const MONTHS_FR = ['Janv.', 'Févr.', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil.', '
 function periodBar(c) {
   const s = jtSel(), n = new Date();
   const res = Array(12).fill(null), cnt = Array(12).fill(0), open = Array(12).fill(0);
-  c.trades.forEach(t => { if (+t.date.slice(0, 4) !== s.y) return; const m = +t.date.slice(5, 7) - 1; res[m] = (res[m] || 0) + val(t, c); cnt[m]++; });
+  c.trades.forEach(t => { if (+t.date.slice(0, 4) !== s.y) return; const m = +t.date.slice(5, 7) - 1; res[m] = (res[m] || 0) + (t.rReal || 0); cnt[m]++; });
   c.openTrades.forEach(t => { if (+t.date.slice(0, 4) === s.y) open[+t.date.slice(5, 7) - 1]++; });
   const years = [...new Set([...c.trades, ...c.openTrades].map(t => +t.date.slice(0, 4)))];
   const minY = Math.min(n.getFullYear(), ...years), maxY = Math.max(n.getFullYear(), ...years);
@@ -2443,7 +2443,7 @@ function periodBar(c) {
     return `<div class="pm${on ? ' on' : ''}${empty ? ' empty' : ''}${now ? ' now' : ''}" data-jm="${m}" role="button" tabindex="0" aria-pressed="${on}">
       <span class="pm-chk" data-jmadd="${m}" role="checkbox" aria-checked="${on}" aria-label="Ajouter ${MONTHS_FR[m]} à la sélection" title="${on ? 'Retirer de' : 'Ajouter à'} la sélection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <b>${MONTHS_FR[m]}</b>
-      <small class="num ${res[m] == null ? '' : sgnCls(res[m])}">${res[m] == null ? (open[m] ? '⏳' : '—') : fV(res[m], c)}</small>
+      <small class="num ${res[m] == null ? '' : sgnCls(res[m])}">${res[m] == null ? (open[m] ? '⏳' : '—') : fR(res[m])}</small>
     </div>`;
   };
   return `<div class="pbar">

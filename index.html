@@ -463,6 +463,16 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt-month + tr.row td{border-top:0}
 .jt-hold{font-size:12.5px;color:var(--fg)}
 .jt-hold span:first-child{margin-right:5px}
+/* ===== Dashboard: its sub-pages ===== */
+.dtabs{display:flex;gap:6px;padding:5px;border-radius:14px;background:var(--surface);border:1px solid var(--line);margin-bottom:16px;width:max-content;max-width:100%;overflow-x:auto}
+.dtabs button{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);border-radius:10px;padding:10px 18px;font-weight:700;font-size:14px;white-space:nowrap;transition:background .18s,color .18s}
+.dtabs button:hover{color:var(--fg);background:var(--surface-2)}
+.dtabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.m-phone .dtabs{width:100%}
+.m-phone .dtabs button{flex:1;justify-content:center;padding:9px 8px;font-size:13px}
+.dsoon{display:flex;flex-direction:column;align-items:center;gap:8px;padding:70px 20px;border-radius:18px;border:1.5px dashed var(--line-2);color:var(--muted);text-align:center}
+.dsoon span{font-size:34px}
+.dsoon b{color:var(--fg);font-size:16px}
 /* ===== Vue d'ensemble ===== */
 .ov{display:flex;flex-direction:column;gap:14px;animation:fiIn .35s cubic-bezier(.2,.8,.3,1)}
 .ov-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
@@ -1161,7 +1171,6 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
     <nav class="side-nav" aria-label="Sections">
       <div class="nav-group">
         <span class="nav-title lbl">Trading</span>
-        <button type="button" data-view="overview" data-tip="Vue d’ensemble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15c2.5-1 3.5-6 6.5-6S17 12 21 6"/></svg><span class="lbl">Vue d’ensemble</span></button>
         <button type="button" data-view="dash" data-tip="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span class="lbl">Dashboard</span></button>
         <button type="button" data-view="journal" data-tip="Mes trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></svg><span class="lbl">Mes trades</span></button>
         <button type="button" data-view="stats" data-tip="Statistiques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="lbl">Statistiques</span></button>
@@ -1211,7 +1220,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 
 <nav class="mnav" aria-label="Navigation">
   <div class="mnav-inner">
-    <button class="mtab" data-view="overview" aria-selected="true" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15c2.5-1 3.5-6 6.5-6S17 12 21 6"/></svg>Aperçu</button>
+    <button class="mtab" data-view="dash" aria-selected="true" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Dashboard</button>
     <button class="mtab" data-view="journal" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Trades</button>
     <button class="fab" data-act="add" type="button" aria-label="Nouveau trade"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <button class="mtab" data-view="stats" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
@@ -1389,7 +1398,7 @@ function guessSession(time) {
 const now = new Date();
 const state = {
   mode: lsGet('ttr-mode', null) || (window.innerWidth < 760 ? 'phone' : 'desk'),
-  view: lsGet('ttr-view', 'dash'), ficheId: lsGet('ttr-fiche', ''),
+  view: (v => v === 'overview' ? 'dash' : v)(lsGet('ttr-view', 'dash')), ficheId: lsGet('ttr-fiche', ''),
   period: lsGet('ttr-period', 'all'),
   unit: lsGet('ttr-unit', 'cur'),
   tmpSel: 'all', movConv: lsGet('ttr-movconv', ''), movAcc: 'all', movFilter: 'all',
@@ -2156,15 +2165,14 @@ function render() {
   destroyCharts();
   const c = ctx();
   renderSideBal(c);
-  const TITLES = {overview: 'Vue d’ensemble', fiche: 'Fiche du trade', dash: 'Dashboard', journal: 'Mes trades', stats: 'Statistiques', accounts: 'Comptes de trading', settings: 'Paramètres', admin: 'Admin', profile: 'Mon compte', more: 'Plus'};
+  const TITLES = {fiche: 'Fiche du trade', dash: 'Dashboard', journal: 'Mes trades', stats: 'Statistiques', accounts: 'Comptes de trading', settings: 'Paramètres', admin: 'Admin', profile: 'Mon compte', more: 'Plus'};
   $('#tb-title').textContent = TITLES[state.view] || '';
   renderSwitcher(c);
   renderMe();
   fillDatalists(c);
   const v = state.view;
   if (!state.loaded) { $('#view').innerHTML = `<div class="welcome"><p>Chargement de ton track record…</p></div>`; return; }
-  if (v === 'overview') renderOverview(c);
-  else if (v === 'journal') renderJournal(c);
+  if (v === 'journal') renderJournal(c);
   else if (v === 'fiche') renderFiche(c);
   else if (v === 'stats') renderStats(c);
   else if (v === 'accounts') renderAccounts(c);
@@ -2172,7 +2180,7 @@ function render() {
   else if (v === 'admin') renderAdmin();
   else if (v === 'more') renderMore();
   else if (v === 'profile') renderProfile();
-  else renderDash(c);
+  else renderDashboard(c);
   const sw = document.querySelector('.sheet-table-wrap'); if (sw && sTop) sw.scrollTop = sTop;
   if (fid && !document.querySelector('#panel-root .overlay')) {
     const n = document.getElementById(fid);
@@ -3617,16 +3625,25 @@ function ovFmt(v, mode, c, signed) {
   if (mode === 'pct') return (signed && v > 0 ? '+' : v < 0 ? '−' : '') + nf2.format(Math.abs(v)) + ' %';
   return money(v, c.cur, signed);
 }
-function renderOverview(c) {
+/* the Dashboard page and its three sub-pages */
+const DTABS = [['overview', '🧭', 'Vue d’ensemble'], ['month', '📅', 'Mensuel'], ['year', '📆', 'Annuel']];
+function renderDashboard(c) {
+  const tab = DTABS.some(t => t[0] === state.dtab) ? state.dtab : (state.dtab = lsGet('ttr-dtab', 'overview'));
+  const bar = `<div class="dtabs" role="tablist">${DTABS.map(([id, e, l]) => `<button type="button" role="tab" data-dtab="${id}" aria-selected="${tab === id}"><span>${e}</span>${l}</button>`).join('')}</div>`;
+  if (tab === 'overview') renderOverview(c, bar);
+  else $('#view').innerHTML = `${demoFlag()}${bar}<div class="dsoon"><span>${tab === 'month' ? '📅' : '📆'}</span><b>Dashboard ${tab === 'month' ? 'mensuel' : 'annuel'}</b>On le construit ensemble à la prochaine étape.</div>`;
+  document.querySelectorAll('[data-dtab]').forEach(b => b.addEventListener('click', () => { state.dtab = b.dataset.dtab; lsSet('ttr-dtab', state.dtab); render(); }));
+}
+function renderOverview(c, bar = '') {
   const el = $('#view'), s = ovState();
   if (!c.d.accounts.length && !state.demo && !state.viewAs) {
-    el.innerHTML = `<section class="welcome"><h2>Bienvenue 👋</h2><p>Crée ton premier compte de trading pour voir ta courbe ici.</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`; return;
+    el.innerHTML = `${bar}<section class="welcome"><h2>Bienvenue 👋</h2><p>Crée ton premier compte de trading pour voir ta courbe ici.</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`; return;
   }
   const S = ovSeries(c, s), mode = S.mode;
   const kpi = (lbl, v, cls = '', sub = '') => `<div class="ov-k"><small>${lbl}</small><b class="num ${cls}">${v}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
   const wins = S.trades.filter(t => t.res === 'win').length, losses = S.trades.filter(t => t.res === 'loss').length;
   const label = s.range === 'zoom' || s.range === 'custom' ? `${fmtDate(S.w.from)} → ${fmtDate(S.w.to)}` : (OV_RANGES.find(x => x[0] === s.range) || [])[1];
-  el.innerHTML = `${demoFlag()}<div class="ov">
+  el.innerHTML = `${demoFlag()}${bar}<div class="ov">
     <div class="ov-kpis">
       ${kpi('Résultat de la période', c.cur ? money(S.net, c.cur, true) : fR(S.sumR), sgnCls(S.net), c.cur ? fR(S.sumR) : '')}
       ${kpi('Performance', (S.twr > 0 ? '+' : S.twr < 0 ? '−' : '') + nf2.format(Math.abs(S.twr)) + ' %', sgnCls(S.twr), 'sur le capital')}

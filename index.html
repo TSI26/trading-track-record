@@ -2617,7 +2617,7 @@ function journalTools() {
     <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="h-q" type="search" placeholder="Rechercher un actif…" autocomplete="off" spellcheck="false" value="${esc(state.q)}"></label>
     <select id="h-res" class="select" aria-label="Résultat"><option value="all">Tous les résultats</option><option value="win" ${state.fRes === 'win' ? 'selected' : ''}>Gagnants</option><option value="loss" ${state.fRes === 'loss' ? 'selected' : ''}>Perdants</option><option value="be" ${state.fRes === 'be' ? 'selected' : ''}>Break-even</option></select>
-    ${readOnly() ? '' : `<button class="ghost desk-only" id="h-import" type="button">Importer (CSV)</button><input type="file" id="h-import-file" accept=".csv,text/csv" hidden>`}
+    ${readOnly() ? '' : `<button class="ghost desk-only" id="h-import" type="button">Importer</button><input type="file" id="h-import-file" accept=".csv,text/csv,.xlsx,.xlsm,.xls" hidden>`}
     <button class="ghost desk-only" id="h-export" type="button">Exporter (CSV)</button>
   </div>`;
 }
@@ -2917,20 +2917,38 @@ function impDate(s) {
   return '';
 }
 const impPick = (list, v, keys) => { const n = nrm(v).replace(/\s/g, ''); if (!n) return null; return list.find(x => keys.some(k => nrm(x[k]).replace(/\s/g, '') === n)) || null; };
-function readImport(text, d) {
-  const rows = parseCsv(text);
-  if (rows.length < 2) return {err: 'Le fichier est vide ou illisible.'};
-  const head = rows[0].map(nrm), col = {};
-  Object.entries(IMP_COLS).forEach(([k, names]) => { const i = head.findIndex(h => names.includes(h)); if (i > -1) col[k] = i; });
-  if (col.cls === col.asset) delete col.cls;
-  if (col.date == null || col.asset == null || col.side == null) return {err: 'Colonnes introuvables : le fichier doit contenir au moins « Date », « Actif » et « Sens » (comme le fichier créé par « Exporter »).'};
+// "$ 5,00", "-2,42 €", "1 043,33", "1,043.33" → a number
+function impNum(s) {
+  let v = String(s ?? '').replace(/[\s\u00a0\u202f]/g, '').replace(/−/g, '-').replace(/[^0-9.,-]/g, '');
+  if (!v || v === '-') return NaN;
+  const lc = v.lastIndexOf(','), ld = v.lastIndexOf('.');
+  if (lc > -1 && ld > -1) v = lc > ld ? v.replace(/\./g, '').replace(',', '.') : v.replace(/,/g, '');
+  else if (lc > -1) v = v.replace(',', '.');
+  const n = parseFloat(v); return isFinite(n) ? n : NaN;
+}
+// the title line can be anywhere in the first rows (a summary box above the table is fine)
+function findHead(rows) {
+  for (let i = 0; i < Math.min(rows.length, 60); i++) {
+    const head = rows[i].map(nrm), col = {};
+    Object.entries(IMP_COLS).forEach(([k, names]) => { const j = head.findIndex(h => names.includes(h)); if (j > -1) col[k] = j; });
+    if (col.cls === col.asset) delete col.cls;
+    if (col.date != null && col.asset != null && col.side != null) return {at: i, col};
+  }
+  return null;
+}
+function readImport(input, d) {
+  const rows = Array.isArray(input) ? input : parseCsv(input);
+  const h = findHead(rows);
+  if (!h) return {err: 'Colonnes introuvables : le fichier doit contenir au moins une colonne « Date », « Actif » et « Long/Short » (ou « Sens »).'};
+  const col = h.col;
   const trades = [], bad = [], curs = new Set();
-  rows.slice(1).forEach((r, i) => {
+  rows.slice(h.at + 1).forEach((r, i) => {
     const g = k => col[k] == null ? '' : String(r[col[k]] ?? '').trim();
-    const line = i + 2, num = k => parseNum(g(k));
+    const line = h.at + i + 2, num = k => impNum(g(k));
+    if (!g('date') && !g('asset')) return; // empty or total line
     const date = impDate(g('date'));
     const side = /^s/i.test(g('side')) || /sell|vente/i.test(g('side')) ? 'short' : /^l|buy|achat/i.test(g('side')) ? 'long' : '';
-    const CLS_ALIAS = {fx: 'forex', devises: 'forex', stock: 'actions', stocks: 'actions', action: 'actions', equity: 'actions', equities: 'actions', shares: 'actions', commodity: 'matieres', commodities: 'matieres', commodite: 'matieres', matiere: 'matieres', 'matieres premieres': 'matieres', metal: 'matieres', metals: 'matieres', index: 'indices', indice: 'indices', indexes: 'indices', cryptos: 'crypto', cryptomonnaie: 'crypto'};
+    const CLS_ALIAS = {bonds: 'etf', bond: 'etf', obligations: 'etf', fx: 'forex', devises: 'forex', stock: 'actions', stocks: 'actions', action: 'actions', equity: 'actions', equities: 'actions', shares: 'actions', commodity: 'matieres', commodities: 'matieres', commodite: 'matieres', matiere: 'matieres', 'matieres premieres': 'matieres', metal: 'matieres', metals: 'matieres', index: 'indices', indice: 'indices', indexes: 'indices', cryptos: 'crypto', cryptomonnaie: 'crypto'};
     const k = impPick(CLASSES, g('cls'), ['id', 'name', 'one']) || (CLS_ALIAS[nrm(g('cls'))] ? classOf(CLS_ALIAS[nrm(g('cls'))]) : null);
     const raw = g('asset');
     const cls = k ? k.id : (detectClass(raw, d) || 'autre');
@@ -2946,7 +2964,7 @@ function readImport(text, d) {
     if (g('cur')) curs.add(g('cur').toUpperCase());
     const se = impPick(SESSIONS, g('session'), ['id', 'name']) || (/^l/i.test(g('session')) ? sessionOf('london') : /^n/i.test(g('session')) ? sessionOf('ny') : /^a/i.test(g('session')) ? sessionOf('asia') : null);
     const on = nrm(g('order'));
-    const tf = impPick(TIMEFRAMES, g('tf'), ['id', 'name']), ho = impPick(HOLDINGS, g('hold'), ['id', 'name']) || (/^intrad/.test(nrm(g('hold'))) ? {id: 'day'} : null);
+    const tf = impPick(TIMEFRAMES, g('tf'), ['id', 'name']), hn = nrm(g('hold')), ho = impPick(HOLDINGS, g('hold'), ['id', 'name']) || (/^scalp/.test(hn) ? {id: 'scalp'} : /^intrad|^day/.test(hn) ? {id: 'day'} : /^intraw|^week/.test(hn) ? {id: 'week'} : /^intram|^month/.test(hn) ? {id: 'month'} : /^swing/.test(hn) ? {id: 'swing'} : null);
     const time = (g('time').match(/^(\d{1,2}):(\d{2})/) || []).slice(1).map((x, j) => j ? x : x.padStart(2, '0')).join(':');
     trades.push({line, date, time, asset, asset_class: cls, side, session: se ? se.id : 'off', risk: round2(risk), rmaxIn: num('rmax'),
       pnl: open ? 0 : round2(pnl), commission: round2(Math.abs(num('comm')) || 0), swap: round2(num('swap') || 0), lots: isFinite(num('lots')) ? num('lots') : null,
@@ -4013,12 +4031,50 @@ function tradeCalc(c) {
   el.innerHTML = parts.map(p => `<span>${p}</span>`).join('');
 }
 /* ---------- import window ---------- */
+// an Excel file is read directly (the reader is loaded only when needed)
+let xlsxLib = null;
+function loadXlsx() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return xlsxLib ||= new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = () => ok(window.XLSX); s.onerror = () => { xlsxLib = null; ko(new Error('lecteur Excel non chargé (connexion ?)')); }; document.head.appendChild(s); });
+}
+async function readExcel(file, d) {
+  const X = await loadXlsx();
+  const wb = X.read(await file.arrayBuffer(), {type: 'array', cellNF: true});
+  const pad = n => String(n).padStart(2, '0');
+  let best = null;
+  for (const name of wb.SheetNames) {
+    const ws = wb.Sheets[name]; if (!ws || !ws['!ref']) continue;
+    const R = X.utils.decode_range(ws['!ref']), rows = [];
+    for (let r = R.s.r; r <= R.e.r; r++) {
+      const row = [];
+      for (let k = R.s.c; k <= R.e.c; k++) {
+        const cell = ws[X.utils.encode_cell({r, c: k})];
+        if (!cell) { row.push(''); continue; }
+        if (cell.t === 'n' && cell.z && X.SSF.is_date(cell.z)) { const p = X.SSF.parse_date_code(cell.v); row.push(p ? (p.H || p.M ? `${p.y}-${pad(p.m)}-${pad(p.d)} ${pad(p.H)}:${pad(p.M)}` : `${p.y}-${pad(p.m)}-${pad(p.d)}`) : ''); }
+        else if (cell.t === 'n') row.push(String(cell.v));
+        else if (cell.t === 'd') row.push(cell.v.toISOString().slice(0, 10));
+        else row.push(String(cell.w ?? cell.v ?? ''));
+      }
+      rows.push(row);
+    }
+    const res = readImport(rows, d);
+    if (!res.err && (!best || res.trades.length > best.trades.length)) best = res;
+  }
+  return best || {err: 'Aucun onglet de ce fichier ne contient un tableau de trades reconnaissable (colonnes « Date », « Actif » et « Long/Short »).'};
+}
 async function openImport(file) {
   const c = ctx();
   if (!activeAccounts(c).length) { toast('Crée d’abord un compte de trading.'); return openAccount(); }
-  let text = '';
-  try { text = await file.text(); } catch (e) { return toast('Impossible de lire ce fichier.'); }
-  const read = readImport(text, c.d);
+  let read;
+  try {
+    if (/\.xls[xm]?$/i.test(file.name)) read = await readExcel(file, c.d);
+    else {
+      const buf = await file.arrayBuffer();
+      let text = new TextDecoder('utf-8').decode(buf);
+      if (text.includes('\uFFFD')) text = new TextDecoder('windows-1252').decode(buf); // CSV saved by Excel on Windows
+      read = readImport(text, c.d);
+    }
+  } catch (e) { return toast('Impossible de lire ce fichier : ' + errText(e)); }
   form = {kind: 'import', fileName: file.name, read, account_id: defaultAccount(c), err: read.err || ''};
   drawPanel(true);
 }

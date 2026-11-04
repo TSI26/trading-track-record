@@ -468,6 +468,8 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dtabs button{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);border-radius:10px;padding:10px 18px;font-weight:700;font-size:14px;white-space:nowrap;transition:background .18s,color .18s}
 .dtabs button:hover{color:var(--fg);background:var(--surface-2)}
 .dtabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 16px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.m-desk .page-head.with-tabs{justify-content:space-between}
+.page-head.with-tabs .dtabs{margin-bottom:0}
 .m-phone .dtabs{width:100%}
 .m-phone .dtabs button{flex:1;justify-content:center;padding:9px 8px;font-size:13px}
 .dsoon{display:flex;flex-direction:column;align-items:center;gap:8px;padding:70px 20px;border-radius:18px;border:1.5px dashed var(--line-2);color:var(--muted);text-align:center}
@@ -3568,144 +3570,20 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const b = document.querySelector(`[data-vw="${e.key === 'ArrowLeft' ? -1 : 1}"]`); if (b) b.click(); }
 }, true);
 
-/* ---------- « Vue d'ensemble » : the equity curve, adjustable ---------- */
-const OV_RANGES = [['1m', '1M'], ['3m', '3M'], ['6m', '6M'], ['ytd', 'Depuis janvier'], ['1y', '1 an'], ['all', 'Tout']];
-const OV_MODES = [['cur', '$'], ['r', 'R']];
-function ovState() {
-  if (!state.ov) state.ov = {range: 'all', mode: 'cur', from: '', to: '', dd: false, ...lsGet('ttr-ov', {})};
-  if (state.ov.mode !== 'cur' && state.ov.mode !== 'r') state.ov.mode = 'cur';
-  return state.ov;
-}
-function setOv(p) { state.ov = {...ovState(), ...p}; lsSet('ttr-ov', state.ov); render(); }
-const dayMs = s => parseD(s).getTime();
-function ovWindow(c, s) {
-  const today = todayStr(), n = new Date();
-  const back = m => dStr(new Date(n.getFullYear(), n.getMonth() - m, n.getDate()));
-  if (s.range === 'zoom' || s.range === 'custom') return {from: s.from || '0000-01-01', to: s.to || today};
-  if (s.range === '1m') return {from: back(1), to: today};
-  if (s.range === '3m') return {from: back(3), to: today};
-  if (s.range === '6m') return {from: back(6), to: today};
-  if (s.range === 'ytd') return {from: `${n.getFullYear()}-01-01`, to: today};
-  if (s.range === '1y') return {from: back(12), to: today};
-  return {from: '0000-01-01', to: '9999-12-31'};
-}
-// the performance curve: the result added up trade after trade (like the first dashboard), on the chosen period
-function ovSeries(c, s) {
-  const mode = s.mode === 'r' || !c.cur ? 'r' : 'cur';
-  const w = ovWindow(c, s);
-  const list = c.trades.filter(t => t.date >= w.from && t.date <= w.to);
-  const v = t => mode === 'r' ? (t.rReal || 0) : t.net;
-  let cum = 0, peak = 0, dd = 0; const values = [0], ddv = [0];
-  list.forEach(t => { cum += v(t); values.push(mode === 'r' ? Math.round(cum * 1000) / 1000 : round2(cum)); peak = Math.max(peak, cum); dd = Math.min(dd, cum - peak); ddv.push(round2(cum - peak)); });
-  const bi = c.cur ? balanceInfo(c, s.range === 'all' ? null : w) : null;
-  const net = list.reduce((a, t) => a + t.net, 0), sumR = list.reduce((a, t) => a + (t.rReal || 0), 0);
-  return {mode, w, list, values, ddv, hi: Math.max(...values), dd, net, sumR, bi, perf: bi && bi.start > 0 ? net / bi.start : null};
-}
-const ovFmt = (v, mode, c, signed) => mode === 'r' ? fR(v, signed) : money(v, c.cur, signed);
-/* the Dashboard page and its three sub-pages */
+/* ---------- the Dashboard page and its three sub-pages ---------- */
 const DTABS = [['overview', '🧭', 'Vue d’ensemble'], ['month', '📅', 'Mensuel'], ['year', '📆', 'Annuel']];
 function renderDashboard(c) {
   const tab = DTABS.some(t => t[0] === state.dtab) ? state.dtab : (state.dtab = lsGet('ttr-dtab', 'overview'));
   const bar = `<div class="dtabs" role="tablist">${DTABS.map(([id, e, l]) => `<button type="button" role="tab" data-dtab="${id}" aria-selected="${tab === id}"><span>${e}</span>${l}</button>`).join('')}</div>`;
-  if (tab === 'overview') renderOverview(c, bar);
-  else $('#view').innerHTML = `${demoFlag()}${bar}<div class="dsoon"><span>${tab === 'month' ? '📅' : '📆'}</span><b>Dashboard ${tab === 'month' ? 'mensuel' : 'annuel'}</b>On le construit ensemble à la prochaine étape.</div>`;
+  const el = $('#view');
+  if (tab === 'overview') { // the first dashboard: a bit of everything
+    renderDash(c);
+    const ph = el.querySelector('.page-head');
+    if (ph && state.mode === 'desk') { ph.insertAdjacentHTML('afterbegin', bar); ph.classList.add('with-tabs'); } else el.insertAdjacentHTML('afterbegin', bar);
+  }
+  else el.innerHTML = `${demoFlag()}${bar}<div class="dsoon"><span>${tab === 'month' ? '📅' : '📆'}</span><b>Dashboard ${tab === 'month' ? 'mensuel' : 'annuel'}</b>On le construit ensemble à la prochaine étape.</div>`;
   document.querySelectorAll('[data-dtab]').forEach(b => b.addEventListener('click', () => { state.dtab = b.dataset.dtab; lsSet('ttr-dtab', state.dtab); render(); }));
 }
-function renderOverview(c, bar = '') {
-  const el = $('#view'), s = ovState();
-  if (!c.d.accounts.length && !state.demo && !state.viewAs) {
-    el.innerHTML = `${bar}<section class="welcome"><h2>Bienvenue 👋</h2><p>Crée ton premier compte de trading pour voir ta courbe ici.</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`; return;
-  }
-  const S = ovSeries(c, s), mode = S.mode, St = stats(S.list, {...c, unit: mode === 'r' ? 'R' : 'cur'});
-  const kpi = (lbl, v, cls = '', sub = '') => `<div class="ov-k"><small>${lbl}</small><b class="num ${cls}">${v}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
-  const label = s.range === 'zoom' || s.range === 'custom' ? `${fmtDate(S.w.from)} → ${fmtDate(S.w.to)}` : s.range === 'all' ? 'Depuis ton premier trade' : (OV_RANGES.find(x => x[0] === s.range) || [])[1];
-  el.innerHTML = `${demoFlag()}${bar}<div class="ov">
-    <div class="ov-kpis">
-      ${kpi('Résultat net', c.cur ? money(S.net, c.cur, true) : fR(S.sumR), sgnCls(S.net), c.cur ? `${fR(S.sumR)}${S.perf != null ? ` · <span class="${sgnCls(S.perf)}">${S.perf > 0 ? '+' : ''}${fPct(S.perf, 1)}</span>` : ''}` : '')}
-      ${kpi('Taux de réussite', S.list.length ? fPct(St.winrate, 1) : '—', '', `${St.wins} G · ${St.losses} P · ${St.be} BE`)}
-      ${kpi('Plus haut', S.list.length ? ovFmt(S.hi, mode, c, true) : '—', '', 'du résultat cumulé')}
-      ${kpi('Drawdown max', S.dd < 0 ? ovFmt(S.dd, mode, c) : '—', S.dd < 0 ? 'neg' : '', S.bi && S.bi.ddPct ? `−${fPct(S.bi.ddPct, 1)} du solde` : 'depuis le plus haut')}
-      ${kpi('Trades', S.list.length, '', St.avgRiskR == null ? '' : 'Risque moyen : ' + fR(St.avgRiskR, false))}
-    </div>
-    <section class="ov-card">
-      <div class="ov-head">
-        <div class="ov-title"><h2>Courbe de performance</h2><span class="ov-period">${esc(label)}</span></div>
-        <div class="ov-seg" role="group" aria-label="Unité">${OV_MODES.map(([id, l]) => `<button type="button" data-ovmode="${id}" aria-pressed="${mode === id}" ${!c.cur && id === 'cur' ? 'disabled title="Plusieurs devises : affichage en R"' : ''}>${id === 'cur' ? esc(c.cur || 'Devise') : l}</button>`).join('')}</div>
-      </div>
-      <p class="ov-sub">Résultat cumulé, trade après trade${mode === 'r' ? ' (en R)' : ''}</p>
-      <div class="ov-ranges">
-        <div class="ov-seg" role="group" aria-label="Période">${OV_RANGES.map(([id, l]) => `<button type="button" data-ovrange="${id}" aria-pressed="${s.range === id}">${l}</button>`).join('')}<button type="button" data-ovrange="custom" aria-pressed="${s.range === 'custom'}">📅 Personnalisée</button></div>
-        ${s.range === 'custom' ? `<div class="ov-dates"><input type="date" id="ov-from" class="field" value="${s.from}" aria-label="Du"><span>→</span><input type="date" id="ov-to" class="field" value="${s.to || todayStr()}" aria-label="Au"></div>` : ''}
-        ${s.range === 'zoom' ? `<button type="button" class="ov-unzoom" data-ovrange="${s.prev || 'all'}">↺ Réinitialiser le zoom</button>` : S.list.length > 2 ? `<span class="ov-hint">Astuce : clique-glisse sur la courbe pour zoomer</span>` : ''}
-        <label class="ov-ddtog"><input type="checkbox" id="ov-dd" ${s.dd ? 'checked' : ''}> Drawdown</label>
-      </div>
-      <div class="ov-chart" id="ov-wrap">${S.list.length ? `<canvas id="ov-eq" role="img" aria-label="Courbe de performance cumulée"></canvas><div class="ov-sel" id="ov-sel"></div>` : `<div class="ov-empty">📭 Aucun trade sur cette période.</div>`}</div>
-      ${s.dd && S.list.length ? `<div class="ov-dd"><canvas id="ov-ddc"></canvas></div>` : ''}
-    </section>
-  </div>`;
-  bindOverview(c, S);
-  if (S.list.length) drawOverview(c, S);
-}
-function bindOverview(c, S) {
-  document.querySelectorAll('[data-ovmode]').forEach(b => b.addEventListener('click', () => setOv({mode: b.dataset.ovmode})));
-  document.querySelectorAll('[data-ovrange]').forEach(b => b.addEventListener('click', () => {
-    const r = b.dataset.ovrange;
-    if (r === 'custom') { setOv({range: 'custom', from: S.list.length ? S.list[0].date : '', to: todayStr()}); return; }
-    setOv({range: r});
-  }));
-  ['from', 'to'].forEach(k => { const n = $('#ov-' + k); if (n) n.addEventListener('change', () => setOv({[k]: n.value})); });
-  const dd = $('#ov-dd'); if (dd) dd.addEventListener('change', () => setOv({dd: dd.checked}));
-}
-// vertical line following the mouse
-const ovCross = {id: 'ovCross', afterDraw(ch) {
-  const a = ch.tooltip && ch.tooltip.getActiveElements && ch.tooltip.getActiveElements(); if (!a || !a.length) return;
-  const x = a[0].element.x, {top, bottom} = ch.chartArea, g = ch.ctx;
-  g.save(); g.strokeStyle = css('--line-2'); g.setLineDash([4, 4]); g.lineWidth = 1; g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore();
-}};
-function drawOverview(c, S) {
-  const el = $('#ov-eq'); if (!el) return;
-  const mode = S.mode, list = S.list, values = S.values, accent = css('--accent');
-  const cc = {...c, unit: mode === 'r' ? 'R' : 'cur'};
-  const o = baseOpts(cc);
-  o.animation = {duration: 400, easing: 'easeOutCubic'};
-  o.scales.x.ticks.callback = (v, i) => String(i);
-  o.scales.y.afterFit = sc => { sc.width = 70; };
-  o.plugins.tooltip.callbacks = {
-    title: items => { const i = items[0].dataIndex; if (!i) return 'Départ'; const t = list[i - 1]; return `Trade n°${i} · ${fmtDate(t.date)} · ${t.asset}`; },
-    label: x => { const i = x.dataIndex; if (!i) return ' Cumul : 0'; const t = list[i - 1]; return [` Trade : ${mode === 'r' ? fR(t.rReal) : money(t.net, accCur(c, t.account_id), true)}`, ` Cumul : ${ovFmt(x.parsed.y, mode, c, true)}`]; }
-  };
-  const ch = new Chart(el, {type: 'line', plugins: [ovCross], data: {labels: values.map((_, i) => i), datasets: [{data: values, borderColor: accent, borderWidth: 2, tension: 0.15, fill: true, backgroundColor: gradientFill(accent), pointRadius: values.map((_, i) => i === values.length - 1 ? 4 : 0), pointHoverRadius: 5, pointBackgroundColor: accent}]}, options: o});
-  charts.push(ch);
-  if ($('#ov-ddc')) {
-    const od = baseOpts(cc), loss = css('--loss');
-    od.animation = {duration: 400};
-    od.scales.x.ticks.display = false;
-    od.scales.y.max = 0; od.scales.y.ticks.maxTicksLimit = 3; od.scales.y.afterFit = sc => { sc.width = 70; };
-    od.plugins.tooltip.callbacks = {title: items => items[0].dataIndex ? `Après le trade n°${items[0].dataIndex}` : 'Départ', label: x => ` Sous le plus haut : ${ovFmt(x.parsed.y, mode, c)}`};
-    charts.push(new Chart($('#ov-ddc'), {type: 'line', data: {labels: S.ddv.map((_, i) => i), datasets: [{data: S.ddv, borderColor: loss, borderWidth: 1.5, tension: 0.1, fill: 'origin', backgroundColor: loss + '33', pointRadius: 0, pointHoverRadius: 4}]}, options: od}));
-  }
-  ovZ.list = list; ovZoom(ch);
-}
-// click and drag on the curve to look at one passage
-const ovZ = {ch: null, x0: null, list: []};
-function ovZoom(ch) {
-  ovZ.ch = ch; ovZ.x0 = null;
-  ch.canvas.addEventListener('mousedown', e => {
-    const sel = $('#ov-sel'); if (!sel || ovZ.list.length < 3) return;
-    ovZ.x0 = ovRel(e); Object.assign(sel.style, {left: ovZ.x0 + 'px', width: '0px', top: ch.chartArea.top + 'px', height: (ch.chartArea.bottom - ch.chartArea.top) + 'px'}); sel.classList.add('on'); e.preventDefault();
-  });
-}
-function ovRel(e) { const ch = ovZ.ch, r = ch.canvas.getBoundingClientRect(), a = ch.chartArea; return Math.max(a.left, Math.min(a.right, e.clientX - r.left)); }
-window.addEventListener('mousemove', e => { if (ovZ.x0 == null || !ovZ.ch || !ovZ.ch.canvas.isConnected) return; const sel = $('#ov-sel'), x = ovRel(e); if (sel) { sel.style.left = Math.min(ovZ.x0, x) + 'px'; sel.style.width = Math.abs(x - ovZ.x0) + 'px'; } });
-window.addEventListener('mouseup', e => {
-  if (ovZ.x0 == null || !ovZ.ch) return;
-  const ch = ovZ.ch, x = ovRel(e), a = Math.min(ovZ.x0, x), b = Math.max(ovZ.x0, x); ovZ.x0 = null;
-  const sel = $('#ov-sel'); if (sel) sel.classList.remove('on');
-  if (b - a < 12 || !ch.canvas.isConnected) return;
-  const L = ovZ.list, i0 = Math.max(1, Math.round(ch.scales.x.getValueForPixel(a))), i1 = Math.min(L.length, Math.round(ch.scales.x.getValueForPixel(b)));
-  if (i1 < i0) return;
-  const s = ovState(); setOv({range: 'zoom', from: L[i0 - 1].date, to: L[i1 - 1].date, prev: s.range === 'zoom' ? s.prev : s.range});
-});
 
 /* =====================================================================
    PANELS (add / edit): trade, account, deposit-withdrawal

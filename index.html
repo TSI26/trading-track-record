@@ -463,6 +463,43 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .jt-month + tr.row td{border-top:0}
 .jt-hold{font-size:12.5px;color:var(--fg)}
 .jt-hold span:first-child{margin-right:5px}
+/* ===== Vue d'ensemble ===== */
+.ov{display:flex;flex-direction:column;gap:14px;animation:fiIn .35s cubic-bezier(.2,.8,.3,1)}
+.ov-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ov-k{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.ov-k small{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.ov-k b{font-size:21px;font-weight:700;line-height:1.15}
+.ov-k span{font-size:12px;color:var(--muted)}
+.ov-card{border-radius:18px;background:var(--surface);border:1px solid var(--line);padding:18px 20px 14px}
+.ov-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ov-title{display:flex;align-items:baseline;gap:12px}
+.ov-title h2{margin:0;font-family:var(--font-display);font-size:19px}
+.ov-period{font-size:13px;color:var(--muted)}
+.ov-seg{display:inline-flex;gap:3px;padding:3px;border-radius:11px;background:var(--bg);border:1px solid var(--line);flex-wrap:wrap}
+.ov-seg button{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;white-space:nowrap;transition:background .15s,color .15s}
+.ov-seg button:hover:not(:disabled){color:var(--fg);background:var(--surface-2)}
+.ov-seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.ov-seg button:disabled{opacity:.35;cursor:default}
+.ov-ranges{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 6px}
+.ov-dates{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.ov-dates .field{padding:7px 10px;width:auto}
+.ov-hint{font-size:12px;color:var(--muted)}
+.ov-unzoom{border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--fg);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:600}
+.ov-unzoom:hover{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.ov-ddtog{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer}
+.ov-chart{position:relative;height:min(46vh,440px);min-height:300px;margin-top:6px;cursor:crosshair;user-select:none}
+.ov-sel{position:absolute;display:none;background:color-mix(in srgb,var(--accent) 16%,transparent);border-left:1px solid var(--accent);border-right:1px solid var(--accent);pointer-events:none}
+.ov-sel.on{display:block}
+.ov-dd{position:relative;height:96px;margin-top:2px}
+.ov-empty{height:100%;display:grid;place-items:center;color:var(--muted)}
+.ov-legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:8px}
+.ov-legend .lg{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+.lg.dep{background:var(--dep)} .lg.ret{background:var(--ret)}
+.m-phone .ov-kpis{grid-template-columns:1fr 1fr}
+.m-phone .ov-k:first-child{grid-column:1 / -1}
+.m-phone .ov-card{padding:14px 12px}
+.m-phone .ov-chart{height:300px}
+.m-phone .ov-hint{display:none}
 /* ===== the trade page ===== */
 .fi{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px;animation:fiIn .35s cubic-bezier(.2,.8,.3,1)}
 @keyframes fiIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -1124,6 +1161,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
     <nav class="side-nav" aria-label="Sections">
       <div class="nav-group">
         <span class="nav-title lbl">Trading</span>
+        <button type="button" data-view="overview" data-tip="Vue d’ensemble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15c2.5-1 3.5-6 6.5-6S17 12 21 6"/></svg><span class="lbl">Vue d’ensemble</span></button>
         <button type="button" data-view="dash" data-tip="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span class="lbl">Dashboard</span></button>
         <button type="button" data-view="journal" data-tip="Mes trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></svg><span class="lbl">Mes trades</span></button>
         <button type="button" data-view="stats" data-tip="Statistiques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="lbl">Statistiques</span></button>
@@ -1173,7 +1211,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 
 <nav class="mnav" aria-label="Navigation">
   <div class="mnav-inner">
-    <button class="mtab" data-view="dash" aria-selected="true" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Dashboard</button>
+    <button class="mtab" data-view="overview" aria-selected="true" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15c2.5-1 3.5-6 6.5-6S17 12 21 6"/></svg>Aperçu</button>
     <button class="mtab" data-view="journal" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Trades</button>
     <button class="fab" data-act="add" type="button" aria-label="Nouveau trade"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
     <button class="mtab" data-view="stats" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
@@ -2118,14 +2156,15 @@ function render() {
   destroyCharts();
   const c = ctx();
   renderSideBal(c);
-  const TITLES = {fiche: 'Fiche du trade', dash: 'Dashboard', journal: 'Mes trades', stats: 'Statistiques', accounts: 'Comptes de trading', settings: 'Paramètres', admin: 'Admin', profile: 'Mon compte', more: 'Plus'};
+  const TITLES = {overview: 'Vue d’ensemble', fiche: 'Fiche du trade', dash: 'Dashboard', journal: 'Mes trades', stats: 'Statistiques', accounts: 'Comptes de trading', settings: 'Paramètres', admin: 'Admin', profile: 'Mon compte', more: 'Plus'};
   $('#tb-title').textContent = TITLES[state.view] || '';
   renderSwitcher(c);
   renderMe();
   fillDatalists(c);
   const v = state.view;
   if (!state.loaded) { $('#view').innerHTML = `<div class="welcome"><p>Chargement de ton track record…</p></div>`; return; }
-  if (v === 'journal') renderJournal(c);
+  if (v === 'overview') renderOverview(c);
+  else if (v === 'journal') renderJournal(c);
   else if (v === 'fiche') renderFiche(c);
   else if (v === 'stats') renderStats(c);
   else if (v === 'accounts') renderAccounts(c);
@@ -2256,11 +2295,11 @@ const accCur = (c, id) => (c.accById[id] || {}).currency || 'USD';
 /* ---------- charts ---------- */
 function baseOpts(c) {
   const muted = css('--muted'), line = css('--line');
-  const font = {family: 'IBM Plex Sans', size: 11.5};
+  const font = {family: "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif", size: 11.5};
   return {
     maintainAspectRatio: false, animation: {duration: 250},
     interaction: {mode: 'index', intersect: false},
-    plugins: {legend: {display: false}, tooltip: {backgroundColor: css('--surface-2'), borderColor: line, borderWidth: 1, titleColor: css('--fg'), bodyColor: css('--fg'), padding: 10, bodyFont: {family: 'IBM Plex Sans', size: 12}, titleFont: {family: 'IBM Plex Sans', size: 12, weight: '600'}}},
+    plugins: {legend: {display: false}, tooltip: {backgroundColor: css('--surface-2'), borderColor: line, borderWidth: 1, titleColor: css('--fg'), bodyColor: css('--fg'), padding: 10, bodyFont: {family: "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif", size: 12}, titleFont: {family: "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif", size: 12, weight: '600'}}},
     scales: {
       x: {grid: {display: false}, ticks: {color: muted, font, maxRotation: 0, autoSkip: true, maxTicksLimit: 8}, border: {color: line}},
       y: {grid: {color: line}, border: {display: false}, ticks: {color: muted, font, callback: v => fVshort(v, c), maxTicksLimit: 6}}
@@ -3518,6 +3557,184 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { e.stopPropagation(); closeViewer(); }
   else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const b = document.querySelector(`[data-vw="${e.key === 'ArrowLeft' ? -1 : 1}"]`); if (b) b.click(); }
 }, true);
+
+/* ---------- « Vue d'ensemble » : the equity curve, adjustable ---------- */
+const OV_RANGES = [['1m', '1M'], ['3m', '3M'], ['6m', '6M'], ['ytd', 'Depuis janvier'], ['1y', '1 an'], ['all', 'Tout']];
+const OV_MODES = [['bal', 'Solde'], ['perf', 'Performance $'], ['pct', 'Performance %'], ['r', 'En R']];
+function ovState() {
+  if (!state.ov) state.ov = {range: 'all', mode: 'bal', from: '', to: '', dd: true, ...lsGet('ttr-ov', {})};
+  return state.ov;
+}
+function setOv(p) { state.ov = {...ovState(), ...p}; lsSet('ttr-ov', state.ov); render(); }
+const dayMs = s => parseD(s).getTime();
+function ovWindow(c, s) {
+  const today = todayStr(), n = new Date();
+  const back = m => dStr(new Date(n.getFullYear(), n.getMonth() - m, n.getDate()));
+  if (s.range === 'zoom' || s.range === 'custom') return {from: s.from || '0000-01-01', to: s.to || today};
+  if (s.range === '1m') return {from: back(1), to: today};
+  if (s.range === '3m') return {from: back(3), to: today};
+  if (s.range === '6m') return {from: back(6), to: today};
+  if (s.range === 'ytd') return {from: `${n.getFullYear()}-01-01`, to: today};
+  if (s.range === '1y') return {from: back(12), to: today};
+  return {from: '0000-01-01', to: '9999-12-31'};
+}
+// one point per event (trade or deposit/withdrawal), placed at its date and time, in order
+function ovSeries(c, s) {
+  const mode = s.mode === 'bal' || s.mode === 'perf' ? (c.cur ? s.mode : 'pct') : s.mode;
+  const w = ovWindow(c, s);
+  const ev = [...c.trades.map(t => ({t, date: t.date, time: t.time, createdAt: t.createdAt})), ...c.movs.map(m => ({m, date: m.date, time: '', createdAt: m.createdAt}))].sort(chrono);
+  let bal = c.accs.reduce((a, x) => a + x.capital, 0), perf = 0, r = 0, twr = 1;
+  let started = false, v0 = 0;
+  const pts = [], perDay = {};
+  const value = () => mode === 'bal' ? bal : mode === 'perf' ? perf : mode === 'r' ? r : (twr - 1) * 100;
+  const xOf = e => { const base = dayMs(e.date); if (e.time) return base + (+e.time.slice(0, 2) * 60 + +e.time.slice(3, 5)) * 60000; const k = perDay[e.date] = (perDay[e.date] || 0) + 1; return base + 12 * 3600000 + k * 60000; };
+  for (const e of ev) {
+    if (e.date > w.to) break;
+    const inside = e.date >= w.from;
+    if (inside && !started) { started = true; perf = 0; r = 0; twr = 1; v0 = value(); pts.push({x: w.from > '0001-01-01' ? Math.min(dayMs(w.from), dayMs(e.date) - 1) : dayMs(e.date) - 1, y: v0, start: true}); }
+    if (e.t) { const before = bal; bal += e.t.net; perf += e.t.net; r += e.t.rReal || 0; if (before > 0) twr *= 1 + e.t.net / before; }
+    else bal += e.m.kind === 'depot' ? e.m.amount : -e.m.amount;
+    if (inside) pts.push({x: xOf(e), y: mode === 'bal' || mode === 'perf' ? round2(value()) : Math.round(value() * 1000) / 1000, t: e.t, m: e.m, bal});
+  }
+  if (!started) v0 = value();
+  // drawdown: how far below the best point, on trading results only (deposits and withdrawals never count)
+  let peak = -Infinity, cum = 0, cumR = 0, ct = 1, best = 1; const dd = [];
+  let ddMax = 0, ddMaxPct = 0, hi = -Infinity;
+  pts.forEach(p => {
+    if (p.t) { cum += p.t.net; cumR += p.t.rReal || 0; if (p.bal - p.t.net > 0) ct *= 1 + p.t.net / (p.bal - p.t.net); }
+    const v = mode === 'r' ? cumR : mode === 'pct' ? (ct - 1) * 100 : cum;
+    peak = Math.max(peak, v); best = Math.max(best, ct);
+    const d = v - peak; dd.push({x: p.x, y: mode === 'pct' ? (ct / best - 1) * 100 : d});
+    ddMax = Math.min(ddMax, d); ddMaxPct = Math.min(ddMaxPct, ct / best - 1);
+    hi = Math.max(hi, p.y);
+  });
+  const trades = pts.filter(p => p.t).map(p => p.t);
+  return {mode, w, pts, dd, v0, end: pts.length ? pts[pts.length - 1].y : v0, hi, ddMax, ddMaxPct, trades,
+    net: trades.reduce((a, t) => a + t.net, 0), sumR: trades.reduce((a, t) => a + (t.rReal || 0), 0), twr: (ct - 1) * 100};
+}
+function ovFmt(v, mode, c, signed) {
+  if (mode === 'r') return fR(v, signed);
+  if (mode === 'pct') return (signed && v > 0 ? '+' : v < 0 ? '−' : '') + nf2.format(Math.abs(v)) + ' %';
+  return money(v, c.cur, signed);
+}
+function renderOverview(c) {
+  const el = $('#view'), s = ovState();
+  if (!c.d.accounts.length && !state.demo && !state.viewAs) {
+    el.innerHTML = `<section class="welcome"><h2>Bienvenue 👋</h2><p>Crée ton premier compte de trading pour voir ta courbe ici.</p><div class="row"><button class="primary" type="button" data-act="newacc">Créer un compte</button></div></section>`; return;
+  }
+  const S = ovSeries(c, s), mode = S.mode;
+  const kpi = (lbl, v, cls = '', sub = '') => `<div class="ov-k"><small>${lbl}</small><b class="num ${cls}">${v}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
+  const wins = S.trades.filter(t => t.res === 'win').length, losses = S.trades.filter(t => t.res === 'loss').length;
+  const label = s.range === 'zoom' || s.range === 'custom' ? `${fmtDate(S.w.from)} → ${fmtDate(S.w.to)}` : (OV_RANGES.find(x => x[0] === s.range) || [])[1];
+  el.innerHTML = `${demoFlag()}<div class="ov">
+    <div class="ov-kpis">
+      ${kpi('Résultat de la période', c.cur ? money(S.net, c.cur, true) : fR(S.sumR), sgnCls(S.net), c.cur ? fR(S.sumR) : '')}
+      ${kpi('Performance', (S.twr > 0 ? '+' : S.twr < 0 ? '−' : '') + nf2.format(Math.abs(S.twr)) + ' %', sgnCls(S.twr), 'sur le capital')}
+      ${kpi(mode === 'bal' ? 'Plus haut' : 'Meilleur niveau', S.pts.length ? ovFmt(S.hi, mode, c) : '—')}
+      ${kpi('Drawdown max', mode === 'pct' ? (S.ddMaxPct < 0 ? '−' + nf2.format(-S.ddMaxPct * 100) + ' %' : '0 %') : S.ddMax < 0 ? ovFmt(S.ddMax, mode === 'bal' ? 'perf' : mode, c) : '—', S.ddMax < 0 ? 'neg' : '', mode !== 'pct' && S.ddMaxPct < 0 ? '−' + nf2.format(-S.ddMaxPct * 100) + ' % du plus haut' : '')}
+      ${kpi('Trades', S.trades.length, '', wins + losses ? `${Math.round(wins / (wins + losses) * 100)} % de réussite` : '')}
+    </div>
+    <section class="ov-card">
+      <div class="ov-head">
+        <div class="ov-title"><h2>📈 Courbe de capital</h2><span class="ov-period">${esc(label)}</span></div>
+        <div class="ov-ctl">
+          <div class="ov-seg" role="group" aria-label="Affichage">${OV_MODES.map(([id, l]) => `<button type="button" data-ovmode="${id}" aria-pressed="${mode === id}" ${!c.cur && (id === 'bal' || id === 'perf') ? 'disabled title="Plusieurs devises : choisis % ou R"' : ''}>${l}</button>`).join('')}</div>
+        </div>
+      </div>
+      <div class="ov-ranges">
+        <div class="ov-seg" role="group" aria-label="Période">${OV_RANGES.map(([id, l]) => `<button type="button" data-ovrange="${id}" aria-pressed="${s.range === id}">${l}</button>`).join('')}<button type="button" data-ovrange="custom" aria-pressed="${s.range === 'custom'}">📅 Personnalisée</button></div>
+        ${s.range === 'custom' ? `<div class="ov-dates"><input type="date" id="ov-from" class="field" value="${s.from}" aria-label="Du"><span>→</span><input type="date" id="ov-to" class="field" value="${s.to || todayStr()}" aria-label="Au"></div>` : ''}
+        ${s.range === 'zoom' ? `<button type="button" class="ov-unzoom" data-ovrange="${s.prev || 'all'}">↺ Réinitialiser le zoom</button>` : `<span class="ov-hint">Astuce : clique-glisse sur la courbe pour zoomer</span>`}
+        <label class="ov-ddtog"><input type="checkbox" id="ov-dd" ${s.dd ? 'checked' : ''}> Drawdown</label>
+      </div>
+      <div class="ov-chart" id="ov-wrap">${S.pts.length > 1 ? `<canvas id="ov-eq"></canvas><div class="ov-sel" id="ov-sel"></div>` : `<div class="ov-empty">📭 Aucun trade sur cette période.</div>`}</div>
+      ${s.dd && S.pts.length > 1 ? `<div class="ov-dd"><canvas id="ov-ddc"></canvas></div>` : ''}
+      ${mode === 'bal' && S.pts.some(p => p.m) ? `<div class="ov-legend"><span><i class="lg dep"></i>Dépôt</span><span><i class="lg ret"></i>Retrait</span></div>` : ''}
+    </section>
+  </div>`;
+  bindOverview(c, S);
+  if (S.pts.length > 1) drawOverview(c, S);
+}
+function bindOverview(c, S) {
+  document.querySelectorAll('[data-ovmode]').forEach(b => b.addEventListener('click', () => setOv({mode: b.dataset.ovmode})));
+  document.querySelectorAll('[data-ovrange]').forEach(b => b.addEventListener('click', () => {
+    const r = b.dataset.ovrange;
+    if (r === 'custom') { const s = ovState(); setOv({range: 'custom', from: s.from || S.w.from.replace('0000-01-01', ''), to: s.to || todayStr()}); return; }
+    setOv({range: r});
+  }));
+  ['from', 'to'].forEach(k => { const n = $('#ov-' + k); if (n) n.addEventListener('change', () => setOv({[k]: n.value})); });
+  const dd = $('#ov-dd'); if (dd) dd.addEventListener('change', () => setOv({dd: dd.checked}));
+}
+// vertical line following the mouse
+const ovCross = {id: 'ovCross', afterDraw(ch) {
+  const a = ch.tooltip && ch.tooltip.getActiveElements && ch.tooltip.getActiveElements(); if (!a || !a.length) return;
+  const x = a[0].element.x, {top, bottom} = ch.chartArea, g = ch.ctx;
+  g.save(); g.strokeStyle = css('--line-2'); g.setLineDash([4, 4]); g.lineWidth = 1; g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore();
+}};
+function ovDateTicks(min, max) {
+  const span = max - min, long = span > 400 * 86400000, mid = span > 60 * 86400000;
+  return v => { const d = new Date(v); return long ? d.toLocaleDateString('fr-FR', {month: 'short', year: '2-digit'}).replace('.', '') : mid ? d.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}).replace('.', '') : d.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}).replace('.', ''); };
+}
+function drawOverview(c, S) {
+  const el = $('#ov-eq'); if (!el) return;
+  const mode = S.mode, up = S.end >= S.v0, col = up ? css('--win') : css('--loss'), accent = css('--accent');
+  const xs = S.pts.map(p => p.x), min = Math.min(...xs), max = Math.max(...xs), pad = Math.max((max - min) * 0.01, 3600000);
+  const o = baseOpts(c);
+  o.animation = {duration: 450, easing: 'easeOutCubic'};
+  o.interaction = {mode: 'nearest', axis: 'x', intersect: false};
+  o.scales.x = {type: 'linear', min: min - pad, max: max + pad, grid: {display: false}, border: {color: css('--line')}, ticks: {color: css('--muted'), font: o.scales.y.ticks.font, maxTicksLimit: 8, callback: ovDateTicks(min, max)}};
+  o.scales.y.afterFit = sc => { sc.width = 72; };
+  o.scales.y.ticks.callback = v => mode === 'r' ? (Math.round(v * 10) / 10).toString().replace('.', ',') + ' R' : mode === 'pct' ? nf1.format(v) + ' %' : money0(v, c.cur);
+  o.plugins.tooltip.filter = x => x.datasetIndex === 0;
+  o.plugins.tooltip.callbacks = {
+    title: items => { const p = S.pts[items[0].dataIndex]; if (p.start) return 'Début de la période'; const d = parseD((p.t || p.m).date); return d.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'}) + ((p.t && p.t.time) ? ' à ' + p.t.time : ''); },
+    label: x => {
+      const p = S.pts[x.dataIndex], cur = c.cur || 'USD', out = [` ${mode === 'bal' ? 'Solde' : mode === 'pct' ? 'Performance' : 'Cumul'} : ${ovFmt(x.parsed.y, mode, c, mode !== 'bal')}`];
+      if (p.t) out.push(` ${p.t.asset} ${p.t.side === 'long' ? 'Long' : 'Short'} : ${money(p.t.net, accCur(c, p.t.account_id), true)} (${fR(p.t.rReal)})`);
+      if (p.m) out.push(` ${p.m.kind === 'depot' ? 'Dépôt' : 'Retrait'} : ${money(p.m.kind === 'depot' ? p.m.amount : -p.m.amount, accCur(c, p.m.account_id), true)}`);
+      return out;
+    }
+  };
+  const fill = ctx2 => { const ch = ctx2.chart, a = ch.chartArea; if (!a) return col + '22'; const g = ch.ctx.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, col + '55'); g.addColorStop(1, col + '00'); return g; };
+  const marks = mode === 'bal' ? S.pts.map(p => p.m ? {x: p.x, y: p.y, k: p.m.kind} : null).filter(Boolean) : [];
+  const ch = new Chart(el, {type: 'line', plugins: [ovCross],
+    data: {datasets: [
+      {data: S.pts.map(p => ({x: p.x, y: p.y})), borderColor: col, borderWidth: 2.2, tension: 0.2, fill: true, backgroundColor: fill, pointRadius: S.pts.map((p, i) => i === S.pts.length - 1 ? 4 : 0), pointBackgroundColor: col, pointHoverRadius: 5, pointHoverBackgroundColor: col, pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2},
+      {type: 'scatter', data: marks, pointRadius: 5, pointHoverRadius: 6, pointBackgroundColor: marks.map(m => m.k === 'depot' ? css('--dep') : css('--ret')), pointBorderColor: css('--surface'), pointBorderWidth: 2},
+      {data: [{x: min - pad, y: S.v0}, {x: max + pad, y: S.v0}], borderColor: css('--line-2'), borderDash: [5, 5], borderWidth: 1, pointRadius: 0, pointHoverRadius: 0, fill: false}
+    ]}, options: o});
+  charts.push(ch);
+  if ($('#ov-ddc')) {
+    const od = baseOpts(c); const loss = css('--loss');
+    od.animation = {duration: 450};
+    od.interaction = {mode: 'nearest', axis: 'x', intersect: false};
+    od.scales.x = {...o.scales.x, ticks: {display: false}};
+    od.scales.y.max = 0; od.scales.y.ticks.maxTicksLimit = 3; od.scales.y.afterFit = sc => { sc.width = 72; };
+    od.scales.y.ticks.callback = v => mode === 'r' ? (Math.round(v * 10) / 10).toString().replace('.', ',') + ' R' : mode === 'pct' ? nf1.format(v) + ' %' : money0(v, c.cur);
+    od.plugins.tooltip.callbacks = {title: items => { const p = S.pts[items[0].dataIndex]; return p.start ? 'Début' : fmtDate((p.t || p.m).date); }, label: x => ` Sous le plus haut : ${ovFmt(x.parsed.y, mode === 'bal' ? 'perf' : mode, c)}`};
+    charts.push(new Chart($('#ov-ddc'), {type: 'line', data: {datasets: [{data: S.dd, borderColor: loss, borderWidth: 1.3, tension: 0.15, fill: 'origin', backgroundColor: loss + '30', pointRadius: 0, pointHoverRadius: 3}]}, options: od}));
+  }
+  ovZoom(ch);
+}
+// click and drag on the curve to look at one passage
+const ovZ = {ch: null, x0: null};
+function ovZoom(ch) {
+  ovZ.ch = ch; ovZ.x0 = null;
+  ch.canvas.addEventListener('mousedown', e => {
+    const sel = $('#ov-sel'); if (!sel) return;
+    ovZ.x0 = ovRel(e); Object.assign(sel.style, {left: ovZ.x0 + 'px', width: '0px', top: ch.chartArea.top + 'px', height: (ch.chartArea.bottom - ch.chartArea.top) + 'px'}); sel.classList.add('on'); e.preventDefault();
+  });
+}
+function ovRel(e) { const ch = ovZ.ch, r = ch.canvas.getBoundingClientRect(), a = ch.chartArea; return Math.max(a.left, Math.min(a.right, e.clientX - r.left)); }
+window.addEventListener('mousemove', e => { if (ovZ.x0 == null || !ovZ.ch || !ovZ.ch.canvas.isConnected) return; const sel = $('#ov-sel'), x = ovRel(e); if (sel) { sel.style.left = Math.min(ovZ.x0, x) + 'px'; sel.style.width = Math.abs(x - ovZ.x0) + 'px'; } });
+window.addEventListener('mouseup', e => {
+  if (ovZ.x0 == null || !ovZ.ch) return;
+  const ch = ovZ.ch, x = ovRel(e), a = Math.min(ovZ.x0, x), b = Math.max(ovZ.x0, x); ovZ.x0 = null;
+  const sel = $('#ov-sel'); if (sel) sel.classList.remove('on');
+  if (b - a < 12 || !ch.canvas.isConnected) return;
+  const from = dStr(new Date(ch.scales.x.getValueForPixel(a))), to = dStr(new Date(ch.scales.x.getValueForPixel(b)));
+  const s = ovState(); setOv({range: 'zoom', from, to, prev: s.range === 'zoom' ? s.prev : s.range});
+});
 
 /* =====================================================================
    PANELS (add / edit): trade, account, deposit-withdrawal

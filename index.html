@@ -526,39 +526,42 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-row.r2b{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
 .dm-row.r2b > .dm-card{display:flex;flex-direction:column}
 .dm-row.r2b > .dm-card > .dm-box{flex:1;min-height:220px;height:auto}
-.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.cal-head h3{margin:0;font-family:var(--font-display);font-size:16px;letter-spacing:.04em}
-.cal-arr{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:16px;transition:border-color .15s,background .15s}
-.cal-arr:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--bg))}
-.cal{display:flex;flex-direction:column;gap:6px}
-.cal-row{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr)) minmax(0,1.05fr);gap:6px}
-.cal-top span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:2px 0}
-.cal-unit{display:flex;gap:2px;justify-content:center;padding:0 !important}
-.cal-unit button{flex:1;border:0;border-radius:7px;padding:3px 0;font-size:10.5px;font-weight:800;background:var(--surface-2);color:var(--muted);transition:all .15s}
-.cal-unit button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.cal-d,.cal-w{position:relative;min-height:70px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);padding:6px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .15s,box-shadow .15s}
-.cal-n{position:absolute;top:5px;left:8px;font-size:11.5px;font-weight:700;color:var(--fg)}
-.cal-d.out{background:transparent;border-color:color-mix(in srgb,var(--line) 60%,transparent)}
-.cal-d.out .cal-n{color:color-mix(in srgb,var(--muted) 55%,transparent)}
-.cal-d b,.cal-w b{font-size:15px;font-weight:800;margin-top:10px;letter-spacing:-.01em}
-.cal-d small,.cal-w small{font-size:10.5px;color:var(--muted)}
-.cal-d.pos{background:color-mix(in srgb,var(--win) 16%,var(--bg));border-color:color-mix(in srgb,var(--win) 45%,var(--line))}
-.cal-d.neg{background:color-mix(in srgb,var(--loss) 18%,var(--bg));border-color:color-mix(in srgb,var(--loss) 50%,var(--line))}
-.cal-d.flat{background:var(--surface-2);border-color:var(--line-2)}
-.cal-d.pos b,.cal-w.pos b{color:var(--win)} .cal-d.neg b,.cal-w.neg b{color:var(--loss)}
-.cal-d.pos .cal-n{color:var(--win)} .cal-d.neg .cal-n{color:var(--loss)}
-.cal-d:not(.out):not(:empty):hover{transform:translateY(-1px);box-shadow:0 6px 16px -10px rgba(0,0,0,.6)}
-.cal-ok{position:absolute;top:5px;right:6px;width:15px;height:15px;border-radius:50%;border:1.5px solid currentColor;font-size:9px;font-weight:800;display:grid;place-items:center;opacity:.8}
-.cal-d.pos .cal-ok{color:var(--win)} .cal-d.neg .cal-ok{color:var(--loss)} .cal-d.flat .cal-ok{color:var(--muted)}
-.cal-w{background:var(--surface-2);border-left-width:3px}
-.cal-w .cal-n{color:var(--muted)}
-.cal-w.pos{border-color:color-mix(in srgb,var(--win) 35%,var(--line));border-left-color:var(--win);background:color-mix(in srgb,var(--win) 9%,var(--surface-2))}
-.cal-w.neg{border-color:color-mix(in srgb,var(--loss) 35%,var(--line));border-left-color:var(--loss);background:color-mix(in srgb,var(--loss) 9%,var(--surface-2))}
-.cal-foot{margin:12px 0 0;font-size:12.5px;color:var(--muted);text-align:right}
+.mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mc-head h3{margin:0;font-family:var(--font-display);font-size:16px;letter-spacing:.04em}
+.mc-arr{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:16px;transition:border-color .15s,background .15s}
+.mc-arr:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--bg))}
+.mcal{display:flex;flex-direction:column;gap:6px}
+.mc-row{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr)) minmax(0,1.05fr);gap:6px}
+.mc-top span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:2px 0}
+.mc-unit{display:flex;gap:2px;justify-content:center;padding:0 !important}
+.mc-unit button{flex:1;border:0;border-radius:7px;padding:3px 0;font-size:10.5px;font-weight:800;background:var(--surface-2);color:var(--muted);transition:all .15s}
+.mc-unit button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.mc-d,.mc-w{position:relative;min-height:70px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);padding:6px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .15s,box-shadow .15s}
+.mc-n{position:absolute;top:5px;left:8px;font-size:11.5px;font-weight:700;color:var(--fg)}
+.mc-d.out{background:transparent;border-color:color-mix(in srgb,var(--line) 60%,transparent)}
+.mc-d.out .mc-n{color:color-mix(in srgb,var(--muted) 55%,transparent)}
+.mc-d b,.mc-w b{font-size:15px;font-weight:800;margin-top:10px;letter-spacing:-.01em}
+.mc-d small,.mc-w small{font-size:10.5px;color:var(--muted)}
+.mc-d.pos{background:color-mix(in srgb,var(--win) 16%,var(--bg));border-color:color-mix(in srgb,var(--win) 45%,var(--line))}
+.mc-d.neg{background:color-mix(in srgb,var(--loss) 18%,var(--bg));border-color:color-mix(in srgb,var(--loss) 50%,var(--line))}
+.mc-d.flat{background:var(--surface-2);border-color:var(--line-2)}
+.mc-d.pos b,.mc-w.pos b{color:var(--win)} .mc-d.neg b,.mc-w.neg b{color:var(--loss)}
+.mc-d.pos .mc-n{color:var(--win)} .mc-d.neg .mc-n{color:var(--loss)}
+.mc-d:not(.out):not(:empty):hover{transform:translateY(-1px);box-shadow:0 6px 16px -10px rgba(0,0,0,.6)}
+.mc-ok{position:absolute;top:5px;right:6px;width:15px;height:15px;border-radius:50%;border:1.5px solid currentColor;font-size:9px;font-weight:800;display:grid;place-items:center;opacity:.8}
+.mc-d.pos .mc-ok{color:var(--win)} .mc-d.neg .mc-ok{color:var(--loss)} .mc-d.flat .mc-ok{color:var(--muted)}
+.mc-w{background:var(--surface-2);border-left-width:3px}
+.mc-w .mc-n{color:var(--muted)}
+.mc-w.pos{border-color:color-mix(in srgb,var(--win) 35%,var(--line));border-left-color:var(--win);background:color-mix(in srgb,var(--win) 9%,var(--surface-2))}
+.mc-w.neg{border-color:color-mix(in srgb,var(--loss) 35%,var(--line));border-left-color:var(--loss);background:color-mix(in srgb,var(--loss) 9%,var(--surface-2))}
+.mc-d.today{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent) inset,0 0 18px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+.mc-d.today .mc-n{color:var(--accent)}
+.dm-tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.mc-foot{margin:12px 0 0;font-size:12.5px;color:var(--muted);text-align:right}
 .m-phone .dm-row.r2b{grid-template-columns:1fr}
-.m-phone .cal-d,.m-phone .cal-w{min-height:56px;padding:4px}
-.m-phone .cal-d b,.m-phone .cal-w b{font-size:11.5px}
-.m-phone .cal-d small,.m-phone .cal-w small{display:none}
+.m-phone .mc-d,.m-phone .mc-w{min-height:56px;padding:4px}
+.m-phone .mc-d b,.m-phone .mc-w b{font-size:11.5px}
+.m-phone .mc-d small,.m-phone .mc-w small{display:none}
 .m-phone .dm-g{grid-column:span 2}
 .dm-donut{position:relative;width:104px;height:104px;flex:none}
 .dm-donut.lg{width:116px;height:116px}
@@ -3731,6 +3734,7 @@ function dmState() {
   return state.dm;
 }
 function setDm(p) { state.dm = {...dmState(), ...p}; lsSet('ttr-dm', state.dm); render(); }
+const dmPlUnit = c => !c.cur || dmState().plUnit === 'R' ? 'R' : 'cur';
 const dmScope = k => dmState().scope[k] === 'y' ? 'y' : 'm';
 const dmWhen = k => { const s = dmState(); return dmScope(k) === 'y' ? `année ${s.y}` : `${MONTHS_LONG[s.m].toLowerCase()} ${s.y}`; };
 function dmTrades(c, scope) {
@@ -3793,7 +3797,7 @@ function renderMonthDash(c, bar) {
         <div class="dm-g-viz"><canvas id="dm-g-rr" data-frac="${aw != null && al ? aw / (aw + al) : ''}"></canvas><div class="dm-g-leg"><span class="pos">⊕ ${aw == null ? '—' : f(aw)}</span><span class="neg">⊖ ${al == null ? '—' : f(al)}</span></div></div></div>`; })()}
     </section>
     <div class="dm-row r2">
-      <section class="dm-card"><div class="dm-card-head"><div><h3>📊 P&L trade par trade</h3><p>${dmScope('pl') === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}Barres : R réel · traits blancs : R/Trade · courbe : cumul en ${c.cur ? esc(curSym(c.cur)) : 'R'}</p></div>${dmToggle('pl')}</div><div class="dm-box">${dmTrades(c, dmScope('pl')).length ? '<canvas id="dm-pl"></canvas>' : dmEmpty()}</div></section>
+      <section class="dm-card"><div class="dm-card-head"><div><h3>📊 P&L trade par trade</h3><p>${dmScope('pl') === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}${dmPlUnit(c) === 'R' ? 'Barres : R réel · traits blancs : R/Trade · courbe : cumul en R' : `Barres : résultat net de chaque trade · courbe : cumul en ${esc(curSym(c.cur))}`}</p></div><div class="dm-tools">${c.cur ? `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-dmplunit="cur" aria-pressed="${dmPlUnit(c) === 'cur'}">${esc(curSym(c.cur))}</button><button type="button" data-dmplunit="R" aria-pressed="${dmPlUnit(c) === 'R'}">R</button></div>` : ''}${dmToggle('pl')}</div></div><div class="dm-box">${dmTrades(c, dmScope('pl')).length ? '<canvas id="dm-pl"></canvas>' : dmEmpty()}</div></section>
       <section class="dm-card"><div class="dm-card-head"><div><h3>📈 Évolution du compte</h3><p>${dmScope('bal') === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}${c.cur ? 'Solde après chaque trade' : 'Cumul en R (plusieurs devises)'}</p></div>${dmToggle('bal')}</div><div class="dm-box">${dmTrades(c, dmScope('bal')).length ? '<canvas id="dm-bal"></canvas>' : dmEmpty()}</div></section>
     </div>
     <div class="dm-row r2b">
@@ -3839,29 +3843,30 @@ function dmCalendar(c) {
   const isoWeek = d => { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 86400000 + 1) / 7); };
   let rows = '', d = new Date(start);
   while (d <= new Date(s.y, s.m, last) || (d.getDay() + 6) % 7) {
-    if ((d.getDay() + 6) % 7 === 0) { var wk = {v: 0, n: 0, no: isoWeek(d)}; rows += '<div class="cal-row">'; }
+    if ((d.getDay() + 6) % 7 === 0) { var wk = {v: 0, n: 0, no: isoWeek(d)}; rows += '<div class="mc-row">'; }
     const wd = (d.getDay() + 6) % 7, inM = d.getMonth() === s.m, day = d.getDate();
     if (wd < cols) {
       const list = inM ? byDay[day] || [] : [], tot = list.reduce((a, t) => a + v(t), 0), n = list.length;
       if (inM) { wk.v += tot; wk.n += n; }
       const kind = !n ? '' : tot > 0.0001 ? 'pos' : tot < -0.0001 ? 'neg' : 'flat';
       const noted = list.some(t => t.explain || t.pros || t.cons || (t.imgs || []).length);
-      rows += `<div class="cal-d ${inM ? '' : 'out'} ${kind}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="cal-n">${day}</span>${n ? `${noted ? '<span class="cal-ok" title="Fiche remplie">✓</span>' : ''}<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
+      const isToday = inM && d.toDateString() === new Date().toDateString();
+      rows += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `${noted ? '<span class="mc-ok" title="Fiche remplie">✓</span>' : ''}<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
     } else if (inM && byDay[day]) { const list = byDay[day]; wk.v += list.reduce((a, t) => a + v(t), 0); wk.n += list.length; }
-    if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; rows += `<div class="cal-w ${k}"><span class="cal-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b><small>${wk.n} trade${wk.n > 1 ? 's' : ''}</small>` : ''}</div></div>`; }
+    if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; rows += `<div class="mc-w ${k}"><span class="mc-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b><small>${wk.n} trade${wk.n > 1 ? 's' : ''}</small>` : ''}</div></div>`; }
     d.setDate(d.getDate() + 1);
   }
   const q = Math.floor(s.m / 3) + 1, total = ts.reduce((a, t) => a + v(t), 0);
   const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].slice(0, cols);
   const pm = s.m ? `${s.y}:${s.m - 1}` : `${s.y - 1}:11`, nm = s.m < 11 ? `${s.y}:${s.m + 1}` : `${s.y + 1}:0`;
-  return `<div class="cal-head"><button type="button" class="cal-arr" data-dmgo="${pm}" aria-label="Mois précédent">←</button>
-      <h3>${MONTHS_FR[s.m].replace('.', '').toUpperCase()} · T${q} ${s.y}</h3>
-      <button type="button" class="cal-arr" data-dmgo="${nm}" aria-label="Mois suivant">→</button></div>
-    <div class="cal" style="--cols:${cols}">
-      <div class="cal-row cal-top">${days.map(x => `<span>${x}</span>`).join('')}<span class="cal-unit">${c.cur ? `<button type="button" data-calunit="cur" aria-pressed="${unit === 'cur'}">P&L</button><button type="button" data-calunit="R" aria-pressed="${unit === 'R'}">R</button>` : 'R'}</span></div>
+  return `<div class="mc-head"><button type="button" class="mc-arr" data-dmgo="${pm}" aria-label="Mois précédent">←</button>
+      <h3>${MONTHS_LONG[s.m]} ${s.y}</h3>
+      <button type="button" class="mc-arr" data-dmgo="${nm}" aria-label="Mois suivant">→</button></div>
+    <div class="mcal" style="--cols:${cols}">
+      <div class="mc-row mc-top">${days.map(x => `<span>${x}</span>`).join('')}<span class="mc-unit">${c.cur ? `<button type="button" data-calunit="cur" aria-pressed="${unit === 'cur'}">P&L</button><button type="button" data-calunit="R" aria-pressed="${unit === 'R'}">R</button>` : 'R'}</span></div>
       ${rows}
     </div>
-    <p class="cal-foot">Total du mois : <b class="num ${sgnCls(total)}">${fmt(total)}</b> · ${ts.length} trade${ts.length > 1 ? 's' : ''}</p>`;
+    <p class="mc-foot">Total du mois : <b class="num ${sgnCls(total)}">${fmt(total)}</b> · ${ts.length} trade${ts.length > 1 ? 's' : ''}</p>`;
 }
 const dmEmpty = () => `<div class="dm-empty"><span>📭</span>Aucun trade sur cette période.</div>`;
 function dmGroups(c, k) {
@@ -3880,6 +3885,7 @@ function dmDonutBlock(c, k) {
 }
 function bindMonthDash(c) {
   document.querySelectorAll('[data-dmgo]').forEach(b => b.addEventListener('click', () => { const [y, m] = b.dataset.dmgo.split(':').map(Number); setDm({y, m}); }));
+  document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => setDm({plUnit: b.dataset.dmplunit})));
   document.querySelectorAll('[data-calunit]').forEach(b => b.addEventListener('click', () => setDm({calUnit: b.dataset.calunit})));
   document.querySelectorAll('[data-dmscope]').forEach(b => b.addEventListener('click', () => { const [k, v] = b.dataset.dmscope.split(':'); const s = dmState(); setDm({scope: {...s.scope, [k]: v}}); }));
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
@@ -3892,19 +3898,22 @@ function drawMonthDash(c, monthList) {
   // P&L trade by trade
   const plList = dmTrades(c, dmScope('pl'));
   if ($('#dm-pl') && plList.length) {
-    const o = baseOpts({...c, unit: 'R'});
-    let cum = 0; const cumV = plList.map(t => (cum += c.cur ? t.net : (t.rReal || 0), round2(cum)));
-    o.scales.x.ticks.callback = (v, i) => String(i + 1); o.scales.x.ticks.maxTicksLimit = 16;
-    o.scales.y.ticks.callback = v => nf1.format(v) + ' R';
-    o.scales.y2 = {position: 'right', grid: {display: false}, border: {display: false}, ticks: {color: muted, font: o.scales.y.ticks.font, maxTicksLimit: 6, callback: v => c.cur ? money0(v, c.cur) : nf1.format(v) + ' R'}};
+    const inR = dmPlUnit(c) === 'R', many = plList.length > 24;
+    const o = baseOpts({...c, unit: inR ? 'R' : 'cur'});
+    let cum = 0; const cumV = plList.map(t => (cum += inR ? (t.rReal || 0) : t.net, round2(cum)));
+    // under each bar: the asset of the trade
+    o.scales.x.ticks = {...o.scales.x.ticks, autoSkip: plList.length > 30, maxTicksLimit: many ? 30 : 60, maxRotation: 55, minRotation: many ? 55 : 0, font: {...o.scales.y.ticks.font, size: many ? 10 : 11}, callback: v => (plList[v] || {}).asset || ''};
+    o.scales.y.ticks.callback = v => inR ? nf1.format(v) + ' R' : money0(v, c.cur);
+    o.scales.y2 = {position: 'right', grid: {display: false}, border: {display: false}, ticks: {color: muted, font: o.scales.y.ticks.font, maxTicksLimit: 6, callback: v => inR ? nf1.format(v) + ' R' : money0(v, c.cur)}};
     o.interaction = {mode: 'index', intersect: false};
     o.plugins.tooltip.callbacks = {title: it => { const t = plList[it[0].dataIndex]; return `Trade n°${it[0].dataIndex + 1} · ${t.asset} · ${fmtDate(t.date)}`; },
-      label: x => { const t = plList[x.dataIndex]; return x.datasetIndex === 0 ? ` Cumul : ${c.cur ? money(x.parsed.y, c.cur, true) : fR(x.parsed.y)}` : x.datasetIndex === 1 ? ` R réel : ${fR(t.rReal)}${c.cur ? ' · ' + money(t.net, accCur(c, t.account_id), true) : ''}` : ` R/Trade : ${fR(t.rTrade)}`; }};
+      label: x => { const t = plList[x.dataIndex]; return x.datasetIndex === 0 ? ` Cumul : ${inR ? fR(x.parsed.y) : money(x.parsed.y, c.cur, true)}` : x.datasetIndex === 1 ? (inR ? ` R réel : ${fR(t.rReal)}` : ` Résultat : ${money(t.net, accCur(c, t.account_id), true)} (${fR(t.rReal)})`) : ` R/Trade : ${fR(t.rTrade)}`; }};
     const tick = plList.length > 40 ? 4 : plList.length > 20 ? 6 : 10;
-    charts.push(new Chart($('#dm-pl'), {data: {labels: plList.map((_, i) => i + 1), datasets: [
+    const ds = [
       {type: 'line', data: cumV, yAxisID: 'y2', borderColor: accent, borderWidth: 2.2, tension: 0.25, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: accent, order: 0},
-      {type: 'bar', data: plList.map(t => t.rReal || 0), backgroundColor: plList.map(colOf), borderRadius: 4, maxBarThickness: 34, order: 2},
-      {type: 'scatter', data: plList.map((t, i) => ({x: i, y: t.rTrade || 0})), pointStyle: 'line', pointRadius: tick, pointHoverRadius: tick, borderColor: fg, borderWidth: 2.5, order: 1}]}, options: o}));
+      {type: 'bar', data: plList.map(t => inR ? (t.rReal || 0) : t.net), backgroundColor: plList.map(colOf), borderRadius: 4, maxBarThickness: 34, order: 2}];
+    if (inR) ds.push({type: 'scatter', data: plList.map((t, i) => ({x: i, y: t.rTrade || 0})), pointStyle: 'line', pointRadius: tick, pointHoverRadius: tick, borderColor: fg, borderWidth: 2.5, order: 1});
+    charts.push(new Chart($('#dm-pl'), {data: {labels: plList.map((_, i) => i), datasets: ds}, options: o}));
   }
   // account balance
   const balList = dmTrades(c, dmScope('bal'));
@@ -3965,7 +3974,7 @@ async function snapMonth() {
     await new Promise(r => setTimeout(r, 120));
     node.classList.add('snapping');
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const blob = await lib.toBlob(node, {pixelRatio: 2, backgroundColor: css('--bg'), cacheBust: true, filter: n => !(n.classList && (n.classList.contains('dm-tog') || n.classList.contains('dm-cam') || n.classList.contains('dm-pick') || n.classList.contains('dm-arrow')))});
+    const blob = await lib.toBlob(node, {pixelRatio: 2, backgroundColor: css('--bg'), cacheBust: true, filter: n => !(n.classList && (n.classList.contains('dm-tog') || n.classList.contains('dm-cam') || n.classList.contains('dm-pick') || n.classList.contains('dm-arrow') || n.classList.contains('mc-arr')))});
     node.classList.remove('snapping');
     if (!blob) throw new Error('image vide');
     const s = dmState(), name = `track-record-${MONTHS_LONG[s.m].toLowerCase()}-${s.y}.png`.normalize('NFD').replace(/[̀-ͯ]/g, '');

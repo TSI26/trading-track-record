@@ -3958,6 +3958,13 @@ function drawSpark(list) {
   path(); g.strokeStyle = col; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke();
   g.fillStyle = col; g.beginPath(); g.arc(X(vals.length - 1), Y(vals[vals.length - 1]), 3, 0, 2 * Math.PI); g.fill();
 }
+// the redraw waits for the next frame (a redraw inside the mouse event would bring the old hover back)
+function plSetHi(ch, i, left) {
+  if (left) ch.$left = true;
+  ch.$want = ch.$left ? null : i;
+  if (ch.$raf) return;
+  ch.$raf = requestAnimationFrame(() => { ch.$raf = 0; if (!ch.canvas.isConnected) return; if (ch.$hi !== ch.$want) { ch.$hi = ch.$want; ch.update('none'); } });
+}
 // P&L par trade: when the mouse is on a trade, each number is written next to its own mark
 const plHover = {id: 'plHover',
   beforeDatasetsDraw(ch) {
@@ -3989,19 +3996,15 @@ const plHover = {id: 'plHover',
     };
     g.save();
     const fg = css('--fg'), muted = css('--muted');
-    // asset and date at the top of the column
-    const d = parseD(t.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}).replace('.', '');
-    pill(`${t.asset} · ${d}`, bar.x, a.top + 12, fg, 'center');
     // the bar: its value beside it
     const v = op.inR ? (t.rReal || 0) : t.net, col = t.res === 'win' ? css('--win') : t.res === 'loss' ? css('--loss') : muted;
     const half = (bar.width || 20) / 2, yMid = (bar.y + bar.base) / 2;
-    const placed = pill(op.fmtBar(v), bar.x + half + 8, Math.abs(bar.y - bar.base) < 22 ? bar.y + (v >= 0 ? -14 : 14) : yMid, col, 'left');
+    pill(op.fmtBar(v), bar.x - half - 8, Math.abs(bar.y - bar.base) < 22 ? bar.y + (v >= 0 ? -14 : 14) : yMid, col, 'right');
     // the white mark: R/T on its left
     if (!op.hide.rt && tick) pill(`${(t.rTrade || 0) > 0 ? '+' : ''}${nf2.format(t.rTrade || 0)} R/T`, tick.x - (tick.options?.radius || 8) - 8, tick.y, fg, 'right');
     // the orange curve: cumul on the right of its point
     if (!op.hide.cum && pt) { g.fillStyle = css('--accent'); g.beginPath(); g.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); g.fill(); g.strokeStyle = css('--surface'); g.lineWidth = 2; g.stroke();
-      const y = Math.abs(pt.y - (placed.y0 + placed.h / 2)) < 22 && pt.x + 10 < placed.x0 + placed.w ? pt.y - 24 : pt.y;
-      pill('Cumul ' + op.fmtCum(ch.data.datasets[0].data[i]), pt.x + 10, y, css('--accent'), 'left'); }
+      pill(op.fmtCum(ch.data.datasets[0].data[i]), pt.x - 10, pt.y, css('--accent'), 'right'); }
     g.restore();
   }
 };
@@ -4042,7 +4045,7 @@ function drawMonthDash(c, monthList) {
     let cum = 0; const cumV = plList.map(t => (cum += inR ? (t.rReal || 0) : t.net, round2(cum)));
     const font = o.scales.y.ticks.font;
     // under each bar: the asset of the trade
-    o.scales.x.ticks = {...o.scales.x.ticks, autoSkip: plList.length > 30, maxTicksLimit: many ? 30 : 60, maxRotation: 55, minRotation: many ? 55 : 0, font: {...font, size: many ? 10 : 11}, callback: v => (plList[v] || {}).asset || ''};
+    o.scales.x.ticks = {...o.scales.x.ticks, autoSkip: plList.length > 30, maxTicksLimit: many ? 30 : 60, maxRotation: 55, minRotation: many ? 55 : 0, font: {...font, size: many ? 10 : 11}, callback: v => { const t = plList[v]; return t ? `${classOf(t.asset_class).emoji} ${t.asset}` : ''; }};
     o.scales.y.ticks.callback = v => inR ? nf1.format(v) + ' R' : money0(v, c.cur);
     o.scales.y.position = 'right'; o.scales.y.grid = {...(o.scales.y.grid || {}), drawOnChartArea: true};
     o.scales.yrt = {position: 'left', display: !hide.rt, grid: {display: false}, border: {display: false}, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => nf1.format(v) + ' R/T'}};
@@ -4050,7 +4053,7 @@ function drawMonthDash(c, monthList) {
     o.interaction = {mode: 'index', intersect: false};
     o.plugins.tooltip.enabled = false; // the numbers are written next to each part instead (see plHover)
     o.hover = {mode: 'index', intersect: false};
-    o.onHover = (e, els, ch) => { const i = els.length ? els[0].index : null; if (ch.$hi !== i) { ch.$hi = i; ch.update('none'); } };
+    o.onHover = (e, els, ch) => { const out = e && (e.type === 'mouseout' || (e.native && e.native.type === 'mouseout')), a = ch.chartArea, inside = e && a && e.x >= a.left && e.x <= a.right && e.y >= a.top && e.y <= a.bottom; const i = !out && inside && els.length ? els[0].index : null; plSetHi(ch, i); };
     o.plugins.plHover = {list: plList, inR, cur: c.cur, hide, fmtBar: v => inR ? fR(v) : money(v, c.cur, true), fmtCum: v => inR ? fR(v) : money(v, c.cur, true)};
     o.plugins.tooltip.callbacks = {title: it => { const t = plList[it[0].dataIndex]; return `Trade n°${it[0].dataIndex + 1} · ${t.asset} · ${fmtDate(t.date)}`; },
       label: x => { const t = plList[x.dataIndex]; return x.datasetIndex === 0 ? ` Cumul : ${inR ? fR(x.parsed.y) : money(x.parsed.y, c.cur, true)}` : x.datasetIndex === 1 ? (inR ? ` R réel : ${fR(t.rReal)}` : ` Résultat : ${money(t.net, accCur(c, t.account_id), true)}`) : ` R/Trade : ${nf2.format(t.rTrade || 0).replace(/^(?!-)/, (t.rTrade || 0) > 0 ? '+' : '')} R/T`; }};
@@ -4066,10 +4069,14 @@ function drawMonthDash(c, monthList) {
     if (!bMax) { o.scales.y.max = 0; o.scales.yrt.max = 0; o.scales.yrt.min = Math.min(rMin, -0.1) * 1.08; }
     // in R, bars and white marks share one scale: a 2 R trade at 5 R/T has its mark well above the bar
     if (inR) { const lo = Math.min(bMin, rMin, 0), hi = Math.max(bMax, rMax, 0); ['y', 'yrt'].forEach(k => { delete o.scales[k].min; delete o.scales[k].max; o.scales[k].suggestedMin = lo; o.scales[k].suggestedMax = hi; }); }
-    charts.push(new Chart($('#dm-pl'), {plugins: [plHover], data: {labels: plList.map((_, i) => i), datasets: [
+    const plChart = new Chart($('#dm-pl'), {plugins: [plHover], data: {labels: plList.map((_, i) => i), datasets: [
       {type: 'line', data: cumV, yAxisID: 'ycum', hidden: !!hide.cum, borderColor: accent, borderWidth: 2.2, tension: 0.25, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: accent, order: 0},
       {type: 'bar', data: bars, backgroundColor: x => { const col = colOf(plList[x.dataIndex] || {}), hi = x.chart.$hi; return hi == null || hi === x.dataIndex ? col : col + '55'; }, borderRadius: 4, maxBarThickness: 34, order: 2},
-      {type: 'scatter', yAxisID: 'yrt', hidden: !!hide.rt, data: rts.map((y, i) => ({x: i, y})), pointStyle: 'line', pointRadius: tick, pointHoverRadius: tick, borderColor: fg, borderWidth: 2.5, order: 1}]}, options: o}));
+      {type: 'scatter', yAxisID: 'yrt', hidden: !!hide.rt, data: rts.map((y, i) => ({x: i, y})), pointStyle: 'line', pointRadius: tick, pointHoverRadius: tick, borderColor: fg, borderWidth: 2.5, order: 1}]}, options: o});
+    charts.push(plChart);
+    // the mouse leaves the chart: every bar goes back to normal
+    plChart.canvas.addEventListener('mouseleave', () => plSetHi(plChart, null, true));
+    plChart.canvas.addEventListener('mousemove', () => { plChart.$left = false; });
   }
   // account balance
   const balList = dmTrades(c, dmScope('bal'));

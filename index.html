@@ -3999,9 +3999,12 @@ const plHover = {id: 'plHover',
     // the bar: its value beside it
     const v = op.inR ? (t.rReal || 0) : t.net, col = t.res === 'win' ? css('--win') : t.res === 'loss' ? css('--loss') : muted;
     const half = (bar.width || 20) / 2, yMid = (bar.y + bar.base) / 2;
-    pill(op.fmtBar(v), bar.x - half - 8, Math.abs(bar.y - bar.base) < 22 ? bar.y + (v >= 0 ? -14 : 14) : yMid, col, 'right');
+    // a gain: its number just under the bar (below the zero line) · a loss: just over it
+    const up = v >= 0;
+    pill(op.fmtBar(v), bar.x, up ? bar.base + 14 : bar.base - 14, col, 'center');
     // the white mark: R/T on its left
-    if (!op.hide.rt && tick) pill(`${(t.rTrade || 0) > 0 ? '+' : ''}${nf2.format(t.rTrade || 0)} R/T`, tick.x - (tick.options?.radius || 8) - 8, tick.y, fg, 'right');
+    // the white mark: its number just over it for a gain, just under it for a loss
+    if (!op.hide.rt && tick) pill(`${(t.rTrade || 0) > 0 ? '+' : ''}${nf2.format(t.rTrade || 0)} R/T`, tick.x, up ? tick.y - 15 : tick.y + 15, fg, 'center');
     // the orange curve: cumul on the right of its point
     if (!op.hide.cum && pt) { g.fillStyle = css('--accent'); g.beginPath(); g.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); g.fill(); g.strokeStyle = css('--surface'); g.lineWidth = 2; g.stroke();
       pill(op.fmtCum(ch.data.datasets[0].data[i]), pt.x - 10, pt.y, css('--accent'), 'right'); }

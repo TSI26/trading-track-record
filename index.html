@@ -618,8 +618,9 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-k2 > div:last-child{justify-content:flex-start}
 .dm-k2 > div:last-child .dm-k-top{min-height:28px}
 .dm-k-sep{width:1px;align-self:stretch;background:var(--line)}
-.dm-k2 .dm-k-rt{align-items:center;justify-content:center;gap:6px;text-align:center}
-.dm-k2 .dm-k-rt b{font-size:18px;font-weight:500}
+.dm-k2 .dm-k-rt{align-items:center;text-align:center}
+.dm-k2 .dm-k-rt b{font-size:18px;font-weight:500;line-height:26.4px}
+.dm-k2 > div:first-child b{line-height:26.4px}
 .dm-prog-txt b{margin:0 1px}
 .dm-legend{display:flex;gap:0;margin-top:4px}
 .dm-lg{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--muted);padding:2px 0;margin-right:10px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s,color .15s}
@@ -3850,7 +3851,7 @@ function renderMonthDash(c, bar) {
     </section>
     <section class="dm-kpis">
       ${kpi('💰', 'Résultat net', c.cur ? money(net, c.cur, true) : fR(rReal), sgnCls(net), pct != null ? `<span class="${sgnCls(pct)}">${pct > 0 ? '+' : ''}${fPct(pct, 2)}</span> du compte` : '')}
-      <div class="dm-k dm-k2"><div><div class="dm-k-top"><span class="dm-k-ico">🎯</span><small>R réel</small></div><b class="num ${sgnCls(rReal)}">${fR(rReal)}</b></div><i class="dm-k-sep"></i><div class="dm-k-rt"><small>R / Trade</small><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
+      <div class="dm-k dm-k2"><div><div class="dm-k-top"><span class="dm-k-ico">🎯</span><small>R réel</small></div><b class="num ${sgnCls(rReal)}">${fR(rReal)}</b></div><i class="dm-k-sep"></i><div class="dm-k-rt"><div class="dm-k-top"><span class="dm-k-ico">📐</span><small>R / Trade</small></div><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
       ${kpi('⚖️', 'Profit factor', S.pf === Infinity ? '∞' : S.pf == null ? '—' : nf2.format(S.pf), S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg', '')}
       <div class="dm-k dm-g"><div class="dm-g-txt"><div class="dm-k-top"><span class="dm-k-ico">🏆</span><small>Win rate</small></div><b class="num">${wr == null ? '—' : fPct(wr, 1)}</b><span class="dm-k-sub">sur ${list.length} trade${list.length > 1 ? 's' : ''}${S.be ? ` · ${S.be} BE` : ''}</span></div>
         <div class="dm-g-viz"><canvas id="dm-g-wr" data-frac="${wr == null ? '' : wr}"></canvas><div class="dm-g-leg"><span class="pos">${S.wins} gagnés</span><span class="neg">${S.losses} perdus</span></div></div></div>

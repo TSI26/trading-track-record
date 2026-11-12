@@ -3958,6 +3958,53 @@ function drawSpark(list) {
   path(); g.strokeStyle = col; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke();
   g.fillStyle = col; g.beginPath(); g.arc(X(vals.length - 1), Y(vals[vals.length - 1]), 3, 0, 2 * Math.PI); g.fill();
 }
+// P&L par trade: when the mouse is on a trade, each number is written next to its own mark
+const plHover = {id: 'plHover',
+  beforeDatasetsDraw(ch) {
+    const i = ch.$hi; if (i == null) return;
+    const bar = ch.getDatasetMeta(1).data[i]; if (!bar) return;
+    const a = ch.chartArea, w = Math.max(bar.width * 1.9, 26), g = ch.ctx;
+    g.save(); g.fillStyle = 'rgba(255,255,255,.045)'; g.beginPath(); g.roundRect(bar.x - w / 2, a.top, w, a.bottom - a.top, 8); g.fill(); g.restore();
+  },
+  afterDatasetsDraw(ch, _a, op) {
+    const i = ch.$hi; if (i == null || !op || !op.list) return;
+    const t = op.list[i], a = ch.chartArea, g = ch.ctx;
+    const bar = ch.getDatasetMeta(1).data[i], tick = ch.getDatasetMeta(2).data[i], pt = ch.getDatasetMeta(0).data[i];
+    const font = "600 12px 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif";
+    const taken = [];
+    const hits = (r) => taken.some(o => r.x0 < o.x0 + o.w + 3 && o.x0 < r.x0 + r.w + 3 && r.y0 < o.y0 + o.h + 3 && o.y0 < r.y0 + r.h + 3);
+    const pill = (txt, x, y, color, align) => {
+      g.font = font; const w = g.measureText(txt).width + 12, h = 20;
+      let x0 = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+      x0 = Math.max(a.left + 2, Math.min(a.right - w - 2, x0));
+      const clampY = yy => Math.max(a.top + 2, Math.min(a.bottom - h - 2, yy));
+      let y0 = clampY(y - h / 2);
+      // never on top of another number: slide up or down until it is free
+      for (let k = 1; k < 9 && hits({x0, y0, w, h}); k++) y0 = clampY(y - h / 2 + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (h + 4));
+      taken.push({x0, y0, w, h});
+      g.fillStyle = css('--surface'); g.globalAlpha = .92; g.beginPath(); g.roundRect(x0, y0, w, h, 6); g.fill();
+      g.globalAlpha = 1; g.strokeStyle = color + '66'; g.lineWidth = 1; g.stroke();
+      g.fillStyle = color; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText(txt, x0 + 6, y0 + h / 2 + .5);
+      return {x0, y0, w, h};
+    };
+    g.save();
+    const fg = css('--fg'), muted = css('--muted');
+    // asset and date at the top of the column
+    const d = parseD(t.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}).replace('.', '');
+    pill(`${t.asset} · ${d}`, bar.x, a.top + 12, fg, 'center');
+    // the bar: its value beside it
+    const v = op.inR ? (t.rReal || 0) : t.net, col = t.res === 'win' ? css('--win') : t.res === 'loss' ? css('--loss') : muted;
+    const half = (bar.width || 20) / 2, yMid = (bar.y + bar.base) / 2;
+    const placed = pill(op.fmtBar(v), bar.x + half + 8, Math.abs(bar.y - bar.base) < 22 ? bar.y + (v >= 0 ? -14 : 14) : yMid, col, 'left');
+    // the white mark: R/T on its left
+    if (!op.hide.rt && tick) pill(`${(t.rTrade || 0) > 0 ? '+' : ''}${nf2.format(t.rTrade || 0)} R/T`, tick.x - (tick.options?.radius || 8) - 8, tick.y, fg, 'right');
+    // the orange curve: cumul on the right of its point
+    if (!op.hide.cum && pt) { g.fillStyle = css('--accent'); g.beginPath(); g.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); g.fill(); g.strokeStyle = css('--surface'); g.lineWidth = 2; g.stroke();
+      const y = Math.abs(pt.y - (placed.y0 + placed.h / 2)) < 22 && pt.x + 10 < placed.x0 + placed.w ? pt.y - 24 : pt.y;
+      pill('Cumul ' + op.fmtCum(ch.data.datasets[0].data[i]), pt.x + 10, y, css('--accent'), 'left'); }
+    g.restore();
+  }
+};
 const dmEmpty = () => `<div class="dm-empty"><span>📭</span>Aucun trade sur cette période.</div>`;
 function dmGroups(c, k) {
   const list = dmTrades(c, dmScope(k));
@@ -4001,7 +4048,10 @@ function drawMonthDash(c, monthList) {
     o.scales.yrt = {position: 'left', display: !hide.rt, grid: {display: false}, border: {display: false}, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => nf1.format(v) + ' R/T'}};
     o.scales.ycum = {display: false};
     o.interaction = {mode: 'index', intersect: false};
-    o.plugins.tooltip.filter = x => !(x.datasetIndex === 2 && hide.rt) && !(x.datasetIndex === 0 && hide.cum);
+    o.plugins.tooltip.enabled = false; // the numbers are written next to each part instead (see plHover)
+    o.hover = {mode: 'index', intersect: false};
+    o.onHover = (e, els, ch) => { const i = els.length ? els[0].index : null; if (ch.$hi !== i) { ch.$hi = i; ch.update('none'); } };
+    o.plugins.plHover = {list: plList, inR, cur: c.cur, hide, fmtBar: v => inR ? fR(v) : money(v, c.cur, true), fmtCum: v => inR ? fR(v) : money(v, c.cur, true)};
     o.plugins.tooltip.callbacks = {title: it => { const t = plList[it[0].dataIndex]; return `Trade n°${it[0].dataIndex + 1} · ${t.asset} · ${fmtDate(t.date)}`; },
       label: x => { const t = plList[x.dataIndex]; return x.datasetIndex === 0 ? ` Cumul : ${inR ? fR(x.parsed.y) : money(x.parsed.y, c.cur, true)}` : x.datasetIndex === 1 ? (inR ? ` R réel : ${fR(t.rReal)}` : ` Résultat : ${money(t.net, accCur(c, t.account_id), true)}`) : ` R/Trade : ${nf2.format(t.rTrade || 0).replace(/^(?!-)/, (t.rTrade || 0) > 0 ? '+' : '')} R/T`; }};
     const tick = plList.length > 40 ? 4 : plList.length > 20 ? 6 : 10;
@@ -4016,9 +4066,9 @@ function drawMonthDash(c, monthList) {
     if (!bMax) { o.scales.y.max = 0; o.scales.yrt.max = 0; o.scales.yrt.min = Math.min(rMin, -0.1) * 1.08; }
     // in R, bars and white marks share one scale: a 2 R trade at 5 R/T has its mark well above the bar
     if (inR) { const lo = Math.min(bMin, rMin, 0), hi = Math.max(bMax, rMax, 0); ['y', 'yrt'].forEach(k => { delete o.scales[k].min; delete o.scales[k].max; o.scales[k].suggestedMin = lo; o.scales[k].suggestedMax = hi; }); }
-    charts.push(new Chart($('#dm-pl'), {data: {labels: plList.map((_, i) => i), datasets: [
+    charts.push(new Chart($('#dm-pl'), {plugins: [plHover], data: {labels: plList.map((_, i) => i), datasets: [
       {type: 'line', data: cumV, yAxisID: 'ycum', hidden: !!hide.cum, borderColor: accent, borderWidth: 2.2, tension: 0.25, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: accent, order: 0},
-      {type: 'bar', data: bars, backgroundColor: plList.map(colOf), borderRadius: 4, maxBarThickness: 34, order: 2},
+      {type: 'bar', data: bars, backgroundColor: x => { const col = colOf(plList[x.dataIndex] || {}), hi = x.chart.$hi; return hi == null || hi === x.dataIndex ? col : col + '55'; }, borderRadius: 4, maxBarThickness: 34, order: 2},
       {type: 'scatter', yAxisID: 'yrt', hidden: !!hide.rt, data: rts.map((y, i) => ({x: i, y})), pointStyle: 'line', pointRadius: tick, pointHoverRadius: tick, borderColor: fg, borderWidth: 2.5, order: 1}]}, options: o}));
   }
   // account balance

@@ -3888,7 +3888,7 @@ function renderMonthDash(c, bar) {
     </section>
     <div class="dm-row r2">
       <section class="dm-card"><div class="dm-card-head"><div><h3>📊 P&L par trade</h3>
-        <div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-dmlg="${k}" aria-pressed="${!dmState().plHide?.[k]}"><i></i>${l}</button>`).join('')}</div></div>
+        <div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-dmlg="${k}" aria-pressed="${!dmState().plHide?.[k]}"${k === 'rt' && dmPlUnit(c) !== 'R' ? ' hidden' : ''}><i></i>${l}</button>`).join('')}</div></div>
         ${c.cur ? `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-dmplunit="cur" aria-pressed="${dmPlUnit(c) === 'cur'}">${esc(curSym(c.cur))}</button><button type="button" data-dmplunit="R" aria-pressed="${dmPlUnit(c) === 'R'}">R</button></div>` : ''}</div>
         <div class="dm-box">${list.length ? '<canvas id="dm-pl"></canvas>' : dmEmpty()}</div></section>
       <section class="dm-card"><div class="dm-card-head"><div><h3>📈 Évolution du compte</h3><p>${dmScope('bal') === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}${c.cur ? 'Solde après chaque trade' : 'Cumul en R (plusieurs devises)'}</p></div>${dmToggle('bal')}</div><div class="dm-box">${dmTrades(c, dmScope('bal')).length ? '<canvas id="dm-bal"></canvas>' : dmEmpty()}</div></section>
@@ -3990,7 +3990,7 @@ function plSetHi(ch, i, left) {
   if (left) ch.$left = true;
   ch.$want = ch.$left ? null : i;
   if (ch.$raf) return;
-  ch.$raf = requestAnimationFrame(() => { ch.$raf = 0; if (!ch.canvas.isConnected) return; if (ch.$hi !== ch.$want) { ch.$hi = ch.$want; ch.update('none'); } });
+  ch.$raf = requestAnimationFrame(() => { ch.$raf = 0; if (!ch.canvas || !ch.canvas.isConnected) return; if (ch.$hi !== ch.$want) { ch.$hi = ch.$want; ch.update('none'); } });
 }
 // P&L par trade: when the mouse is on a trade, each number is written next to its own mark
 const plHover = {id: 'plHover',
@@ -3998,7 +3998,8 @@ const plHover = {id: 'plHover',
     const i = ch.$hi; if (i == null) return;
     const bar = ch.getDatasetMeta(1).data[i]; if (!bar) return;
     const a = ch.chartArea, w = Math.max(bar.width * 1.9, 26), g = ch.ctx;
-    g.save(); g.fillStyle = 'rgba(255,255,255,.045)'; g.beginPath(); g.roundRect(bar.x - w / 2, a.top, w, a.bottom - a.top, 8); g.fill(); g.restore();
+    const xb = ch.scales.x ? ch.scales.x.bottom : a.bottom;
+    g.save(); g.fillStyle = 'rgba(255,255,255,.045)'; g.beginPath(); g.roundRect(bar.x - w / 2, a.top, w, xb - a.top, 8); g.fill(); g.restore();
   },
   afterDatasetsDraw(ch, _a, op) {
     const i = ch.$hi; if (i == null || !op || !op.list) return;
@@ -4036,6 +4037,21 @@ const plHover = {id: 'plHover',
     if (!op.hide.cum && pt) { g.fillStyle = css('--accent'); g.beginPath(); g.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); g.fill(); g.strokeStyle = css('--surface'); g.lineWidth = 2; g.stroke();
       pill(op.fmtCum(ch.data.datasets[0].data[i]), pt.x - 10, pt.y, css('--accent'), 'right'); }
     g.restore();
+  },
+  afterDraw(ch, _a, op) {
+    const i = ch.$hi; if (i == null || !op || !op.list) return;
+    const sc = ch.scales.x; if (!sc || !sc.getLabelItems) return;
+    const j = sc.ticks.findIndex(k => k.value === i); if (j < 0) return;
+    const it = sc.getLabelItems()[j]; if (!it) return;
+    const t = op.list[i], o = it.options, g = ch.ctx;
+    const glow = t.res === 'win' ? css('--win') : t.res === 'loss' ? css('--loss') : css('--muted');
+    g.save(); g.translate(o.translation[0], o.translation[1]); g.rotate(o.rotation);
+    g.font = `700 ${(it.font && it.font.size) || 11}px 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif`;
+    g.textAlign = o.textAlign; g.textBaseline = o.textBaseline;
+    g.scale(1.14, 1.14);
+    g.shadowColor = glow; g.shadowBlur = 14; g.fillStyle = css('--fg');
+    g.fillText(it.label, 0, it.textOffset / 1.14); g.shadowBlur = 6; g.fillText(it.label, 0, it.textOffset / 1.14);
+    g.restore();
   }
 };
 const dmEmpty = () => `<div class="dm-empty"><span>📭</span>Aucun trade sur cette période.</div>`;
@@ -4065,14 +4081,16 @@ function bindMonthDash(c) {
 function drawPl(c) {
   const win = css('--win'), loss = css('--loss'), muted = css('--muted'), accent = css('--accent'), fg = css('--fg');
   const colOf = t => t.res === 'win' ? win : t.res === 'loss' ? loss : muted;
-  const plList = dmTrades(c, 'm'), hide = dmState().plHide || {};
+  const plList = dmTrades(c, 'm'), inR = dmPlUnit(c) === 'R', hide = {...(dmState().plHide || {})};
+  if (!inR) hide.rt = true; // in $ the chart shows money only
   if ($('#dm-pl') && plList.length) {
-    const inR = dmPlUnit(c) === 'R', many = plList.length > 24;
+    const many = plList.length > 24;
     const o = baseOpts({...c, unit: inR ? 'R' : 'cur'});
     let cum = 0; const cumV = plList.map(t => (cum += inR ? (t.rReal || 0) : t.net, round2(cum)));
     const font = o.scales.y.ticks.font;
     // under each bar: the asset of the trade
-    o.scales.x.ticks = {...o.scales.x.ticks, autoSkip: plList.length > 30, maxTicksLimit: many ? 30 : 60, maxRotation: 55, minRotation: many ? 55 : 0, font: {...font, size: many ? 10 : 11}, callback: v => { const t = plList[v]; return t ? `${classOf(t.asset_class).emoji} ${t.asset}` : ''; }};
+    o.scales.x.ticks = {...o.scales.x.ticks, autoSkip: plList.length > 30, maxTicksLimit: many ? 30 : 60, maxRotation: 55, minRotation: many ? 55 : 0, font: {...font, size: many ? 10 : 11}, callback: v => { const t = plList[v]; return t ? `${classOf(t.asset_class).emoji} ${t.asset}` : ''; },
+      color: x => { const hi = x.chart.$hi; return hi == null ? muted : hi === x.index ? 'rgba(0,0,0,0)' : muted + '66'; }};
     o.scales.y.ticks.callback = v => inR ? nf1.format(v) + ' R' : money0(v, c.cur);
     o.scales.y.position = 'right'; o.scales.y.grid = {...(o.scales.y.grid || {}), drawOnChartArea: true};
     o.scales.yrt = {position: 'left', display: !hide.rt, grid: {display: false}, border: {display: false}, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => nf1.format(v) + ' R/T'}};
@@ -4111,7 +4129,7 @@ function refreshPl() {
   const old = Chart.getChart(cv); if (old) { const k = charts.indexOf(old); if (k > -1) charts.splice(k, 1); old.destroy(); }
   const s = dmState(), h = s.plHide || {};
   document.querySelectorAll('[data-dmplunit]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dmplunit === dmPlUnit(c))));
-  document.querySelectorAll('[data-dmlg]').forEach(b => b.setAttribute('aria-pressed', String(!h[b.dataset.dmlg])));
+  document.querySelectorAll('[data-dmlg]').forEach(b => { b.setAttribute('aria-pressed', String(!h[b.dataset.dmlg])); b.hidden = b.dataset.dmlg === 'rt' && dmPlUnit(c) !== 'R'; });
   drawPl(c);
 }
 function drawMonthDash(c, monthList) {

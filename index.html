@@ -747,7 +747,10 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .fi-add-ico{font-size:24px;line-height:1;color:var(--accent)}
 .fi-add b{font-size:13.5px}
 .fi-add small{font-size:11.5px;line-height:1.4}
-.fi-empty{color:var(--muted);margin:0}
+.fi-empty{color:var(--muted);margin:0;grid-column:1 / -1;font-size:13px}
+.acc-add.fi-plus{width:34px;height:34px}
+.acc-add.fi-plus:hover{transform:scale(1.08);filter:brightness(1.06)}
+.fi-count{font-family:var(--font-body,inherit);font-size:12.5px;color:var(--muted);font-weight:600;margin-left:8px}
 .fi-lost{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:11px 14px;border-radius:12px;background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px dashed color-mix(in srgb,var(--accent) 55%,var(--line));font-size:13.5px}
 .fi-lost .primary{padding:8px 14px;font-size:13px}
 .fi-spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line-2);border-top-color:var(--accent);animation:spin .7s linear infinite}
@@ -772,7 +775,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .m-phone .fi-save{order:5;margin-left:0;flex-basis:100%}
 /* full screen viewer */
 .vw{position:fixed;inset:0;z-index:80;background:rgba(3,5,10,.92);display:grid;place-items:center;padding:40px;animation:fadein .18s ease-out}
-.vw img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:vwIn .25s cubic-bezier(.2,.8,.3,1)}
+.vw img{max-width:calc(100vw - 140px);max-height:calc(100vh - 90px);width:auto;height:auto;object-fit:contain;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:vwIn .25s cubic-bezier(.2,.8,.3,1)}
 @keyframes vwIn{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
 .vw-x{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:11px;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:17px;transition:background .15s}
 .vw-x:hover{background:var(--loss)}
@@ -3601,11 +3604,11 @@ function renderFiche(c) {
       </div>
     </section>
     <section class="fi-card fi-pics" id="fi-pics">
-      <div class="fi-card-head"><h3>📸 Captures</h3><span class="fi-count">${imgs.length} / ${FI_MAX}</span></div>
+      <div class="fi-card-head"><h3>📸 Captures <span class="fi-count">${imgs.length} / ${FI_MAX}</span></h3>${!ro && imgs.length + fi.uploads < FI_MAX ? `<button type="button" class="acc-add fi-plus" id="fi-add" aria-label="Ajouter une capture" data-tip="Ajouter une capture (ou Ctrl + V)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>` : ''}</div>
       <div class="fi-grid">
         ${imgs.map((x, i) => `<figure class="fi-img" data-fimg="${i}"><img alt="Capture ${i + 1}" data-path="${esc(x.p)}" ${imgCached(x.p) ? `src="${esc(imgCached(x.p))}"` : ''} decoding="async">${ro ? '' : `<button type="button" class="fi-img-del" data-fimgdel="${i}" aria-label="Supprimer cette capture" data-tip="Supprimer">✕</button>`}</figure>`).join('')}
         ${Array.from({length: fi.uploads}, () => `<figure class="fi-img up"><span class="fi-spin"></span><small>Compression…</small></figure>`).join('')}
-        ${!ro && imgs.length + fi.uploads < FI_MAX ? `<button type="button" class="fi-add" id="fi-add"><span class="fi-add-ico">＋</span><b>Ajouter des captures</b><small>Clique, glisse une image ici<br>ou colle-la avec Ctrl + V</small></button>` : ''}
+        ${!ro && !imgs.length && !fi.uploads ? `<p class="fi-empty">Aucune capture pour l’instant. Fais Ctrl + V sur la page pour coller une capture TradingView, ou clique sur le <b>+</b>.</p>` : ''}
         ${ro && !imgs.length ? `<p class="fi-empty">Aucune capture.</p>` : ''}
       </div>
       ${ro ? '' : `<input type="file" id="fi-file" accept="image/*" multiple hidden>`}
@@ -4028,19 +4031,16 @@ function dmDonutBlock(c, k) {
 }
 function bindMonthDash(c) {
   document.querySelectorAll('[data-dmgo]').forEach(b => b.addEventListener('click', () => { const [y, m] = b.dataset.dmgo.split(':').map(Number); setDm({y, m}); }));
-  document.querySelectorAll('[data-dmlg]').forEach(b => b.addEventListener('click', () => { const s = dmState(), h = {...(s.plHide || {})}; h[b.dataset.dmlg] = !h[b.dataset.dmlg]; setDm({plHide: h}); }));
-  document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => setDm({plUnit: b.dataset.dmplunit})));
+  document.querySelectorAll('[data-dmlg]').forEach(b => b.addEventListener('click', () => { const s = dmState(), h = {...(s.plHide || {})}; h[b.dataset.dmlg] = !h[b.dataset.dmlg]; state.dm = {...s, plHide: h}; lsSet('ttr-dm', state.dm); refreshPl(); }));
+  document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), plUnit: b.dataset.dmplunit}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-calunit]').forEach(b => b.addEventListener('click', () => setDm({calUnit: b.dataset.calunit})));
   document.querySelectorAll('[data-dmscope]').forEach(b => b.addEventListener('click', () => { const [k, v] = b.dataset.dmscope.split(':'); const s = dmState(); setDm({scope: {...s.scope, [k]: v}}); }));
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
 }
-function drawMonthDash(c, monthList) {
+// P&L par trade (redrawn alone when its $ / R button or its legend is clicked)
+function drawPl(c) {
   const win = css('--win'), loss = css('--loss'), muted = css('--muted'), accent = css('--accent'), fg = css('--fg');
   const colOf = t => t.res === 'win' ? win : t.res === 'loss' ? loss : muted;
-  const S = stats(monthList, {...c, unit: 'cur'});
-  document.querySelectorAll('.dm-g-viz canvas').forEach(cv => drawGauge(cv, cv.dataset.frac === '' ? null : +cv.dataset.frac));
-  drawSpark(monthList);
-  // P&L trade by trade
   const plList = dmTrades(c, 'm'), hide = dmState().plHide || {};
   if ($('#dm-pl') && plList.length) {
     const inR = dmPlUnit(c) === 'R', many = plList.length > 24;
@@ -4081,6 +4081,22 @@ function drawMonthDash(c, monthList) {
     plChart.canvas.addEventListener('mouseleave', () => plSetHi(plChart, null, true));
     plChart.canvas.addEventListener('mousemove', () => { plChart.$left = false; });
   }
+}
+function refreshPl() {
+  const c = ctx(), cv = $('#dm-pl'); if (!cv) return;
+  const old = Chart.getChart(cv); if (old) { const k = charts.indexOf(old); if (k > -1) charts.splice(k, 1); old.destroy(); }
+  const s = dmState(), h = s.plHide || {};
+  document.querySelectorAll('[data-dmplunit]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dmplunit === dmPlUnit(c))));
+  document.querySelectorAll('[data-dmlg]').forEach(b => b.setAttribute('aria-pressed', String(!h[b.dataset.dmlg])));
+  drawPl(c);
+}
+function drawMonthDash(c, monthList) {
+  const win = css('--win'), loss = css('--loss'), muted = css('--muted'), accent = css('--accent'), fg = css('--fg');
+  const colOf = t => t.res === 'win' ? win : t.res === 'loss' ? loss : muted;
+  const S = stats(monthList, {...c, unit: 'cur'});
+  document.querySelectorAll('.dm-g-viz canvas').forEach(cv => drawGauge(cv, cv.dataset.frac === '' ? null : +cv.dataset.frac));
+  drawSpark(monthList);
+  drawPl(c);
   // account balance
   const balList = dmTrades(c, dmScope('bal'));
   if ($('#dm-bal') && balList.length) {

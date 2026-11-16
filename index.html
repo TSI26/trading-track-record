@@ -3824,6 +3824,7 @@ function dmState() {
 }
 function setDm(p) { state.dm = {...dmState(), ...p}; lsSet('ttr-dm', state.dm); render(); }
 const dmPlUnit = c => !c.cur || dmState().plUnit === 'R' ? 'R' : 'cur';
+const dmBalUnit = c => !c.cur || dmState().balUnit === 'R' ? 'R' : 'cur';
 const dmScope = k => dmState().scope[k] === 'y' ? 'y' : 'm';
 const dmWhen = k => { const s = dmState(); return dmScope(k) === 'y' ? `année ${s.y}` : `${MONTHS_LONG[s.m].toLowerCase()} ${s.y}`; };
 function dmTrades(c, scope) {
@@ -3891,7 +3892,7 @@ function renderMonthDash(c, bar) {
         <div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-dmlg="${k}" aria-pressed="${!dmState().plHide?.[k]}"${k === 'rt' && dmPlUnit(c) !== 'R' ? ' hidden' : ''}><i></i>${l}</button>`).join('')}</div></div>
         ${c.cur ? `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-dmplunit="cur" aria-pressed="${dmPlUnit(c) === 'cur'}">${esc(curSym(c.cur))}</button><button type="button" data-dmplunit="R" aria-pressed="${dmPlUnit(c) === 'R'}">R</button></div>` : ''}</div>
         <div class="dm-box">${list.length ? '<canvas id="dm-pl"></canvas>' : dmEmpty()}</div></section>
-      <section class="dm-card"><div class="dm-card-head"><div><h3>📈 Évolution du compte</h3><p>${dmScope('bal') === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}${c.cur ? 'Solde après chaque trade' : 'Cumul en R (plusieurs devises)'}</p></div>${dmToggle('bal')}</div><div class="dm-box">${dmTrades(c, dmScope('bal')).length ? '<canvas id="dm-bal"></canvas>' : dmEmpty()}</div></section>
+      <section class="dm-card"><div class="dm-card-head"><div><h3>📈 Évolution du compte</h3><p id="dm-bal-sub">${dmBalUnit(c) === 'cur' ? 'Solde après chaque trade' : c.cur ? 'Cumul en R après chaque trade' : 'Cumul en R (plusieurs devises)'}</p></div>${c.cur ? `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-dmbalunit="cur" aria-pressed="${dmBalUnit(c) === 'cur'}">${esc(curSym(c.cur))}</button><button type="button" data-dmbalunit="R" aria-pressed="${dmBalUnit(c) === 'R'}">R</button></div>` : ''}</div><div class="dm-box">${dmTrades(c, 'm').length ? '<canvas id="dm-bal"></canvas>' : dmEmpty()}</div></section>
     </div>
     <div class="dm-row r2b">
     <section class="dm-card dm-cal-card">${dmCalendar(c)}</section>
@@ -4073,6 +4074,7 @@ function bindMonthDash(c) {
   document.querySelectorAll('[data-dmgo]').forEach(b => b.addEventListener('click', () => { const [y, m] = b.dataset.dmgo.split(':').map(Number); setDm({y, m}); }));
   document.querySelectorAll('[data-dmlg]').forEach(b => b.addEventListener('click', () => { const s = dmState(), h = {...(s.plHide || {})}; h[b.dataset.dmlg] = !h[b.dataset.dmlg]; state.dm = {...s, plHide: h}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), plUnit: b.dataset.dmplunit}; lsSet('ttr-dm', state.dm); refreshPl(); }));
+  document.querySelectorAll('[data-dmbalunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), balUnit: b.dataset.dmbalunit}; lsSet('ttr-dm', state.dm); refreshBal(); }));
   document.querySelectorAll('[data-calunit]').forEach(b => b.addEventListener('click', () => setDm({calUnit: b.dataset.calunit})));
   document.querySelectorAll('[data-dmscope]').forEach(b => b.addEventListener('click', () => { const [k, v] = b.dataset.dmscope.split(':'); const s = dmState(); setDm({scope: {...s.scope, [k]: v}}); }));
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
@@ -4124,6 +4126,32 @@ function drawPl(c) {
     plChart.canvas.addEventListener('mousemove', () => { plChart.$left = false; });
   }
 }
+// Évolution du compte (redrawn alone when its $ / R button is clicked)
+function drawBal(c) {
+  const win = css('--win'), loss = css('--loss'), muted = css('--muted'), fg = css('--fg');
+  const balList = dmTrades(c, 'm');
+  if ($('#dm-bal') && balList.length) {
+    const s = dmState(), from = `${s.y}-${String(s.m + 1).padStart(2, '0')}-01`, to = `${s.y}-${String(s.m + 1).padStart(2, '0')}-31`;
+    let pts, start; const inCur = dmBalUnit(c) === 'cur';
+    if (inCur) { const B = dmBalance(c, from, to); start = B.start; pts = B.pts; } else { let r = 0; start = 0; pts = balList.map(t => ({bal: round2(r += t.rReal || 0), t})); }
+    const vals = [start, ...pts.map(p => p.bal)];
+    const o = baseOpts({...c, unit: inCur ? 'cur' : 'R'});
+    o.scales.x.ticks.callback = (v, i) => String(i); o.scales.x.ticks.maxTicksLimit = 12;
+    o.scales.y.ticks.callback = v => inCur ? money0(v, c.cur) : nf1.format(v) + ' R';
+    o.plugins.tooltip.callbacks = {title: it => { const i = it[0].dataIndex; if (!i) return 'Début de la période'; const p = pts[i - 1]; return p.t ? `${p.t.asset} · ${fmtDate(p.t.date)}` : `${p.m.kind === 'depot' ? 'Dépôt' : 'Retrait'} · ${fmtDate(p.m.date)}`; },
+      label: x => { const i = x.dataIndex, p = pts[i - 1]; const l = [` ${inCur ? 'Solde' : 'Cumul'} : ${inCur ? money(x.parsed.y, c.cur) : fR(x.parsed.y)}`]; if (p && p.t) l.push(` Trade : ${inCur ? money(p.t.net, c.cur, true) : fR(p.t.rReal)}`); if (p && p.m) l.push(` ${money(p.m.kind === 'depot' ? p.m.amount : -p.m.amount, c.cur, true)}`); return l; }};
+    const few = vals.length <= 40;
+    charts.push(new Chart($('#dm-bal'), {type: 'line', data: {labels: vals.map((_, i) => i), datasets: [{data: vals, borderColor: fg, borderWidth: 2.2, tension: 0.25, fill: true, backgroundColor: gradientFill(fg.length === 7 ? fg : '#e7eaf0'),
+      pointRadius: vals.map((_, i) => few ? 3.5 : i === vals.length - 1 ? 4 : 0), pointBackgroundColor: vals.map((v, i) => !i ? muted : pts[i - 1].m ? css(pts[i - 1].m.kind === 'depot' ? '--dep' : '--ret') : v >= vals[i - 1] ? win : loss), pointBorderColor: css('--surface'), pointBorderWidth: 1.5, pointHoverRadius: 5}]}, options: o}));
+  }
+}
+function refreshBal() {
+  const c = ctx(), cv = $('#dm-bal'); if (!cv) return;
+  const old = Chart.getChart(cv); if (old) { const k = charts.indexOf(old); if (k > -1) charts.splice(k, 1); old.destroy(); }
+  document.querySelectorAll('[data-dmbalunit]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dmbalunit === dmBalUnit(c))));
+  const sub = $('#dm-bal-sub'); if (sub) sub.textContent = dmBalUnit(c) === 'cur' ? 'Solde après chaque trade' : 'Cumul en R après chaque trade';
+  drawBal(c);
+}
 function refreshPl() {
   const c = ctx(), cv = $('#dm-pl'); if (!cv) return;
   const old = Chart.getChart(cv); if (old) { const k = charts.indexOf(old); if (k > -1) charts.splice(k, 1); old.destroy(); }
@@ -4139,22 +4167,7 @@ function drawMonthDash(c, monthList) {
   document.querySelectorAll('.dm-g-viz canvas').forEach(cv => drawGauge(cv, cv.dataset.frac === '' ? null : +cv.dataset.frac));
   drawSpark(monthList);
   drawPl(c);
-  // account balance
-  const balList = dmTrades(c, dmScope('bal'));
-  if ($('#dm-bal') && balList.length) {
-    const s = dmState(), from = dmScope('bal') === 'y' ? `${s.y}-01-01` : `${s.y}-${String(s.m + 1).padStart(2, '0')}-01`, to = dmScope('bal') === 'y' ? `${s.y}-12-31` : `${s.y}-${String(s.m + 1).padStart(2, '0')}-31`;
-    let pts, start;
-    if (c.cur) { const B = dmBalance(c, from, to); start = B.start; pts = B.pts; } else { let r = 0; start = 0; pts = balList.map(t => ({bal: round2(r += t.rReal || 0), t})); }
-    const vals = [start, ...pts.map(p => p.bal)];
-    const o = baseOpts({...c, unit: c.cur ? 'cur' : 'R'});
-    o.scales.x.ticks.callback = (v, i) => String(i); o.scales.x.ticks.maxTicksLimit = 12;
-    o.scales.y.ticks.callback = v => c.cur ? money0(v, c.cur) : nf1.format(v) + ' R';
-    o.plugins.tooltip.callbacks = {title: it => { const i = it[0].dataIndex; if (!i) return 'Début de la période'; const p = pts[i - 1]; return p.t ? `${p.t.asset} · ${fmtDate(p.t.date)}` : `${p.m.kind === 'depot' ? 'Dépôt' : 'Retrait'} · ${fmtDate(p.m.date)}`; },
-      label: x => { const i = x.dataIndex, p = pts[i - 1]; const l = [` ${c.cur ? 'Solde' : 'Cumul'} : ${c.cur ? money(x.parsed.y, c.cur) : fR(x.parsed.y)}`]; if (p && p.t) l.push(` Trade : ${c.cur ? money(p.t.net, c.cur, true) : fR(p.t.rReal)}`); if (p && p.m) l.push(` ${money(p.m.kind === 'depot' ? p.m.amount : -p.m.amount, c.cur, true)}`); return l; }};
-    const few = vals.length <= 40;
-    charts.push(new Chart($('#dm-bal'), {type: 'line', data: {labels: vals.map((_, i) => i), datasets: [{data: vals, borderColor: fg, borderWidth: 2.2, tension: 0.25, fill: true, backgroundColor: gradientFill(fg.length === 7 ? fg : '#e7eaf0'),
-      pointRadius: vals.map((_, i) => few ? 3.5 : i === vals.length - 1 ? 4 : 0), pointBackgroundColor: vals.map((v, i) => !i ? muted : pts[i - 1].m ? css(pts[i - 1].m.kind === 'depot' ? '--dep' : '--ret') : v >= vals[i - 1] ? win : loss), pointBorderColor: css('--surface'), pointBorderWidth: 1.5, pointHoverRadius: 5}]}, options: o}));
-  }
+  drawBal(c);
   // performance in time: days of the month, or months of the year
   const tList = dmTrades(c, dmScope('time'));
   if ($('#dm-time') && tList.length) {

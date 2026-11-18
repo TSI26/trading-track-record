@@ -531,16 +531,11 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-row.r2b{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
 .dm-row.r2b > .dm-card{display:flex;flex-direction:column}
 .dm-row.r2b > .dm-card > .dm-box{flex:1;min-height:220px;height:auto}
-.mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .mc-head h3{margin:0;font-family:var(--font-display);font-size:16px;letter-spacing:.04em}
-.mc-arr{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:16px;transition:border-color .15s,background .15s}
-.mc-arr:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--bg))}
 .mcal{display:flex;flex-direction:column;gap:6px}
 .mc-row{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr)) minmax(0,1.05fr);gap:6px}
 .mc-top span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:2px 0}
-.mc-unit{display:flex;gap:2px;justify-content:center;padding:0 !important}
-.mc-unit button{flex:1;border:0;border-radius:7px;padding:3px 0;font-size:10.5px;font-weight:800;background:var(--surface-2);color:var(--muted);transition:all .15s}
-.mc-unit button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .mc-d,.mc-w{position:relative;min-height:70px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);padding:6px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .15s,box-shadow .15s}
 .mc-n{position:absolute;top:5px;left:8px;font-size:11.5px;font-weight:700;color:var(--fg)}
 .mc-d.out{background:transparent;border-color:color-mix(in srgb,var(--line) 60%,transparent)}
@@ -587,7 +582,8 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-card-head p{margin:3px 0 0;font-size:12px;color:var(--muted)}
 .dm-tog{display:inline-flex;gap:2px;padding:2px;border-radius:9px;background:var(--bg);border:1px solid var(--line);flex:none}
 .dm-tog button{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;transition:all .15s}
-.dm-tog button:hover{color:var(--fg)}
+.dm-tog button:hover:not(:disabled){color:var(--fg)}
+.dm-tog button:disabled{opacity:.45;cursor:not-allowed}
 .dm-tog button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);box-shadow:0 0 0 1px var(--line-2) inset}
 .dm-box{position:relative;height:280px}
 .dm-box.sm{height:220px}
@@ -2444,6 +2440,11 @@ function renderSideBal(c) {
 
 /* ---------- account switcher (which accounts the whole site shows) ---------- */
 const curSym = cur => money(0, cur).replace(/[\d\s,.  −-]/g, '') || cur;
+// the money button shows the sign of the selected accounts: $ · € · "$ · €" with several currencies
+const curLabel = c => c.cur ? curSym(c.cur) : [...new Set(c.accs.map(a => a.currency))].map(curSym).join(' · ') || '$';
+const MULTI_TIP = 'Comptes en plusieurs devises : les montants ne peuvent pas s’additionner, affichage en R';
+// $ / R pair used on every chart: key = data attribute, on = 'cur' or 'R'
+const unitTog = (c, key, on) => `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-${key}="cur" aria-pressed="${on === 'cur'}"${c.cur ? '' : ` disabled data-tip="${MULTI_TIP}"`}>${esc(curLabel(c))}</button><button type="button" data-${key}="R" aria-pressed="${on === 'R'}">R</button></div>`;
 function selInfo(c) {
   const all = c.d.accounts;
   if (!all.length) return {label: 'Aucun compte', sub: 'Crée ton premier compte', kind: 'none'};
@@ -2505,7 +2506,7 @@ function toggleAccShown(id, on, c) {
 /* ---------- shared header pieces ---------- */
 function unitSeg(c) {
   return `<div class="seg" role="group" aria-label="Unité d’affichage">
-    <button type="button" data-unit="cur" aria-pressed="${c.unit === 'cur'}" ${c.cur ? '' : 'disabled title="Plusieurs devises : affichage en R"'}>${c.cur || 'Devise'}</button>
+    <button type="button" data-unit="cur" aria-pressed="${c.unit === 'cur'}" ${c.cur ? '' : `disabled data-tip="${MULTI_TIP}"`}>${esc(curLabel(c))}</button>
     <button type="button" data-unit="R" aria-pressed="${c.unit === 'R'}">R</button>
   </div>`;
 }
@@ -3965,9 +3966,9 @@ function renderMonthDash(c, bar) {
     <div class="dm-row r2">
       <section class="dm-card"><div class="dm-card-head"><div><h3>📊 P&L par trade</h3>
         <div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-dmlg="${k}" aria-pressed="${!dmState().plHide?.[k]}"${k === 'rt' && dmPlUnit(c) !== 'R' ? ' hidden' : ''}><i></i>${l}</button>`).join('')}</div></div>
-        ${c.cur ? `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-dmplunit="cur" aria-pressed="${dmPlUnit(c) === 'cur'}">${esc(curSym(c.cur))}</button><button type="button" data-dmplunit="R" aria-pressed="${dmPlUnit(c) === 'R'}">R</button></div>` : ''}</div>
+        ${unitTog(c, 'dmplunit', dmPlUnit(c))}</div>
         <div class="dm-box">${list.length ? '<canvas id="dm-pl"></canvas>' : dmEmpty()}</div></section>
-      <section class="dm-card"><div class="dm-card-head"><div><h3>📈 Évolution du compte</h3><p id="dm-bal-sub">${dmBalUnit(c) === 'cur' ? 'Solde après chaque trade' : c.cur ? 'Cumul en R après chaque trade' : 'Cumul en R (plusieurs devises)'}</p></div>${c.cur ? `<div class="dm-tog" role="group" aria-label="Unité"><button type="button" data-dmbalunit="cur" aria-pressed="${dmBalUnit(c) === 'cur'}">${esc(curSym(c.cur))}</button><button type="button" data-dmbalunit="R" aria-pressed="${dmBalUnit(c) === 'R'}">R</button></div>` : ''}</div><div class="dm-box">${dmTrades(c, 'm').length ? '<canvas id="dm-bal"></canvas>' : dmEmpty()}</div></section>
+      <section class="dm-card"><div class="dm-card-head"><div><h3>📈 Évolution du compte</h3><p id="dm-bal-sub">${dmBalUnit(c) === 'cur' ? 'Solde après chaque trade' : c.cur ? 'Cumul en R après chaque trade' : 'Cumul en R (plusieurs devises)'}</p></div>${unitTog(c, 'dmbalunit', dmBalUnit(c))}</div><div class="dm-box">${dmTrades(c, 'm').length ? '<canvas id="dm-bal"></canvas>' : dmEmpty()}</div></section>
     </div>
     <div class="dm-row r2b">
     <section class="dm-card dm-cal-card">${dmCalendar(c)}</section>
@@ -4010,28 +4011,26 @@ function dmCalendar(c) {
   const fmt = x => unit === 'R' ? fR(x) : money(x, c.cur, true).replace(/,00(?=\s)/, '');
   const first = new Date(s.y, s.m, 1), start = new Date(first); start.setDate(1 - ((first.getDay() + 6) % 7));
   const isoWeek = d => { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 86400000 + 1) / 7); };
-  let rows = '', d = new Date(start);
+  let rows = '', row = '', seen = false, d = new Date(start);
   while (d <= new Date(s.y, s.m, last) || (d.getDay() + 6) % 7) {
-    if ((d.getDay() + 6) % 7 === 0) { var wk = {v: 0, n: 0, no: isoWeek(d)}; rows += '<div class="mc-row">'; }
+    if ((d.getDay() + 6) % 7 === 0) { var wk = {v: 0, n: 0, no: isoWeek(d)}; row = '<div class="mc-row">'; seen = false; }
     const wd = (d.getDay() + 6) % 7, inM = d.getMonth() === s.m, day = d.getDate();
     if (wd < cols) {
       const list = inM ? byDay[day] || [] : [], tot = list.reduce((a, t) => a + v(t), 0), n = list.length;
       if (inM) { wk.v += tot; wk.n += n; }
       const kind = !n ? '' : tot > 0.0001 ? 'pos' : tot < -0.0001 ? 'neg' : 'flat';
       const isToday = inM && d.toDateString() === new Date().toDateString();
-      rows += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
+      if (inM) seen = true;
+      row += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
     } else if (inM && byDay[day]) { const list = byDay[day]; wk.v += list.reduce((a, t) => a + v(t), 0); wk.n += list.length; }
-    if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; rows += `<div class="mc-w ${k}"><span class="mc-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b><small>${wk.n} trade${wk.n > 1 ? 's' : ''}</small>` : ''}</div></div>`; }
+    if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; row += `<div class="mc-w ${k}"><span class="mc-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b><small>${wk.n} trade${wk.n > 1 ? 's' : ''}</small>` : ''}</div></div>`; if (seen || wk.n) rows += row; }
     d.setDate(d.getDate() + 1);
   }
   const q = Math.floor(s.m / 3) + 1, total = ts.reduce((a, t) => a + v(t), 0);
   const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].slice(0, cols);
-  const pm = s.m ? `${s.y}:${s.m - 1}` : `${s.y - 1}:11`, nm = s.m < 11 ? `${s.y}:${s.m + 1}` : `${s.y + 1}:0`;
-  return `<div class="mc-head"><button type="button" class="mc-arr" data-dmgo="${pm}" aria-label="Mois précédent">←</button>
-      <h3>${MONTHS_LONG[s.m]} ${s.y}</h3>
-      <button type="button" class="mc-arr" data-dmgo="${nm}" aria-label="Mois suivant">→</button></div>
+  return `<div class="mc-head"><h3>🗓️ ${MONTHS_LONG[s.m]} ${s.y}</h3>${unitTog(c, 'calunit', unit)}</div>
     <div class="mcal" style="--cols:${cols}">
-      <div class="mc-row mc-top">${days.map(x => `<span>${x}</span>`).join('')}<span class="mc-unit">${c.cur ? `<button type="button" data-calunit="cur" aria-pressed="${unit === 'cur'}">P&L</button><button type="button" data-calunit="R" aria-pressed="${unit === 'R'}">R</button>` : 'R'}</span></div>
+      <div class="mc-row mc-top">${days.map(x => `<span>${x}</span>`).join('')}<span>Semaine</span></div>
       ${rows}
     </div>
     <p class="mc-foot">Total du mois : <b class="num ${sgnCls(total)}">${fmt(total)}</b> · ${ts.length} trade${ts.length > 1 ? 's' : ''}</p>`;
@@ -4144,12 +4143,18 @@ function dmDonutBlock(c, k) {
   return `<div class="dm-split"><div class="dm-donut lg"><canvas id="dm-d-${k}"></canvas><div class="dm-donut-c"><b class="num">${tot}</b><small>trade${tot > 1 ? 's' : ''}</small></div></div>
     <div class="dm-leg">${gs.sort((a, b) => b.n - a.n).map(g => `<div><span class="dm-leg-n"><i style="background:${g.color}"></i><span>${g.emoji} ${esc(g.name)}</span></span><span class="dm-leg-c num">${g.n}</span><b class="num ${sgnCls(g.r)}">${fR(g.r)}</b></div>`).join('')}</div></div>`;
 }
+function bindCal() {
+  document.querySelectorAll('[data-calunit]').forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return; state.dm = {...dmState(), calUnit: b.dataset.calunit}; lsSet('ttr-dm', state.dm);
+    const box = document.querySelector('.dm-cal-card'); if (!box) return; box.innerHTML = dmCalendar(ctx()); bindCal();
+  }));
+}
 function bindMonthDash(c) {
   document.querySelectorAll('[data-dmgo]').forEach(b => b.addEventListener('click', () => { const [y, m] = b.dataset.dmgo.split(':').map(Number); setDm({y, m}); }));
   document.querySelectorAll('[data-dmlg]').forEach(b => b.addEventListener('click', () => { const s = dmState(), h = {...(s.plHide || {})}; h[b.dataset.dmlg] = !h[b.dataset.dmlg]; state.dm = {...s, plHide: h}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), plUnit: b.dataset.dmplunit}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmbalunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), balUnit: b.dataset.dmbalunit}; lsSet('ttr-dm', state.dm); refreshBal(); }));
-  document.querySelectorAll('[data-calunit]').forEach(b => b.addEventListener('click', () => setDm({calUnit: b.dataset.calunit})));
+  bindCal();
   document.querySelectorAll('[data-dmscope]').forEach(b => b.addEventListener('click', () => { const [k, v] = b.dataset.dmscope.split(':'); const s = dmState(); setDm({scope: {...s.scope, [k]: v}}); }));
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
 }

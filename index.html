@@ -4021,9 +4021,9 @@ function dmCalendar(c) {
       const kind = !n ? '' : tot > 0.0001 ? 'pos' : tot < -0.0001 ? 'neg' : 'flat';
       const isToday = inM && d.toDateString() === new Date().toDateString();
       if (inM) seen = true;
-      row += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
+      row += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `<b class="num">${fmt(tot)}</b>${n > 1 ? `<small>${n} trades</small>` : ''}` : ''}</div>`;
     } else if (inM && byDay[day]) { const list = byDay[day]; wk.v += list.reduce((a, t) => a + v(t), 0); wk.n += list.length; }
-    if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; row += `<div class="mc-w ${k}"><span class="mc-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b><small>${wk.n} trade${wk.n > 1 ? 's' : ''}</small>` : ''}</div></div>`; if (seen || wk.n) rows += row; }
+    if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; row += `<div class="mc-w ${k}"><span class="mc-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b>${wk.n > 1 ? `<small>${wk.n} trades</small>` : ''}` : ''}</div></div>`; if (seen || wk.n) rows += row; }
     d.setDate(d.getDate() + 1);
   }
   const q = Math.floor(s.m / 3) + 1, total = ts.reduce((a, t) => a + v(t), 0);

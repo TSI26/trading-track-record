@@ -553,8 +553,6 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .mc-d.pos b,.mc-w.pos b{color:var(--win)} .mc-d.neg b,.mc-w.neg b{color:var(--loss)}
 .mc-d.pos .mc-n{color:var(--win)} .mc-d.neg .mc-n{color:var(--loss)}
 .mc-d:not(.out):not(:empty):hover{transform:translateY(-1px);box-shadow:0 6px 16px -10px rgba(0,0,0,.6)}
-.mc-ok{position:absolute;top:5px;right:6px;width:15px;height:15px;border-radius:50%;border:1.5px solid currentColor;font-size:9px;font-weight:800;display:grid;place-items:center;opacity:.8}
-.mc-d.pos .mc-ok{color:var(--win)} .mc-d.neg .mc-ok{color:var(--loss)} .mc-d.flat .mc-ok{color:var(--muted)}
 .mc-w{background:var(--surface-2);border-left-width:3px}
 .mc-w .mc-n{color:var(--muted)}
 .mc-w.pos{border-color:color-mix(in srgb,var(--win) 35%,var(--line));border-left-color:var(--win);background:color-mix(in srgb,var(--win) 9%,var(--surface-2))}
@@ -4020,9 +4018,8 @@ function dmCalendar(c) {
       const list = inM ? byDay[day] || [] : [], tot = list.reduce((a, t) => a + v(t), 0), n = list.length;
       if (inM) { wk.v += tot; wk.n += n; }
       const kind = !n ? '' : tot > 0.0001 ? 'pos' : tot < -0.0001 ? 'neg' : 'flat';
-      const noted = list.some(t => t.explain || t.pros || t.cons || (t.imgs || []).length);
       const isToday = inM && d.toDateString() === new Date().toDateString();
-      rows += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `${noted ? '<span class="mc-ok" title="Fiche remplie">✓</span>' : ''}<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
+      rows += `<div class="mc-d ${inM ? '' : 'out'} ${kind}${isToday ? ' today' : ''}"${n ? ` title="${esc(list.map(t => `${t.asset} ${fmt(v(t))}`).join(' · '))}"` : ''}><span class="mc-n">${day}</span>${n ? `<b class="num">${fmt(tot)}</b><small>${n} trade${n > 1 ? 's' : ''}</small>` : ''}</div>`;
     } else if (inM && byDay[day]) { const list = byDay[day]; wk.v += list.reduce((a, t) => a + v(t), 0); wk.n += list.length; }
     if (wd === 6) { const k = !wk.n ? '' : wk.v > 0.0001 ? 'pos' : wk.v < -0.0001 ? 'neg' : 'flat'; rows += `<div class="mc-w ${k}"><span class="mc-n">S${wk.no}</span>${wk.n ? `<b class="num">${fmt(wk.v)}</b><small>${wk.n} trade${wk.n > 1 ? 's' : ''}</small>` : ''}</div></div>`; }
     d.setDate(d.getDate() + 1);

@@ -1292,6 +1292,19 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 .view-flag button{margin-left:auto;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:9px;padding:7px 13px}
 .users-table td .see{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:5px 11px;font-weight:600}
 .users-table tr.me td{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.tag-blk{font-size:10.5px;font-weight:700;color:var(--loss);margin-left:8px;padding:2px 7px;border-radius:99px;background:color-mix(in srgb,var(--loss) 14%,transparent);white-space:nowrap}
+.users-table tr.blk td{color:var(--muted)}
+.users-table tr.blk td strong{color:var(--muted)}
+.u-acts{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.u-ic{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);transition:color .15s,background .15s,border-color .15s}
+.u-ic:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.u-ic.on{color:var(--loss);border-color:color-mix(in srgb,var(--loss) 45%,var(--line))}
+.u-ic.on:hover{color:var(--win);border-color:color-mix(in srgb,var(--win) 45%,var(--line))}
+.u-ic.u-del:hover{color:#fff;background:var(--loss);border-color:var(--loss)}
+.u-card .u-acts{display:flex;gap:8px}.u-card .u-acts .ghost{flex:1}
+.cf-word{display:block;width:100%;margin-top:8px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.cf-word.bad{border-color:var(--loss);animation:cfShake .35s}
+@keyframes cfShake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 .tag-me{font-size:10.5px;font-weight:700;color:var(--accent);margin-left:8px;text-transform:uppercase;letter-spacing:.06em}
 .u-cards{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .u-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:8px}
@@ -1897,6 +1910,7 @@ function stopRealtime() {
   rtChannel = null; state.live = false;
 }
 async function checkAdmin() {
+  try { const b = await sb.rpc('am_i_blocked'); if (b.data === true) return kickBlocked(); } catch (e) {}
   const {data: row} = await sb.from('admins').select('user_id').eq('user_id', state.me).maybeSingle();
   state.isAdmin = !!row;
   document.querySelectorAll('.admin-only').forEach(b => { b.hidden = !state.isAdmin; });
@@ -1921,6 +1935,10 @@ async function fetchAdmin() {
     state.adminError = errText(e) + (e.table ? ' (table ' + e.table + ')' : ''); state.adminLoaded = true;
     if (state.view === 'admin') render();
   } finally { adminLoading = false; }
+}
+async function kickBlocked() {
+  try { await sb.auth.signOut({scope: 'local'}); } catch (e) {}
+  signedOut(); authMode = 'login'; showAuth('Ton accès à l’application a été suspendu.', 'err');
 }
 function signedOut() {
   stopRealtime();
@@ -2105,6 +2123,7 @@ const pwField = (id, label, ac) => `<label class="a-field">${label}<div class="p
 function authError(err) {
   const t = String(err && err.message || '');
   if (/Invalid login/i.test(t)) return 'E-mail ou mot de passe incorrect.';
+  if (/banned/i.test(t)) return 'Ton accès à l’application a été suspendu.';
   if (/not confirmed/i.test(t)) return 'Ton e-mail n’est pas encore confirmé : ouvre le lien reçu par e-mail (regarde aussi dans les indésirables).';
   if (/already registered/i.test(t)) return 'Un compte existe déjà avec cette adresse : connecte-toi.';
   if (/signups? not allowed/i.test(t)) return 'Les inscriptions sont fermées pour le moment.';
@@ -2138,7 +2157,6 @@ function showAuth(msg, kind) {
       <div class="a-hint">6 caractères minimum.</div>
       ${pwField('a-pass2', 'Confirme le mot de passe', 'new-password')}
       <label class="check"><input id="a-remember" type="checkbox" ${remember ? 'checked' : ''}>Rester connecté</label>
-      <p class="auth-note">L’administrateur de cette appli peut consulter tous les trades et comptes enregistrés.</p>
       <button class="primary" type="submit" id="a-submit">Créer mon compte</button>`,
     forgot: `
       <label class="a-field">E-mail<input id="a-email" class="field" type="email" autocomplete="email" inputmode="email" required value="${esc(authEmail)}"></label>
@@ -3489,6 +3507,47 @@ function renderMore() {
 }
 
 /* ---------- ADMIN ---------- */
+const LOCK = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const UNLOCK = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg>';
+const BIN = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+// block / unblock / delete buttons (never on my own line)
+const adminActs = u => u.id === state.me ? '' : `<button type="button" class="u-ic${u.blocked ? ' on' : ''}" data-ublock="${u.id}" data-tip="${u.blocked ? 'Débloquer l’accès' : 'Bloquer l’accès'}" aria-label="${u.blocked ? 'Débloquer l’accès' : 'Bloquer l’accès'}">${u.blocked ? UNLOCK : LOCK}</button><button type="button" class="u-ic u-del" data-udel="${u.id}" data-tip="Supprimer le membre" aria-label="Supprimer le membre">${BIN}</button>`;
+const sqlMissing = e => /admin_set_blocked|admin_delete_user|could not find the function/i.test(errText(e)) ? 'le code SQL n°6 (« accès des membres ») n’a pas encore été exécuté dans Supabase.' : errText(e);
+function confirmBlock(id) {
+  const u = state.admin.users.find(x => x.id === id); if (!u) return;
+  if (u.blocked) return openConfirm({icon: '🔓', title: 'Débloquer l’accès ?', html: `<strong>${esc(u.email)}</strong> pourra de nouveau se connecter et retrouvera toutes ses données.`,
+    buttons: [{id: 'cancel', label: 'Annuler'}, {id: 'ok', label: '🔓 Débloquer', cls: 'primary'}],
+    onPick: async () => { try { const r = await sb.rpc('admin_set_blocked', {target: u.id, block: false}); if (r.error) throw r.error; u.blocked = false; render(); toast(`${u.email} est débloqué`); } catch (e) { toast('Impossible : ' + sqlMissing(e)); } }});
+  openConfirm({icon: '🔒', title: 'Bloquer l’accès ?', html: `<strong>${esc(u.email)}</strong> ne pourra plus se connecter, et s’il est connecté en ce moment il sera déconnecté.<br><br>Rien n’est supprimé : ses comptes, ses trades et ses captures sont gardés. Tu pourras le débloquer quand tu veux.`,
+    buttons: [{id: 'cancel', label: 'Annuler'}, {id: 'ok', label: '🔒 Bloquer', cls: 'danger'}],
+    onPick: async () => { try { const r = await sb.rpc('admin_set_blocked', {target: u.id, block: true}); if (r.error) throw r.error; u.blocked = true; render(); toast(`Accès bloqué pour ${u.email}`); } catch (e) { toast('Impossible : ' + sqlMissing(e)); } }});
+}
+function confirmDeleteUser(id) {
+  const A = state.admin, u = A.users.find(x => x.id === id); if (!u) return;
+  const nA = A.accounts.filter(a => a.user_id === id).length, tr = A.trades.filter(t => t.user_id === id), nI = tr.reduce((a, t) => a + ((t.imgs || []).length), 0);
+  openConfirm({icon: '🗑️', title: 'Supprimer ce membre ?', confirmWord: 'SUPPRIMER',
+    html: `<strong>${esc(u.email)}</strong> sera supprimé, avec <strong>${nA} compte${nA > 1 ? 's' : ''}</strong>, <strong>${tr.length} trade${tr.length > 1 ? 's' : ''}</strong>${nI ? ` et <strong>${nI} capture${nI > 1 ? 's' : ''}</strong>` : ''}. <strong>C’est définitif</strong>, rien ne pourra être récupéré.<br><br>Si tu veux seulement l’empêcher d’entrer, bloque plutôt son accès.<br><br>Pour confirmer, écris <b>SUPPRIMER</b> :<input class="field cf-word" id="cf-word" autocomplete="off" spellcheck="false">`,
+    buttons: [{id: 'cancel', label: 'Annuler'}, {id: 'ok', label: 'Supprimer définitivement', cls: 'danger'}],
+    onPick: () => deleteUser(u)});
+}
+async function deleteUser(u) {
+  toast(`Suppression de ${u.email}…`);
+  try {
+    // the pictures first: the user can't be removed while he still owns files
+    const B = sb.storage.from('trade-images'), paths = [];
+    const top = await B.list(u.id, {limit: 1000}); if (top.error) throw top.error;
+    for (const f of top.data || []) {
+      if (f.id) { paths.push(`${u.id}/${f.name}`); continue; }
+      const sub = await B.list(`${u.id}/${f.name}`, {limit: 1000}); if (sub.error) throw sub.error;
+      (sub.data || []).forEach(x => paths.push(`${u.id}/${f.name}/${x.name}`));
+    }
+    for (let i = 0; i < paths.length; i += 100) { const r = await B.remove(paths.slice(i, i + 100)); if (r.error) throw r.error; }
+    const r = await sb.rpc('admin_delete_user', {target: u.id}); if (r.error) throw r.error;
+    const A = state.admin;
+    A.users = A.users.filter(x => x.id !== u.id); A.accounts = A.accounts.filter(x => x.user_id !== u.id); A.trades = A.trades.filter(x => x.user_id !== u.id); A.movements = A.movements.filter(x => x.user_id !== u.id);
+    render(); toast(`${u.email} a été supprimé`);
+  } catch (e) { toast('Suppression impossible : ' + sqlMissing(e)); }
+}
 function renderAdmin() {
   const el = $('#view');
   if (!state.isAdmin) { el.innerHTML = ''; return; }
@@ -3518,8 +3577,8 @@ function renderAdmin() {
   if (state.mode === 'desk') {
     el.innerHTML = head + `<div class="sheet-table-wrap"><table class="tx-table users-table" style="min-width:980px">
       <thead><tr><th>Utilisateur</th><th>Inscrit le</th><th>Dernière connexion</th><th class="r">Comptes</th><th>Types</th><th class="r">Trades</th><th class="r">Réussite</th><th class="r">Résultat (R)</th><th>Dernier trade</th><th></th></tr></thead>
-      <tbody>${users.map(u => `<tr class="${u.id === state.me ? 'me' : ''}">
-        <td><strong>${esc(u.email)}</strong>${u.id === state.me ? '<span class="tag-me">Toi</span>' : ''}</td>
+      <tbody>${users.map(u => `<tr class="${u.id === state.me ? 'me' : ''}${u.blocked ? ' blk' : ''}">
+        <td><strong>${esc(u.email)}</strong>${u.id === state.me ? '<span class="tag-me">Toi</span>' : ''}${u.blocked ? '<span class="tag-blk">🔒 Bloqué</span>' : ''}</td>
         <td class="num">${fmtD(u.created_at)}</td>
         <td class="num">${fmtD(u.last_sign_in_at)}</td>
         <td class="r num">${u.nAcc}</td>
@@ -3528,14 +3587,13 @@ function renderAdmin() {
         <td class="r num">${fPct(u.wr)}</td>
         <td class="r num ${sgnCls(u.sumR)}" style="font-weight:700">${fR(u.sumR)}</td>
         <td class="num">${u.last ? fmtDate(u.last) : '—'}</td>
-        <td class="r"><button class="see" type="button" data-see="${u.id}">${u.id === state.me ? 'Mon espace' : 'Voir son espace'}</button></td>
-      </tr>`).join('')}</tbody></table></div>
-      <p class="q-hint">Pour retirer l’accès à quelqu’un : Supabase, Authentication, Users, puis Delete user (ses comptes et trades sont supprimés avec).</p>`;
+        <td class="r"><div class="u-acts"><button class="see" type="button" data-see="${u.id}">${u.id === state.me ? 'Mon espace' : 'Voir son espace'}</button>${adminActs(u)}</div></td>
+      </tr>`).join('')}</tbody></table></div>`;
   } else {
     el.innerHTML = head + `<div class="u-cards">${users.map(u => `<div class="u-card">
-        <div class="u-top"><span class="u-mail">${esc(u.email)}${u.id === state.me ? '<span class="tag-me">Toi</span>' : ''}</span><strong class="num ${sgnCls(u.sumR)}">${fR(u.sumR)}</strong></div>
+        <div class="u-top"><span class="u-mail">${esc(u.email)}${u.id === state.me ? '<span class="tag-me">Toi</span>' : ''}${u.blocked ? '<span class="tag-blk">🔒 Bloqué</span>' : ''}</span><strong class="num ${sgnCls(u.sumR)}">${fR(u.sumR)}</strong></div>
         <div class="u-nums num"><span>${u.nAcc} compte${u.nAcc > 1 ? 's' : ''}</span><span>${u.n} trade${u.n > 1 ? 's' : ''}</span><span>${fPct(u.wr)} réussite</span><span>Connexion : ${fmtD(u.last_sign_in_at)}</span></div>
-        <button class="ghost" type="button" data-see="${u.id}">${u.id === state.me ? 'Mon espace' : 'Voir son espace'}</button>
+        <div class="u-acts"><button class="ghost" type="button" data-see="${u.id}">${u.id === state.me ? 'Mon espace' : 'Voir son espace'}</button>${adminActs(u)}</div>
       </div>`).join('')}</div>`;
   }
 }
@@ -4608,8 +4666,8 @@ function syncMovForm() {
   if (af) af.innerHTML = isFinite(amt) && amt > 0 ? `Solde après ${f.mkind === 'depot' ? 'ce dépôt' : 'ce retrait'} : <strong class="num">${money(round2(bal + (f.mkind === 'depot' ? amt : -amt)), acc.currency)}</strong>` : `Solde actuel : <strong class="num">${money(round2(bal), acc.currency)}</strong>`;
 }
 // "Are you sure?" window. buttons: [{id, label, cls}] ; onPick(id) runs the chosen action.
-function openConfirm({icon = '⚠️', title, html, buttons, onPick}) {
-  form = {kind: 'confirm', icon, title, html, buttons, onPick};
+function openConfirm({icon = '⚠️', title, html, buttons, onPick, confirmWord}) {
+  form = {kind: 'confirm', icon, title, html, buttons, onPick, confirmWord};
   drawPanel(true);
   setTimeout(() => document.querySelector('#panel-root [data-cact="cancel"]')?.focus(), 30);
 }
@@ -4984,6 +5042,8 @@ document.addEventListener('click', async e => {
   if (ds.act === 'logout') { state.menuOpen = false; renderMe(); if (sb) await logout(); else toast('Pas de compte connecté en mode local.'); return; }
   if (ds.act === 'stopview') { state.viewAs = null; state.tmpSel = 'all'; go('admin'); return; }
   if (ds.see) { const u = state.admin.users.find(x => x.id === ds.see); if (u) { state.viewAs = u.id === state.me ? null : {id: u.id, email: u.email}; state.tmpSel = 'all'; go('dash'); } return; }
+  if (ds.ublock) return confirmBlock(ds.ublock);
+  if (ds.udel) return confirmDeleteUser(ds.udel);
   if (ds.act === 'adminrefresh') { state.adminLoaded = false; render(); fetchAdmin(); return; }
   if (ds.act === 'add') return openTrade();
   if (ds.act === 'newacc') return openAccount();
@@ -5018,7 +5078,9 @@ document.addEventListener('click', async e => {
   if (ds.trcard) { toast('La fiche du trade arrive bientôt 🙂'); return; }
   if (ds.edit && !form) { const tr = data().trades.find(x => x.id === ds.edit); if (tr) openTrade(tr); return; }
   if (!form) return;
-  if (ds.cact && form.kind === 'confirm') { const fn = form.onPick; closePanel(); if (ds.cact !== 'cancel' && fn) await fn(ds.cact); return; }
+  if (ds.cact && form.kind === 'confirm') {
+    if (ds.cact !== 'cancel' && form.confirmWord) { const w = $('#cf-word'); if (!w || w.value.trim().toUpperCase() !== form.confirmWord) { if (w) { w.classList.remove('bad'); void w.offsetWidth; w.classList.add('bad'); w.focus(); } return; } }
+    const fn = form.onPick; closePanel(); if (ds.cact !== 'cancel' && fn) await fn(ds.cact); return; }
   if (t.hasAttribute('data-close')) return closePanelSoft();
   if (t.hasAttribute('data-save')) return panelSave();
   if (t.hasAttribute('data-del')) { if (form.kind === 'account') { const a = ctx().d.accounts.find(x => x.id === form.id); if (a) confirmDeleteAccount(a); return; } form.confirm = true; return drawPanel(); }

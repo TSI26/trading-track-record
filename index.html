@@ -4172,7 +4172,7 @@ const plHover = {id: 'plHover',
   }
 };
 const dmEmpty = () => `<div class="dm-empty"><span>📭</span>Aucun trade sur cette période.</div>`;
-const DN_KEYS = ['style', 'sess', 'asset', 'side'];
+const DN_KEYS = ['asset', 'sess', 'style', 'side'];
 const DN_HEAD = {style: ['⏱️ Style', 'style', 'styles'], sess: ['🌍 Session', 'session', 'sessions'], asset: ['🧩 Asset', 'famille', 'familles'], side: ['🔼🔽 Long / Short', '', '']};
 const SIDE_COLORS = {long: '#4b8ff0', short: '#a37cf0'};
 const dnUnit = (c, k) => !c.cur || (dmState().dnUnit || {})[k] === 'R' ? 'R' : 'cur';

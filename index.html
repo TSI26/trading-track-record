@@ -528,7 +528,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-g b{font-size:24px}
 .dm-g .dm-k-sub{line-height:1.35}
 .dm-g-leg{display:flex;justify-content:space-between;width:100%;font-size:10.5px;font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;gap:6px}
-.dm-row.r2b{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+.dm-row.r2b{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 .dm-row.r2b > .dm-card{display:flex;flex-direction:column}
 .dm-row.r2b > .dm-card > .dm-box{flex:1;min-height:220px;height:auto}
 .mc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
@@ -574,6 +574,24 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-wr-leg div:last-child{border-bottom:0}
 .dm-wr-leg i,.dm-leg i{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
 .dm-wr-leg b{margin-left:auto;font-size:15px}
+.dm-as-card{display:flex;flex-direction:column}
+.as-leg{display:flex;gap:14px;margin-top:6px;font-size:11.5px;color:var(--muted);font-weight:600}
+.as-leg span{display:inline-flex;align-items:center;gap:6px}
+.as-leg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.as-leg i.l,.as-bar i.l{background:#4b8ff0}
+.as-leg i.s,.as-bar i.s{background:#a37cf0}
+.as-focus{color:var(--fg)}
+.as-list{display:flex;flex-direction:column;gap:8px;flex:1;margin-top:6px}
+.as-row{flex:1 1 0;max-height:66px;min-height:48px;display:grid;grid-template-columns:118px minmax(0,1fr) 96px;align-items:center;gap:12px;padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.as-name{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.as-emo{font-size:14px}
+.as-track{height:22px;display:flex;align-items:center}
+.as-bar{display:flex;height:100%;border-radius:6px;overflow:hidden;gap:2px}
+.as-bar i{display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;color:#fff;min-width:18px}
+.as-res{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.as-res b{font-size:14px}
+.as-res small{font-size:10.5px;color:var(--muted)}
+.m-phone .as-row{grid-template-columns:96px minmax(0,1fr) 82px;gap:8px;padding:7px 8px}
 .dm-row{display:grid;gap:14px}
 .dm-row.r2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 .dm-row.r3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -3973,7 +3991,7 @@ function renderMonthDash(c, bar) {
     </div>
     <div class="dm-row r2b">
     <section class="dm-card dm-cal-card">${dmCalendar(c)}</section>
-    <section class="dm-card"><div class="dm-card-head"><div><h3>🗓️ Performance ${dmScope('time') === 'y' ? 'de chaque mois' : 'de chaque jour'}</h3><p>${dmScope('time') === 'y' ? `Résultat de chaque mois de ${s.y}${c.cur ? ' en % du compte' : ' en R'}` : `Résultat de chaque jour de ${MONTHS_LONG[s.m].toLowerCase()} en R réel`}</p></div>${dmToggle('time')}</div><div class="dm-box sm">${dmTrades(c, dmScope('time')).length ? '<canvas id="dm-time"></canvas>' : dmEmpty()}</div></section>
+    <section class="dm-card dm-as-card">${dmAssets(c)}</section>
     </div>
     <div class="dm-row r3">${[['style', '⏱️ Style'], ['sess', '🌍 Session'], ['asset', '🧩 Asset']].map(([k, t]) => `<section class="dm-card"><div class="dm-card-head"><div><h3>${t}</h3><p>${dmScope(k) === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}Trades et résultat (R réel)</p></div>${dmToggle(k)}</div>${dmDonutBlock(c, k)}</section>`).join('')}</div>
     <p class="dm-foot">Trading Track-Record · ${MONTHS_LONG[s.m]} ${s.y} · ${esc(accName)}</p>
@@ -4002,6 +4020,22 @@ function drawGauge(cv, frac) {
   const t0 = performance.now(); const step = t => { const k = Math.min(1, (t - t0) / 700); draw(1 - Math.pow(1 - k, 3)); if (k < 1 && cv.isConnected) requestAnimationFrame(step); }; requestAnimationFrame(step);
 }
 /* the calendar of the month: each day coloured by its result, and the total of each week */
+// 🧩 Mes actifs du mois : one line per asset, longest = most traded; Long / Short split; result on the right
+function dmAssets(c) {
+  const s = dmState(), unit = s.asUnit === 'R' || !c.cur ? 'R' : 'cur';
+  const list = dmTrades(c, 'm'); const by = {};
+  list.forEach(t => { const o = by[t.asset] ||= {asset: t.asset, cls: t.asset_class, n: 0, L: 0, S: 0, w: 0, v: 0}; o.n++; t.side === 'short' ? o.S++ : o.L++; if (t.res === 'win') o.w++; o.v += unit === 'R' ? (t.rReal || 0) : t.net; });
+  const rows = Object.values(by).sort((a, b) => b.n - a.n || b.v - a.v), max = Math.max(1, ...rows.map(r => r.n));
+  const fmt = x => unit === 'R' ? fR(x) : money(x, c.cur, true).replace(/,00(?=\s)/, '');
+  const top = rows[0], share = top ? Math.round(top.n / list.length * 100) : 0;
+  return `<div class="dm-card-head"><div><h3>🧩 Mes actifs du mois</h3><p>${rows.length ? `${rows.length} actif${rows.length > 1 ? 's' : ''} tradé${rows.length > 1 ? 's' : ''} · <b class="as-focus">${share} %</b> de tes trades sur ${esc(top.asset)}` : 'Aucun trade ce mois-ci'}</p>
+      <div class="as-leg"><span><i class="l"></i>Long</span><span><i class="s"></i>Short</span></div></div>${unitTog(c, 'asunit', unit)}</div>
+    ${rows.length ? `<div class="as-list">${rows.map(r => `<div class="as-row">
+      <span class="as-name"><span class="as-emo">${classOf(r.cls).emoji}</span>${esc(r.asset)}</span>
+      <span class="as-track"><span class="as-bar" style="width:${Math.max(r.n / max * 100, 9)}%">${r.L ? `<i class="l" style="flex:${r.L}">${r.L}</i>` : ''}${r.S ? `<i class="s" style="flex:${r.S}">${r.S}</i>` : ''}</span></span>
+      <span class="as-res"><b class="num ${sgnCls(r.v)}">${fmt(r.v)}</b><small>${Math.round(r.w / r.n * 100)} % réussite</small></span>
+    </div>`).join('')}</div>` : dmEmpty()}`;
+}
 function dmCalendar(c) {
   const s = dmState(), unit = s.calUnit === 'R' || !c.cur ? 'R' : 'cur';
   const ym = `${s.y}-${String(s.m + 1).padStart(2, '0')}`, last = new Date(s.y, s.m + 1, 0).getDate();
@@ -4144,6 +4178,12 @@ function dmDonutBlock(c, k) {
   return `<div class="dm-split"><div class="dm-donut lg"><canvas id="dm-d-${k}"></canvas><div class="dm-donut-c"><b class="num">${tot}</b><small>trade${tot > 1 ? 's' : ''}</small></div></div>
     <div class="dm-leg">${gs.sort((a, b) => b.n - a.n).map(g => `<div><span class="dm-leg-n"><i style="background:${g.color}"></i><span>${g.emoji} ${esc(g.name)}</span></span><span class="dm-leg-c num">${g.n}</span><b class="num ${sgnCls(g.r)}">${fR(g.r)}</b></div>`).join('')}</div></div>`;
 }
+function bindAssets() {
+  document.querySelectorAll('[data-asunit]').forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return; state.dm = {...dmState(), asUnit: b.dataset.asunit}; lsSet('ttr-dm', state.dm);
+    const box = document.querySelector('.dm-as-card'); if (!box) return; box.innerHTML = dmAssets(ctx()); bindAssets();
+  }));
+}
 function bindCal() {
   document.querySelectorAll('[data-calunit]').forEach(b => b.addEventListener('click', () => {
     if (b.disabled) return; state.dm = {...dmState(), calUnit: b.dataset.calunit}; lsSet('ttr-dm', state.dm);
@@ -4155,7 +4195,7 @@ function bindMonthDash(c) {
   document.querySelectorAll('[data-dmlg]').forEach(b => b.addEventListener('click', () => { const s = dmState(), h = {...(s.plHide || {})}; h[b.dataset.dmlg] = !h[b.dataset.dmlg]; state.dm = {...s, plHide: h}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), plUnit: b.dataset.dmplunit}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmbalunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), balUnit: b.dataset.dmbalunit}; lsSet('ttr-dm', state.dm); refreshBal(); }));
-  bindCal();
+  bindCal(); bindAssets();
   document.querySelectorAll('[data-dmscope]').forEach(b => b.addEventListener('click', () => { const [k, v] = b.dataset.dmscope.split(':'); const s = dmState(); setDm({scope: {...s.scope, [k]: v}}); }));
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
 }
@@ -4248,27 +4288,6 @@ function drawMonthDash(c, monthList) {
   drawSpark(monthList);
   drawPl(c);
   drawBal(c);
-  // performance in time: days of the month, or months of the year
-  const tList = dmTrades(c, dmScope('time'));
-  if ($('#dm-time') && tList.length) {
-    const s = dmState(), y = dmScope('time') === 'y';
-    let labels, vals, tips;
-    if (y) {
-      labels = MONTHS_FR.map(m => m.replace('.', ''));
-      vals = MONTHS_FR.map((_, m) => { const ym = `${s.y}-${String(m + 1).padStart(2, '0')}`, ts = tList.filter(t => t.date.slice(0, 7) === ym); if (!ts.length) return null; const nt = ts.reduce((a, t) => a + t.net, 0); if (!c.cur) return round2(ts.reduce((a, t) => a + (t.rReal || 0), 0)); const B = dmBalance(c, ym + '-01', ym + '-31'); return B.start > 0 ? Math.round(nt / B.start * 10000) / 100 : null; });
-      tips = MONTHS_FR.map((_, m) => { const ym = `${s.y}-${String(m + 1).padStart(2, '0')}`, ts = tList.filter(t => t.date.slice(0, 7) === ym); return ts.length ? `${ts.length} trade${ts.length > 1 ? 's' : ''} · ${c.cur ? money(ts.reduce((a, t) => a + t.net, 0), c.cur, true) + ' · ' : ''}${fR(ts.reduce((a, t) => a + (t.rReal || 0), 0))}` : ''; });
-    } else {
-      const last = new Date(s.y, s.m + 1, 0).getDate(), ym = `${s.y}-${String(s.m + 1).padStart(2, '0')}`;
-      labels = Array.from({length: last}, (_, i) => String(i + 1));
-      const day = i => tList.filter(t => t.date === `${ym}-${String(i + 1).padStart(2, '0')}`);
-      vals = labels.map((_, i) => { const ts = day(i); return ts.length ? Math.round(ts.reduce((a, t) => a + (t.rReal || 0), 0) * 100) / 100 : null; });
-      tips = labels.map((_, i) => { const ts = day(i); return ts.length ? `${ts.length} trade${ts.length > 1 ? 's' : ''}${c.cur ? ' · ' + money(ts.reduce((a, t) => a + t.net, 0), c.cur, true) : ''} · ${ts.map(t => t.asset).join(', ')}` : ''; });
-    }
-    const o = baseOpts({...c, unit: 'R'});
-    o.scales.y.ticks.callback = v => y && c.cur ? nf1.format(v) + ' %' : nf1.format(v) + ' R';
-    o.plugins.tooltip.callbacks = {title: it => y ? MONTHS_LONG[it[0].dataIndex] + ' ' + s.y : `${it[0].label} ${MONTHS_LONG[s.m].toLowerCase()}`, label: x => [` ${y && c.cur ? (x.parsed.y > 0 ? '+' : '') + nf2.format(x.parsed.y) + ' %' : fR(x.parsed.y)}`, ' ' + tips[x.dataIndex]]};
-    charts.push(new Chart($('#dm-time'), {type: 'bar', data: {labels, datasets: [{data: vals, backgroundColor: vals.map(v => v > 0 ? win : v < 0 ? loss : muted), borderRadius: 5, maxBarThickness: y ? 64 : 26}]}, options: o}));
-  }
   ['style', 'sess', 'asset'].forEach(k => {
     const cv = $('#dm-d-' + k); if (!cv) return; const gs = dmGroups(c, k).sort((a, b) => b.n - a.n);
     charts.push(new Chart(cv, {type: 'doughnut', data: {labels: gs.map(g => g.name), datasets: [{data: gs.map(g => g.n), backgroundColor: gs.map(g => g.color), borderWidth: 2, borderColor: css('--surface'), hoverOffset: 4}]},

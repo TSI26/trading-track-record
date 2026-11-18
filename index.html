@@ -595,6 +595,11 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .dm-row{display:grid;gap:14px}
 .dm-row.r2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 .dm-row.r3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dm-row.r4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.dm-dn{display:flex;flex-direction:column}
+.dn-body{display:flex;flex-direction:column;align-items:center;gap:14px;flex:1}
+.dn-body .dm-leg{width:100%}
+.dm-leg-w{color:var(--muted);font-size:12px;min-width:38px;text-align:right}
 .dm-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;min-width:0}
 .dm-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
 .dm-card-head h3{margin:0;font-family:var(--font-display);font-size:15.5px}
@@ -664,6 +669,9 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .m-phone .dm-kpis{grid-template-columns:1fr 1fr}
 
 .m-phone .dm-row.r2,.m-phone .dm-row.r3{grid-template-columns:1fr}
+.m-phone .dm-row.r4{grid-template-columns:1fr}
+.m-phone .dn-body{flex-direction:row;align-items:center}
+@media (max-width:1250px){.m-desk .dm-row.r4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .m-phone .dm-box{height:240px}
 /* ===== Vue d'ensemble ===== */
 .ov{display:flex;flex-direction:column;gap:14px;animation:fiIn .35s cubic-bezier(.2,.8,.3,1)}
@@ -3993,7 +4001,7 @@ function renderMonthDash(c, bar) {
     <section class="dm-card dm-cal-card">${dmCalendar(c)}</section>
     <section class="dm-card dm-as-card">${dmAssets(c)}</section>
     </div>
-    <div class="dm-row r3">${[['style', '⏱️ Style'], ['sess', '🌍 Session'], ['asset', '🧩 Asset']].map(([k, t]) => `<section class="dm-card"><div class="dm-card-head"><div><h3>${t}</h3><p>${dmScope(k) === 'y' ? '<b class="dm-scope">Année ' + s.y + '</b> · ' : ''}Trades et résultat (R réel)</p></div>${dmToggle(k)}</div>${dmDonutBlock(c, k)}</section>`).join('')}</div>
+    <div class="dm-row r4">${DN_KEYS.map(k => `<section class="dm-card dm-dn" data-dn="${k}">${dmDonutCard(c, k)}</section>`).join('')}</div>
     <p class="dm-foot">Trading Track-Record · ${MONTHS_LONG[s.m]} ${s.y} · ${esc(accName)}</p>
   </div>`;
   bindMonthDash(c);
@@ -4164,19 +4172,42 @@ const plHover = {id: 'plHover',
   }
 };
 const dmEmpty = () => `<div class="dm-empty"><span>📭</span>Aucun trade sur cette période.</div>`;
+const DN_KEYS = ['style', 'sess', 'asset', 'side'];
+const DN_HEAD = {style: ['⏱️ Style', 'style', 'styles'], sess: ['🌍 Session', 'session', 'sessions'], asset: ['🧩 Asset', 'famille', 'familles'], side: ['🔼🔽 Long / Short', '', '']};
+const SIDE_COLORS = {long: '#4b8ff0', short: '#a37cf0'};
+const dnUnit = (c, k) => !c.cur || (dmState().dnUnit || {})[k] === 'R' ? 'R' : 'cur';
 function dmGroups(c, k) {
-  const list = dmTrades(c, dmScope(k));
+  const list = dmTrades(c, 'm');
   const defs = k === 'style' ? HOLDINGS.map(h => ({id: h.id, name: h.name, emoji: h.emoji, color: HOLD_COLORS[h.id]})).concat([{id: '', name: 'Non renseigné', emoji: '❔', color: HOLD_COLORS['']}])
     : k === 'sess' ? SESSIONS.map(x => ({id: x.id, name: x.name, emoji: x.emoji, color: x.color}))
+    : k === 'side' ? [{id: 'long', name: 'Long', emoji: '🔼', color: SIDE_COLORS.long}, {id: 'short', name: 'Short', emoji: '🔽', color: SIDE_COLORS.short}]
     : CLASSES.map(x => ({id: x.id, name: x.one || x.name, emoji: x.emoji, color: resolveCol(x.color)}));
-  const key = t => k === 'style' ? (t.hold || '') : k === 'sess' ? t.session : t.asset_class;
-  return defs.map(g => { const ts = list.filter(t => key(t) === g.id); return {...g, n: ts.length, r: ts.reduce((a, t) => a + (t.rReal || 0), 0)}; }).filter(g => g.n);
+  const key = t => k === 'style' ? (t.hold || '') : k === 'sess' ? t.session : k === 'side' ? (t.side === 'short' ? 'short' : 'long') : t.asset_class;
+  return defs.map(g => { const ts = list.filter(t => key(t) === g.id); return {...g, n: ts.length, w: ts.filter(t => t.res === 'win').length, r: ts.reduce((a, t) => a + (t.rReal || 0), 0), net: ts.reduce((a, t) => a + t.net, 0)}; }).filter(g => g.n);
 }
-function dmDonutBlock(c, k) {
-  const gs = dmGroups(c, k); if (!gs.length) return `<div class="dm-box xs">${dmEmpty()}</div>`;
-  const tot = gs.reduce((a, g) => a + g.n, 0);
-  return `<div class="dm-split"><div class="dm-donut lg"><canvas id="dm-d-${k}"></canvas><div class="dm-donut-c"><b class="num">${tot}</b><small>trade${tot > 1 ? 's' : ''}</small></div></div>
-    <div class="dm-leg">${gs.sort((a, b) => b.n - a.n).map(g => `<div><span class="dm-leg-n"><i style="background:${g.color}"></i><span>${g.emoji} ${esc(g.name)}</span></span><span class="dm-leg-c num">${g.n}</span><b class="num ${sgnCls(g.r)}">${fR(g.r)}</b></div>`).join('')}</div></div>`;
+// one donut card: in the middle, how many styles / sessions / families were used (Long / Short: the main side)
+function dmDonutCard(c, k) {
+  const [title, one, many] = DN_HEAD[k], unit = dnUnit(c, k), gs = dmGroups(c, k).sort((a, b) => b.n - a.n);
+  const fmt = g => unit === 'R' ? fR(g.r) : money(g.net, c.cur, true);
+  const head = `<div class="dm-card-head"><div><h3>${title}</h3></div>${unitTog(c, 'dn' + k, unit)}</div>`;
+  if (!gs.length) return head + `<div class="dm-box xs">${dmEmpty()}</div>`;
+  const tot = gs.reduce((a, g) => a + g.n, 0), used = gs.filter(g => g.id !== '').length;
+  const mid = k === 'side' ? `<b class="num">${Math.round(gs[0].n / tot * 100)} %</b><small>${gs[0].name}</small>` : `<b class="num">${used}</b><small>${used > 1 ? many : one}</small>`;
+  return head + `<div class="dn-body"><div class="dm-donut lg"><canvas id="dm-d-${k}"></canvas><div class="dm-donut-c">${mid}</div></div>
+    <div class="dm-leg">${gs.map(g => `<div><span class="dm-leg-n"><i style="background:${g.color}"></i><span>${g.emoji} ${esc(g.name)}</span></span><span class="dm-leg-c num" data-tip="${g.n} trade${g.n > 1 ? 's' : ''}">${g.n}</span><span class="dm-leg-w num" data-tip="Taux de réussite">${Math.round(g.w / g.n * 100)} %</span><b class="num ${sgnCls(unit === 'R' ? g.r : g.net)}">${fmt(g)}</b></div>`).join('')}</div></div>`;
+}
+function drawDonut(c, k) {
+  const cv = $('#dm-d-' + k); if (!cv) return; const gs = dmGroups(c, k).sort((a, b) => b.n - a.n), unit = dnUnit(c, k);
+  charts.push(new Chart(cv, {type: 'doughnut', data: {labels: gs.map(g => g.name), datasets: [{data: gs.map(g => g.n), backgroundColor: gs.map(g => g.color), borderWidth: 2, borderColor: css('--surface'), hoverOffset: 4}]},
+    options: {cutout: '68%', maintainAspectRatio: false, animation: {duration: 500}, plugins: {legend: {display: false}, tooltip: {callbacks: {label: x => { const g = gs[x.dataIndex]; return ` ${g.n} trade${g.n > 1 ? 's' : ''} · ${Math.round(g.w / g.n * 100)} % · ${unit === 'R' ? fR(g.r) : money(g.net, c.cur, true)}`; }}}}}}));
+}
+function bindDonuts(keys = DN_KEYS) {
+  keys.forEach(k => document.querySelectorAll(`[data-dn${k}]`).forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return; const s = dmState(); state.dm = {...s, dnUnit: {...(s.dnUnit || {}), [k]: b.getAttribute('data-dn' + k)}}; lsSet('ttr-dm', state.dm);
+    const box = document.querySelector(`.dm-dn[data-dn="${k}"]`); if (!box) return;
+    const old = $('#dm-d-' + k) && Chart.getChart($('#dm-d-' + k)); if (old) { const i = charts.indexOf(old); if (i > -1) charts.splice(i, 1); old.destroy(); }
+    box.innerHTML = dmDonutCard(ctx(), k); drawDonut(ctx(), k); bindDonuts([k]);
+  })));
 }
 function bindAssets() {
   document.querySelectorAll('[data-asunit]').forEach(b => b.addEventListener('click', () => {
@@ -4195,7 +4226,7 @@ function bindMonthDash(c) {
   document.querySelectorAll('[data-dmlg]').forEach(b => b.addEventListener('click', () => { const s = dmState(), h = {...(s.plHide || {})}; h[b.dataset.dmlg] = !h[b.dataset.dmlg]; state.dm = {...s, plHide: h}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmplunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), plUnit: b.dataset.dmplunit}; lsSet('ttr-dm', state.dm); refreshPl(); }));
   document.querySelectorAll('[data-dmbalunit]').forEach(b => b.addEventListener('click', () => { state.dm = {...dmState(), balUnit: b.dataset.dmbalunit}; lsSet('ttr-dm', state.dm); refreshBal(); }));
-  bindCal(); bindAssets();
+  bindCal(); bindAssets(); bindDonuts();
   document.querySelectorAll('[data-dmscope]').forEach(b => b.addEventListener('click', () => { const [k, v] = b.dataset.dmscope.split(':'); const s = dmState(); setDm({scope: {...s.scope, [k]: v}}); }));
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
 }
@@ -4288,11 +4319,7 @@ function drawMonthDash(c, monthList) {
   drawSpark(monthList);
   drawPl(c);
   drawBal(c);
-  ['style', 'sess', 'asset'].forEach(k => {
-    const cv = $('#dm-d-' + k); if (!cv) return; const gs = dmGroups(c, k).sort((a, b) => b.n - a.n);
-    charts.push(new Chart(cv, {type: 'doughnut', data: {labels: gs.map(g => g.name), datasets: [{data: gs.map(g => g.n), backgroundColor: gs.map(g => g.color), borderWidth: 2, borderColor: css('--surface'), hoverOffset: 4}]},
-      options: {cutout: '68%', maintainAspectRatio: false, animation: {duration: 500}, plugins: {legend: {display: false}, tooltip: {callbacks: {label: x => ` ${gs[x.dataIndex].n} trade${gs[x.dataIndex].n > 1 ? 's' : ''} · ${fR(gs[x.dataIndex].r)}`}}}}}));
-  });
+  DN_KEYS.forEach(k => drawDonut(c, k));
 }
 /* 📷 a picture of the whole month, ready to send */
 let snapLib = null;

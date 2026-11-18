@@ -544,7 +544,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .mc-d,.mc-w{position:relative;min-height:70px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);padding:6px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .15s,box-shadow .15s}
 .mc-n{position:absolute;top:5px;left:8px;font-size:11.5px;font-weight:700;color:var(--fg)}
 .mc-d.out{background:transparent;border-color:color-mix(in srgb,var(--line) 60%,transparent)}
-.mc-d.out .mc-n{color:color-mix(in srgb,var(--muted) 55%,transparent)}
+.mc-d.out{visibility:hidden}
 .mc-d b,.mc-w b{font-size:15px;font-weight:800;margin-top:10px;letter-spacing:-.01em}
 .mc-d small,.mc-w small{font-size:10.5px;color:var(--muted)}
 .mc-d.pos{background:color-mix(in srgb,var(--win) 16%,var(--bg));border-color:color-mix(in srgb,var(--win) 45%,var(--line))}
@@ -741,7 +741,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .fi-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s cubic-bezier(.2,.8,.3,1)}
 .fi-img:hover img{transform:scale(1.03)}
 .fi-img.broken{cursor:default}
-.fi-img.broken::after{content:"Image introuvable";position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:12.5px}
+.fi-img.broken::after{content:"Image introuvable" "\A" attr(data-why);white-space:pre-wrap;text-align:center;padding:12px;line-height:1.5;position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:12.5px}
 .fi-img.up{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:default;color:var(--muted)}
 .fi-img-del{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:8px;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;display:grid;place-items:center;opacity:0;transition:opacity .15s,background .15s}
 .fi-img:hover .fi-img-del,.m-phone .fi-img-del{opacity:1}
@@ -2066,8 +2066,9 @@ async function imageUrls(paths) {
   paths.forEach(p => { if (p.startsWith('data:')) out[p] = p; else { const c = imgUrls.get(p); if (c && c.until > Date.now()) out[p] = c.url; else need.push(p); } });
   if (need.length && sb) {
     await freshSession(false);
-    const {data} = await sb.storage.from(IMG_BUCKET).createSignedUrls(need, 3600);
-    (data || []).forEach(x => { if (x.signedUrl) { imgUrls.set(x.path, {url: x.signedUrl, until: Date.now() + 3300 * 1000}); out[x.path] = x.signedUrl; } });
+    const {data, error} = await sb.storage.from(IMG_BUCKET).createSignedUrls(need, 3600);
+    if (error) imageUrls.why = errText(error);
+    (data || []).forEach(x => { if (x.signedUrl) { imgUrls.set(x.path, {url: x.signedUrl, until: Date.now() + 3300 * 1000}); out[x.path] = x.signedUrl; } else if (x.error) imageUrls.why = String(x.error); });
   }
   return out;
 }
@@ -3728,8 +3729,14 @@ async function loadFicheImages() {
   const imgs = [...document.querySelectorAll('.fi-img img[data-path]')]; if (!imgs.length) return;
   try {
     const urls = await imageUrls(imgs.map(i => i.dataset.path));
-    imgs.forEach(i => { const u = urls[i.dataset.path]; if (u && i.getAttribute('src') !== u) i.src = u; if (!u) i.closest('.fi-img')?.classList.add('broken'); });
-  } catch (e) { imgs.forEach(i => i.closest('.fi-img')?.classList.add('broken')); }
+    imgs.forEach(i => { const u = urls[i.dataset.path]; if (u && i.getAttribute('src') !== u) i.src = u; if (!u) brokenPic(i, imageUrls.why || 'pas de lien reçu'); });
+  } catch (e) { imgs.forEach(i => brokenPic(i, errText(e))); }
+}
+// the tile says why the picture can't be shown (helps to find the cause)
+function brokenPic(i, why) {
+  const f = i.closest('.fi-img'); if (!f) return;
+  f.classList.add('broken'); f.dataset.why = why;
+  console.warn('[TTR] image', i.dataset.path, why);
 }
 function fiSaveState() {
   const n = $('#fi-save'); if (!n) return;

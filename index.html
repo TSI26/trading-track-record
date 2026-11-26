@@ -592,6 +592,81 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .as-res b{font-size:14px}
 .as-res small{font-size:10.5px;color:var(--muted)}
 .m-phone .as-row{grid-template-columns:96px minmax(0,1fr) 82px;gap:8px;padding:7px 8px}
+/* 📆 Dashboard annuel */
+.ya-kpis{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,.85fr) minmax(0,.95fr) repeat(2,minmax(0,1.3fr))}
+.ya-per-txt{font-size:13px;color:var(--muted);margin-top:4px}
+.ya-per-txt b{color:var(--fg)} .ya-per-txt b.on{color:var(--accent)}
+.ya-pre{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.ya-pre > button{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;transition:all .15s}
+.ya-pre > button:hover{color:var(--fg);border-color:var(--line-2)}
+.ya-pre > button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ya-custom{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border-radius:8px;background:color-mix(in srgb,var(--accent) 16%,var(--bg));border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--accent);font-size:12px;font-weight:700}
+.ya-custom button{border:0;background:transparent;color:inherit;font-size:12px;width:20px;height:20px;border-radius:6px}
+.ya-custom button:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.ya-months button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 20%,var(--bg));border-color:color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--fg)}
+.ya-months button.first,.ya-months button.last{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ya-months button.anchor{box-shadow:0 0 0 2px var(--accent)}
+.ya-hint{font-size:11px;color:var(--muted)}
+.ya-row{display:grid;gap:14px}
+.ya-r1{grid-template-columns:minmax(0,2.2fr) minmax(0,1fr)}
+.ya-r2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.ya-eq,.ya-rec,.ya-qt{display:flex;flex-direction:column}
+.ya-ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ya-sync{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:11.5px;font-weight:700;transition:color .15s,border-color .15s,background .15s}
+.ya-sync:hover{color:var(--fg);border-color:var(--line-2)}
+.ya-sync[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 10%,var(--bg))}
+.ya-when{font-weight:600}
+.ya-when.on{color:var(--accent);font-weight:700}
+.ya-hov{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px}
+.ya-hov > span{font-size:11.5px;color:var(--muted);font-weight:600;margin-right:2px}
+.ya-hov button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;padding:4px 11px;font-size:11.5px;font-weight:600;transition:all .15s}
+.ya-hov button:hover:not(:disabled){color:var(--fg);border-color:var(--line-2)}
+.ya-hov button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--line-2)}
+.ya-hov button:disabled{opacity:.4;cursor:not-allowed}
+.ya-eqbox{position:relative;height:340px;cursor:crosshair}
+.ya-ddbox{position:relative;height:130px;cursor:crosshair}
+.ya-dd-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:12px 0 4px;padding-top:12px;border-top:1px dashed var(--line)}
+.ya-dd-head h4{margin:0;font-size:13.5px;font-family:var(--font-display)}
+.ya-dd-head p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.ya-tip{position:absolute;left:0;top:0;z-index:3;min-width:200px;max-width:270px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--surface-2) 94%,transparent);backdrop-filter:blur(10px);border:1px solid var(--line-2);box-shadow:0 16px 36px -14px rgba(0,0,0,.55);pointer-events:none;transition:transform .08s ease-out;font-size:12.5px}
+.ya-th{display:flex;flex-direction:column;gap:3px;font-weight:700;margin-bottom:6px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.ya-th small{color:var(--muted);font-weight:500;font-size:11px}
+.ya-ta i{font-style:normal;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:99px;margin-left:4px}
+.ya-ta i.lg{color:#4b8ff0;background:#4b8ff022} .ya-ta i.sh{color:#a37cf0;background:#a37cf022}
+.ya-tr{display:flex;justify-content:space-between;gap:16px;padding:2px 0;color:var(--muted)}
+.ya-tr b{color:var(--fg)} .ya-tr b.pos{color:var(--win)} .ya-tr b.neg{color:var(--loss)}
+.ya-recs{display:flex;flex-direction:column;flex:1;justify-content:space-between}
+.ya-rr{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.ya-rr:last-child{border-bottom:0}
+.ya-ri{width:32px;height:32px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;font-size:16px}
+.ya-rl{display:flex;flex-direction:column;min-width:0;gap:1px}
+.ya-rl small{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.ya-rl span{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ya-rr b{font-size:15px;white-space:nowrap}
+.ya-mobox{height:290px}
+.ya-qs{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.ya-q{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-height:130px;transition:opacity .2s}
+.ya-q.qpos{border-color:color-mix(in srgb,var(--win) 38%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--win) 11%,var(--bg)),var(--bg) 65%)}
+.ya-q.qneg{border-color:color-mix(in srgb,var(--loss) 38%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--loss) 11%,var(--bg)),var(--bg) 65%)}
+.ya-q.off{opacity:.42}
+.ya-qh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ya-qh b{font-family:var(--font-display);font-size:15px}
+.ya-qh small{color:var(--muted);font-size:11px}
+.ya-qv{font-size:21px;font-weight:800;letter-spacing:-.01em}
+.ya-qv.muted{font-size:13px;color:var(--muted);font-weight:600}
+.ya-qs-sub{font-size:11.5px;color:var(--muted)}
+.ya-qbars{display:flex;gap:8px;align-items:flex-end;height:46px;margin-top:auto;padding-top:6px}
+.ya-qb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
+.ya-qb i{width:100%;max-width:28px;border-radius:4px 4px 2px 2px;display:block;transition:height .45s cubic-bezier(.2,.8,.3,1)}
+.ya-qb i.p{background:var(--win)} .ya-qb i.n{background:var(--loss)}
+.ya-qb small{font-size:10px;color:var(--muted);line-height:1}
+.ya-qb.off{opacity:.3}
+.ya-plbox{height:320px}
+@media (max-width:1250px){.m-desk .ya-r1,.m-desk .ya-r2{grid-template-columns:1fr} .m-desk .ya-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.m-phone .ya-r1,.m-phone .ya-r2{grid-template-columns:1fr}
+.m-phone .ya-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.m-phone .ya-kpis .dm-k2{grid-column:span 2}
+.m-phone .ya-eqbox{height:250px} .m-phone .ya-hint{display:none} .m-phone .ya-qs{grid-template-columns:1fr 1fr}
 .dm-row{display:grid;gap:14px}
 .dm-row.r2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 .dm-row.r3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -3913,7 +3988,7 @@ function renderDashboard(c) {
   const inPage = top ? '' : bar;
   if (tab === 'overview') { renderDash(c); if (inPage) el.insertAdjacentHTML('afterbegin', inPage); } // the first dashboard: a bit of everything
   else if (tab === 'month') renderMonthDash(c, inPage);
-  else el.innerHTML = `${demoFlag()}${inPage}<div class="dsoon"><span>📆</span><b>Dashboard annuel</b>On le construit ensemble à la prochaine étape.</div>`;
+  else renderYearDash(c, inPage);
   document.querySelectorAll('[data-dtab]').forEach(b => b.addEventListener('click', () => { state.dtab = b.dataset.dtab; lsSet('ttr-dtab', state.dtab); render(); }));
 }
 
@@ -4231,19 +4306,25 @@ function bindMonthDash(c) {
   const cam = $('#dm-cam'); if (cam) cam.addEventListener('click', () => snapMonth());
 }
 // P&L par trade (redrawn alone when its $ / R button or its legend is clicked)
-function drawPl(c) {
+function drawPl(c) { plDraw($('#dm-pl'), dmTrades(c, 'm'), dmPlUnit(c) === 'R', dmState().plHide || {}, c); }
+// the P&L par trade chart, shared by the monthly and the yearly dashboards
+// with many trades (a year), the bottom shows the months instead of each asset
+function plDraw(cv, plList, inR, hide0, c) {
   const win = css('--win'), loss = css('--loss'), muted = css('--muted'), accent = css('--accent'), fg = css('--fg');
   const colOf = t => t.res === 'win' ? win : t.res === 'loss' ? loss : muted;
-  const plList = dmTrades(c, 'm'), inR = dmPlUnit(c) === 'R', hide = {...(dmState().plHide || {})};
+  const hide = {...(hide0 || {})};
   if (!inR) hide.rt = true; // in $ the chart shows money only
-  if ($('#dm-pl') && plList.length) {
-    const many = plList.length > 24;
+  if (cv && plList.length) {
+    const many = plList.length > 24, byMonth = plList.length > 45;
     const o = baseOpts({...c, unit: inR ? 'R' : 'cur'});
     let cum = 0; const cumV = plList.map(t => (cum += inR ? (t.rReal || 0) : t.net, round2(cum)));
     const font = o.scales.y.ticks.font;
     // under each bar: the asset of the trade
     o.scales.x.ticks = {...o.scales.x.ticks, autoSkip: plList.length > 30, maxTicksLimit: many ? 30 : 60, maxRotation: 55, minRotation: many ? 55 : 0, font: {...font, size: many ? 10 : 11}, callback: v => { const t = plList[v]; return t ? `${classOf(t.asset_class).emoji} ${t.asset}` : ''; },
       color: x => { const hi = x.chart.$hi; return hi == null ? muted : hi === x.index ? 'rgba(0,0,0,0)' : muted + '66'; }};
+    if (byMonth) { const gap = Math.ceil(46 / Math.max(((cv.clientWidth || 900) - 90) / plList.length, 0.01)), shown = new Set(); let lastK = -1e9;
+      plList.forEach((t, k) => { if ((!k || plList[k - 1].date.slice(0, 7) !== t.date.slice(0, 7)) && k - lastK >= gap) { shown.add(k); lastK = k; } });
+      Object.assign(o.scales.x.ticks, {autoSkip: false, maxRotation: 0, minRotation: 0, font: {...font, size: 11}, callback: v => shown.has(v) ? MONTHS_FR[+plList[v].date.slice(5, 7) - 1] : ''}); }
     o.scales.y.ticks.callback = v => inR ? nf1.format(v) + ' R' : money0(v, c.cur);
     o.scales.y.position = 'right'; o.scales.y.grid = {...(o.scales.y.grid || {}), drawOnChartArea: true};
     o.scales.yrt = {position: 'left', display: !hide.rt, grid: {display: false}, border: {display: false}, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => nf1.format(v) + ' R/T'}};
@@ -4267,7 +4348,7 @@ function drawPl(c) {
     if (!bMax) { o.scales.y.max = 0; o.scales.yrt.max = 0; o.scales.yrt.min = Math.min(rMin, -0.1) * 1.08; }
     // in R, bars and white marks share one scale: a 2 R trade at 5 R/T has its mark well above the bar
     if (inR) { const lo = Math.min(bMin, rMin, 0), hi = Math.max(bMax, rMax, 0); ['y', 'yrt'].forEach(k => { delete o.scales[k].min; delete o.scales[k].max; o.scales[k].suggestedMin = lo; o.scales[k].suggestedMax = hi; }); }
-    const plChart = new Chart($('#dm-pl'), {plugins: [plHover], data: {labels: plList.map((_, i) => i), datasets: [
+    const plChart = new Chart(cv, {plugins: [plHover], data: {labels: plList.map((_, i) => i), datasets: [
       {type: 'line', data: cumV, yAxisID: 'ycum', hidden: !!hide.cum, borderColor: accent, borderWidth: 2.2, tension: 0.25, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: accent, order: 0},
       {type: 'bar', data: bars, backgroundColor: x => { const col = colOf(plList[x.dataIndex] || {}), hi = x.chart.$hi; return hi == null || hi === x.dataIndex ? col : col + '55'; }, borderRadius: 4, maxBarThickness: 34, order: 2},
       {type: 'scatter', yAxisID: 'yrt', hidden: !!hide.rt, data: rts.map((y, i) => ({x: i, y})), pointStyle: 'line', pointRadius: tick, pointHoverRadius: tick, borderColor: fg, borderWidth: 2.5, order: 1}]}, options: o});
@@ -4321,14 +4402,415 @@ function drawMonthDash(c, monthList) {
   drawBal(c);
   DN_KEYS.forEach(k => drawDonut(c, k));
 }
+/* ---------- 📆 Dashboard annuel ---------- */
+// what the yearly page remembers: the year, the chosen period, the units, which charts follow the period
+const YA_HOV = [['date', '📅 Date'], ['asset', '🧩 Actif'], ['bal', '💰 Solde'], ['tcur', '💵 Trade'], ['tR', '🎯 Trade R'], ['pct', '📈 Perf. %'], ['cum', '∑ Cumul'], ['dd', '📉 Drawdown']];
+function yaState() {
+  if (!state.ya) {
+    const s = lsGet('ttr-ya', null) || {};
+    state.ya = {y: new Date().getFullYear(), from: null, to: null, axis: 'trade', eqUnit: 'cur', ddUnit: 'pct', plUnit: 'cur', moUnit: 'cur', qtUnit: 'cur', recUnit: 'cur', ...s};
+    state.ya.sync = {eq: true, mo: true, qt: true, rec: true, pl: true, ...(s.sync || {})};
+    state.ya.hov = {date: true, asset: true, bal: true, tcur: true, dd: true, ...(s.hov || {})};
+    state.ya.plHide = {...(s.plHide || {})};
+  }
+  return state.ya;
+}
+const yaSave = p => { state.ya = {...yaState(), ...p}; lsSet('ttr-ya', state.ya); return state.ya; };
+const yaFull = s => ({from: `${s.y}-01-01`, to: `${s.y}-12-31`});
+const yaPartial = s => !!(s.from && s.to) && (s.from !== `${s.y}-01-01` || s.to !== `${s.y}-12-31`);
+const yaPeriod = s => yaPartial(s) ? {from: s.from, to: s.to} : yaFull(s);
+const yaRange = k => { const s = yaState(); return s.sync[k] ? yaPeriod(s) : yaFull(s); };
+const yaTrades = (c, r) => c.trades.filter(t => t.date >= r.from && t.date <= r.to);
+// $ and % need one currency; with several currencies everything is in R
+const yaU = (c, u) => !c.cur && u !== 'R' ? 'R' : u;
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dShort = s => { const d = parseD(s); return `${d.getDate()} ${MONTHS_FR[d.getMonth()].toLowerCase()}`; };
+const dLong = s => { const t = parseD(s).toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'}); return t.charAt(0).toUpperCase() + t.slice(1); };
+function yaLabel(r) {
+  const a = parseD(r.from), b = parseD(r.to);
+  const fullMonths = a.getDate() === 1 && parseD(ymd(new Date(b.getFullYear(), b.getMonth() + 1, 0))).getTime() === b.getTime();
+  if (r.from.slice(5) === '01-01' && r.to.slice(5) === '12-31') return 'Toute l’année';
+  if (fullMonths) return a.getMonth() === b.getMonth() ? MONTHS_LONG[a.getMonth()] : `${MONTHS_LONG[a.getMonth()]} → ${MONTHS_LONG[b.getMonth()]}`;
+  return `Du ${dShort(r.from)} au ${dShort(r.to)}`;
+}
+// the account trade after trade: balance, cumuls, performance in % and the drawdown, in every unit
+// % = the trading performance only (a deposit or a withdrawal does not count as a gain or a loss)
+function yaSeries(c, r) {
+  let bal = c.accs.reduce((a, x) => a + x.capital, 0), start = null, mov = 0;
+  const ev = [...c.trades.map(t => ({t, date: t.date, time: t.time, createdAt: t.createdAt})), ...c.movs.map(m => ({m, date: m.date, time: '', createdAt: m.createdAt}))].sort(chrono);
+  const pts = [];
+  let cn = 0, cr = 0, tw = 1, pN = 0, pR = 0, pT = 1;
+  for (const e of ev) {
+    if (e.date > r.to) break;
+    if (e.date < r.from) { bal += e.t ? e.t.net : e.m.kind === 'depot' ? e.m.amount : -e.m.amount; continue; }
+    if (start == null) start = bal;
+    if (e.m) { const d = e.m.kind === 'depot' ? e.m.amount : -e.m.amount; bal += d; mov += d; continue; }
+    const t = e.t, before = bal;
+    bal += t.net; cn += t.net; cr += t.rReal || 0; if (before > 0) tw *= 1 + t.net / before;
+    pN = Math.max(pN, cn); pR = Math.max(pR, cr); pT = Math.max(pT, tw);
+    pts.push({t, bal: round2(bal), cn: round2(cn), cr: round2(cr), pct: (tw - 1) * 100, ddN: round2(cn - pN), ddR: round2(cr - pR), ddP: (tw / pT - 1) * 100, mov});
+    mov = 0;
+  }
+  if (start == null) start = bal;
+  pts.unshift({t: null, bal: round2(start), cn: 0, cr: 0, pct: 0, ddN: 0, ddR: 0, ddP: 0, mov: 0});
+  return {start: round2(start), pts};
+}
+const yaEqVal = (p, u) => u === 'cur' ? p.bal : u === 'R' ? p.cr : p.pct;
+const yaDdVal = (p, u) => u === 'cur' ? p.ddN : u === 'R' ? p.ddR : p.ddP;
+const yaFmt = (v, u, c, signed = true) => u === 'cur' ? money(v, c.cur, signed) : u === 'R' ? fR(v, signed) : `${signed && v > 0 ? '+' : ''}${nf2.format(v)} %`.replace('-', '−');
+const yaFmt0 = (v, u, c) => u === 'cur' ? money0(v, c.cur) : u === 'R' ? nf1.format(v) + ' R' : nf1.format(v) + ' %';
+// a group of trades: result in each unit (the % compounds trade after trade)
+function yaSum(c, list, ser) {
+  const byT = new Map(ser.pts.filter(p => p.t).map((p, i, a) => [p.t, p]));
+  let tw = 1; list.forEach(t => { const p = byT.get(t); if (p) { const before = p.bal - t.net; if (before > 0) tw *= 1 + t.net / before; } });
+  const w = list.filter(t => t.res === 'win').length, l = list.filter(t => t.res === 'loss').length;
+  return {n: list.length, w, wr: w + l ? w / (w + l) : null, cur: list.reduce((a, t) => a + t.net, 0), R: list.reduce((a, t) => a + (t.rReal || 0), 0), pct: (tw - 1) * 100};
+}
+const yaSeg = (key, on, opts) => `<div class="dm-tog" role="group">${opts.map(o => `<button type="button" data-yaseg="${key}:${o.v}" aria-pressed="${on === o.v}"${o.off ? ` disabled data-tip="${MULTI_TIP}"` : ''}>${o.l}</button>`).join('')}</div>`;
+const yaUnits = (c, key, on, withPct = true) => yaSeg(key, yaU(c, on), [{v: 'cur', l: esc(curLabel(c)), off: !c.cur}, {v: 'R', l: 'R'}, ...(withPct ? [{v: 'pct', l: '%', off: !c.cur}] : [])]);
+const LINK = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+function yaSyncBtn(k) {
+  const s = yaState(), on = !!s.sync[k];
+  return `<button type="button" class="ya-sync" data-yasync="${k}" aria-pressed="${on}" data-tip="${on ? 'Suit la période choisie en haut · clic pour rester sur toute l’année' : 'Reste sur toute l’année · clic pour suivre la période choisie'}">${LINK}<span>${on ? 'Synchro' : 'Année'}</span></button>`;
+}
+const yaSub = k => { const s = yaState(), r = yaRange(k); return `<span class="ya-when${s.sync[k] && yaPartial(s) ? ' on' : ''}">${yaLabel(r)}</span>`; };
+
+/* the page */
+function renderYearDash(c, bar) {
+  const el = $('#view'), s = yaState();
+  el.innerHTML = `${demoFlag()}${bar}
+  <div class="dm ya" id="ya-cap">
+    <section class="dm-hero ya-hero">${yaHero(c)}</section>
+    <section class="dm-kpis ya-kpis" id="ya-kpis">${yaKpis(c)}</section>
+    <div class="ya-row ya-r1">
+      <section class="dm-card ya-eq" id="ya-eq">${yaEqCard(c)}</section>
+      <section class="dm-card ya-rec" id="ya-rec">${yaRecCard(c)}</section>
+    </div>
+    <div class="ya-row ya-r2">
+      <section class="dm-card ya-mo" id="ya-mo">${yaMoCard(c)}</section>
+      <section class="dm-card ya-qt" id="ya-qt">${yaQtCard(c)}</section>
+    </div>
+    <section class="dm-card ya-pl" id="ya-pl">${yaPlCard(c)}</section>
+    <p class="dm-foot">Trading Track-Record · Année ${s.y} · ${esc(c.accs.length === 1 ? c.accs[0].name : c.accs.length === c.d.accounts.filter(a => !a.archived).length ? 'Tous les comptes' : c.accs.map(a => a.name).join(' · '))}</p>
+  </div>`;
+  const cap = $('#ya-cap');
+  cap.addEventListener('click', yaClick);
+  yaDraw(c, ['kpis', 'eq', 'mo', 'pl']);
+}
+function yaHero(c) {
+  const s = yaState(), P = yaPeriod(s), n = new Date();
+  const yl = c.trades.filter(t => +t.date.slice(0, 4) === s.y), list = yaTrades(c, P);
+  const has = new Set(yl.map(t => +t.date.slice(5, 7) - 1));
+  const mA = parseD(P.from).getMonth(), mB = parseD(P.to).getMonth(), anchor = state.yaAnchor;
+  const pre = [['year', 'Année'], ['q1', 'T1'], ['q2', 'T2'], ['q3', 'T3'], ['q4', 'T4'], ['s1', 'S1'], ['s2', 'S2']];
+  const preOn = k => { const f = yaPreset(k, s.y); return f.from === P.from && f.to === P.to; };
+  const custom = yaPartial(s) && !(P.from.slice(8) === '01' && P.to === ymd(new Date(+P.to.slice(0, 4), +P.to.slice(5, 7), 0)));
+  return `<div class="dm-when">
+      <button type="button" class="dm-arrow" data-yago="${s.y - 1}" aria-label="Année précédente"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+      <div class="dm-title"><h1>Année <span>${s.y}</span></h1><div class="ya-per-txt"><b class="${yaPartial(s) ? 'on' : ''}">${yaLabel(P)}</b> · ${list.length} trade${list.length > 1 ? 's' : ''}</div></div>
+      <button type="button" class="dm-arrow" data-yago="${s.y + 1}" aria-label="Année suivante"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="dm-pick ya-pick">
+      <div class="ya-pre">${pre.map(([k, l]) => `<button type="button" data-yaper="${k}" aria-pressed="${preOn(k)}">${l}</button>`).join('')}${custom ? `<span class="ya-custom">${yaLabel(P)}<button type="button" data-yaper="year" aria-label="Revenir à toute l’année">✕</button></span>` : ''}</div>
+      <div class="dm-months ya-months">${MONTHS_FR.map((m, i) => { const inR = !custom && yaPartial(s) && i >= mA && i <= mB;
+        return `<button type="button" data-yam="${i}" aria-pressed="${inR}" class="${has.has(i) ? 'has' : ''}${s.y === n.getFullYear() && i === n.getMonth() ? ' now' : ''}${inR && i === mA ? ' first' : ''}${inR && i === mB ? ' last' : ''}${anchor === i ? ' anchor' : ''}">${m.replace('.', '')}</button>`; }).join('')}</div>
+      <div class="ya-hint">Clique un mois, puis un autre pour une période · ou glisse la souris sur la courbe</div>
+    </div>
+    <button type="button" class="dm-cam" id="ya-cam" data-tip="Capture de la page"><span>📷</span></button>`;
+}
+function yaPreset(k, y) {
+  const m = {year: [0, 11], q1: [0, 2], q2: [3, 5], q3: [6, 8], q4: [9, 11], s1: [0, 5], s2: [6, 11]}[k] || [0, 11];
+  return {from: ymd(new Date(y, m[0], 1)), to: ymd(new Date(y, m[1] + 1, 0))};
+}
+function yaKpis(c) {
+  const P = yaPeriod(yaState()), list = yaTrades(c, P), ser = yaSeries(c, P);
+  const S = stats(list, {...c, unit: c.cur ? 'cur' : 'R'}), sum = yaSum(c, list, ser);
+  const rT = list.reduce((a, t) => a + (t.rTrade || 0), 0);
+  const mdd = ser.pts.reduce((a, p) => Math.min(a, c.cur ? p.ddP : p.ddR), 0);
+  const kpi = (icon, lbl, v, cls, sub) => `<div class="dm-k"><div class="dm-k-top"><span class="dm-k-ico">${icon}</span><small>${lbl}</small></div><b class="num ${cls || ''}">${v}</b><span class="dm-k-sub">${sub || ''}</span></div>`;
+  const wr = S.winrate, SS = c.cur ? S : stats(list, {...c, unit: 'R'}), aw = SS.avgW, al = SS.avgL == null ? null : Math.abs(SS.avgL), rr = aw != null && al ? aw / al : null, f = v => c.cur ? money(v, c.cur) : fR(v, false);
+  return `${kpi('💰', 'Résultat net', c.cur ? money(sum.cur, c.cur, true) : fR(sum.R), sgnCls(c.cur ? sum.cur : sum.R), c.cur ? `<span class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</span> de performance` : '')}
+    <div class="dm-k dm-k2"><div><div class="dm-k-top"><span class="dm-k-ico">🎯</span><small>R réel</small></div><b class="num ${sgnCls(sum.R)}">${fR(sum.R)}</b></div><i class="dm-k-sep"></i><div class="dm-k-rt"><div class="dm-k-top"><span class="dm-k-ico">📐</span><small>R / Trade</small></div><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
+    ${kpi('⚖️', 'Profit factor', S.pf === Infinity ? '∞' : S.pf == null ? '—' : nf2.format(S.pf), S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg', '')}
+    ${kpi('📉', 'Drawdown max', mdd ? (c.cur ? yaFmt(mdd, 'pct', c) : fR(mdd)) : '0', mdd ? 'neg' : '', 'sous le plus haut')}
+    <div class="dm-k dm-g"><div class="dm-g-txt"><div class="dm-k-top"><span class="dm-k-ico">🏆</span><small>Win rate</small></div><b class="num">${wr == null ? '—' : fPct(wr, 1)}</b><span class="dm-k-sub">sur ${list.length} trade${list.length > 1 ? 's' : ''}${S.be ? ` · ${S.be} BE` : ''}</span></div>
+      <div class="dm-g-viz"><canvas data-frac="${wr == null ? '' : wr}"></canvas><div class="dm-g-leg"><span class="pos">${S.wins} gagnés</span><span class="neg">${S.losses} perdus</span></div></div></div>
+    <div class="dm-k dm-g"><div class="dm-g-txt"><div class="dm-k-top"><span class="dm-k-ico">📏</span><small>Ratio gain / perte</small></div><b class="num">${rr == null ? '—' : '1 : ' + nf2.format(rr)}</b><span class="dm-k-sub">gain moyen ÷ perte moyenne</span></div>
+      <div class="dm-g-viz"><canvas data-frac="${aw != null && al ? aw / (aw + al) : ''}"></canvas><div class="dm-g-leg"><span class="pos">⊕ ${aw == null ? '—' : f(aw)}</span><span class="neg">⊖ ${al == null ? '—' : f(al)}</span></div></div></div>`;
+}
+
+/* 📈 equity curve + 📉 drawdown (one card: same axis, same mouse) */
+function yaEqCard(c) {
+  const s = yaState(), r = yaRange('eq'), ser = yaSeries(c, r), u = yaU(c, s.eqUnit), du = yaU(c, s.ddUnit), n = ser.pts.length - 1;
+  const last = ser.pts[n], first = ser.pts[0];
+  const head = !n ? '' : u === 'cur' ? `${money(first.bal, c.cur)} → <b>${money(last.bal, c.cur)}</b> · <span class="${sgnCls(last.pct)}">${yaFmt(last.pct, 'pct', c)}</span>` : u === 'R' ? `<b class="${sgnCls(last.cr)}">${fR(last.cr)}</b> sur ${n} trades` : `<b class="${sgnCls(last.pct)}">${yaFmt(last.pct, 'pct', c)}</b> sur ${n} trades`;
+  const mdd = ser.pts.reduce((a, p) => Math.min(a, yaDdVal(p, du)), 0), now = yaDdVal(last, du);
+  return `<div class="dm-card-head"><div><h3>📈 Equity curve</h3><p>${yaSub('eq')}${head ? ' · ' + head : ''}</p></div>
+      <div class="ya-ctl">${yaSeg('axis', s.axis, [{v: 'trade', l: 'Trades'}, {v: 'date', l: 'Dates'}])}${yaUnits(c, 'eqUnit', s.eqUnit)}${yaSyncBtn('eq')}</div></div>
+    <div class="ya-hov"><span>Au survol :</span>${YA_HOV.map(([k, l]) => { const off = !c.cur && (k === 'bal' || k === 'pct' || k === 'tcur'); return `<button type="button" data-yahov="${k}" aria-pressed="${!!s.hov[k] && !off}"${off ? ` disabled data-tip="${MULTI_TIP}"` : ''}>${k === 'tcur' && c.cur ? `💵 Trade ${esc(curSym(c.cur))}` : l}</button>`; }).join('')}</div>
+    ${n ? `<div class="ya-eqbox"><canvas id="ya-eq-cv"></canvas><div class="ya-tip" id="ya-tip" hidden></div></div>
+    <div class="ya-dd-head"><div><h4>📉 Drawdown</h4><p>Sous le plus haut · aujourd’hui <b class="${now < 0 ? 'neg' : ''}">${yaFmt(now, du, c)}</b> · pire <b class="${mdd < 0 ? 'neg' : ''}">${yaFmt(mdd, du, c)}</b></p></div>${yaSeg('ddUnit', du, [{v: 'pct', l: '%', off: !c.cur}, {v: 'cur', l: esc(curLabel(c)), off: !c.cur}, {v: 'R', l: 'R'}])}</div>
+    <div class="ya-ddbox"><canvas id="ya-dd-cv"></canvas></div>` : `<div class="dm-box">${dmEmpty()}</div>`}`;
+}
+// a thin line that follows the mouse, a soft band while selecting, and the month separators
+const yaCross = {id: 'yaCross',
+  beforeDatasetsDraw(ch, _a, op) {
+    const a = ch.chartArea, g = ch.ctx, x = ch.scales.x; if (!x) return;
+    g.save();
+    if (op && op.bounds && op.bounds.length) { g.strokeStyle = css('--line'); g.lineWidth = 1; g.setLineDash([3, 4]); op.bounds.forEach(k => { const px = x.getPixelForValue(k - 0.5); g.beginPath(); g.moveTo(px, a.top); g.lineTo(px, a.bottom); g.stroke(); }); g.setLineDash([]); }
+    if (ch.$sel) { const p1 = x.getPixelForValue(Math.min(...ch.$sel)), p2 = x.getPixelForValue(Math.max(...ch.$sel)); g.fillStyle = css('--accent') + '22'; g.fillRect(p1, a.top, Math.max(p2 - p1, 2), a.bottom - a.top); g.strokeStyle = css('--accent') + '88'; g.strokeRect(p1 + .5, a.top + .5, Math.max(p2 - p1, 2) - 1, a.bottom - a.top - 1); }
+    g.restore();
+  },
+  afterDatasetsDraw(ch, _a, op) {
+    const i = ch.$hi; if (i == null) return;
+    const a = ch.chartArea, g = ch.ctx, pt = ch.getDatasetMeta(0).data[i]; if (!pt) return;
+    g.save(); g.strokeStyle = css('--fg') + '55'; g.lineWidth = 1; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(pt.x, a.top); g.lineTo(pt.x, a.bottom); g.stroke(); g.setLineDash([]);
+    const col = (op && op.dot) ? op.dot(i) : css('--fg');
+    g.fillStyle = col + '33'; g.beginPath(); g.arc(pt.x, pt.y, 9, 0, Math.PI * 2); g.fill();
+    g.fillStyle = col; g.strokeStyle = css('--surface'); g.lineWidth = 2; g.beginPath(); g.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2); g.fill(); g.stroke();
+    g.restore();
+  }
+};
+// little labelled marks on the curves: the start line, the highest point, deposits, the worst drawdown
+const yaMarks = {id: 'yaMarks',
+  beforeDatasetDraw(ch, a, op) { if (op && op.glow && a.index === 0) { ch.ctx.save(); ch.ctx.shadowColor = op.glow; ch.ctx.shadowBlur = 10; ch.ctx.shadowOffsetY = 3; } },
+  afterDatasetDraw(ch, a, op) { if (op && op.glow && a.index === 0) ch.ctx.restore(); },
+  afterDatasetsDraw(ch, _a, op) {
+    if (!op) return; const g = ch.ctx, A = ch.chartArea, y = ch.scales.y, meta = ch.getDatasetMeta(0).data;
+    const pill = (txt, x, yy, color, align = 'left') => { g.font = "600 11px 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif"; const w = g.measureText(txt).width + 12, h = 19;
+      let x0 = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x; x0 = Math.max(A.left + 2, Math.min(A.right - w - 2, x0)); const y0 = Math.max(A.top + 2, Math.min(A.bottom - h - 2, yy - h / 2));
+      g.fillStyle = css('--surface'); g.globalAlpha = .9; g.beginPath(); g.roundRect(x0, y0, w, h, 6); g.fill(); g.globalAlpha = 1; g.strokeStyle = color + '66'; g.lineWidth = 1; g.stroke(); g.fillStyle = color; g.textBaseline = 'middle'; g.fillText(txt, x0 + 6, y0 + h / 2 + .5); };
+    g.save();
+    if (op.base != null) { const py = y.getPixelForValue(op.base); g.strokeStyle = css('--muted') + 'aa'; g.setLineDash([5, 5]); g.lineWidth = 1; g.beginPath(); g.moveTo(A.left, py); g.lineTo(A.right, py); g.stroke(); g.setLineDash([]); if (op.baseTxt) pill(op.baseTxt, A.left + 6, py - 14, css('--muted')); }
+    (op.movs || []).forEach(m => { const p = meta[m.i]; if (!p) return; const col = css(m.v > 0 ? '--dep' : '--ret'); g.fillStyle = col; g.save(); g.translate(p.x, p.y); g.rotate(Math.PI / 4); g.fillRect(-4, -4, 8, 8); g.restore(); });
+    if (ch.$hi == null && op.mark) { const p = meta[op.mark.i]; if (p) { const col = op.mark.color; g.fillStyle = col; g.strokeStyle = css('--surface'); g.lineWidth = 2; g.beginPath(); g.arc(p.x, p.y, 4, 0, Math.PI * 2); g.fill(); g.stroke(); pill(op.mark.txt, p.x, op.mark.below ? p.y + 16 : p.y - 16, col, 'center'); } }
+    if (op.end) { const p = meta[meta.length - 1]; if (p) { g.fillStyle = op.end + '30'; g.beginPath(); g.arc(p.x, p.y, 8, 0, Math.PI * 2); g.fill(); g.fillStyle = op.end; g.beginPath(); g.arc(p.x, p.y, 3.8, 0, Math.PI * 2); g.fill(); } }
+    g.restore();
+  }
+};
+let yaCh = {};
+function yaKill(k) { const ch = yaCh[k]; if (ch) { const i = charts.indexOf(ch); if (i > -1) charts.splice(i, 1); ch.destroy(); } delete yaCh[k]; }
+function yaDrawEq(c) {
+  yaKill('eq'); yaKill('dd');
+  const s = yaState(), cv = $('#ya-eq-cv'), dv = $('#ya-dd-cv'); if (!cv) return;
+  const r = yaRange('eq'), ser = yaSeries(c, r), P = ser.pts, u = yaU(c, s.eqUnit), du = yaU(c, s.ddUnit);
+  const fg = css('--fg'), win = css('--win'), loss = css('--loss'), muted = css('--muted'), line = css('--line');
+  const vals = P.map(p => yaEqVal(p, u)), dds = P.map(p => yaDdVal(p, du)), base = u === 'cur' ? ser.start : 0;
+  const bounds = []; for (let k = 2; k < P.length; k++) if (P[k].t.date.slice(0, 7) !== P[k - 1].t.date.slice(0, 7)) bounds.push(k);
+  const byDate = s.axis === 'date';
+  // dates: a month name where the month starts, skipped when it would touch the previous one
+  const gap = Math.ceil(46 / Math.max(((cv.clientWidth || 800) - 90) / Math.max(P.length - 1, 1), 0.01)), shown = new Set(); let lastK = -1e9;
+  for (let k = 1; k < P.length; k++) if (k === 1 || P[k].t.date.slice(0, 7) !== P[k - 1].t.date.slice(0, 7)) { if (k - lastK >= gap) { shown.add(k); lastK = k; } }
+  const font = {family: "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif", size: 11.5};
+  const xTicks = {color: muted, font, maxRotation: 0, autoSkip: !byDate, maxTicksLimit: byDate ? 400 : 12,
+    callback: v => byDate ? (shown.has(v) ? MONTHS_FR[+P[v].t.date.slice(5, 7) - 1] : '') : v === 0 ? 'Départ' : String(v)};
+  const yFit = sc => { sc.width = 74; };
+  const common = {maintainAspectRatio: false, animation: {duration: 450, easing: 'easeOutQuart'}, events: [], layout: {padding: {top: 8, right: 10}}};
+  const pk = vals.reduce((b, v, i) => v > vals[b] ? i : b, 0);
+  const movs = u === 'cur' ? P.map((p, i) => ({i, v: p.mov})).filter(m => m.v) : [];
+  yaCh.eq = new Chart(cv, {type: 'line', plugins: [yaCross, yaMarks], data: {labels: P.map((_, i) => i), datasets: [{data: vals, borderColor: fg, borderWidth: 2.4, tension: 0.32, cubicInterpolationMode: 'monotone', pointRadius: 0,
+      fill: {target: {value: base}, above: win + '24', below: loss + '2e'}}]},
+    options: {...common, scales: {x: {display: true, grid: {display: false}, border: {display: false}, ticks: {...xTicks, display: false}},
+      y: {grid: {color: line}, border: {display: false}, afterFit: yFit, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => yaFmt0(v, u, c)}}},
+      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: byDate ? bounds : [], dot: i => vals[i] >= base ? win : loss},
+        yaMarks: {glow: fg + '40', base, baseTxt: `Départ · ${yaFmt(base, u, c, false)}`, movs, mark: pk > 0 && vals[pk] > base ? {i: pk, txt: `Plus haut · ${yaFmt(vals[pk], u, c, u !== 'cur')}`, color: win} : null, end: vals[vals.length - 1] >= base ? win : loss}}}});
+  charts.push(yaCh.eq);
+  const wi = dds.reduce((b, v, i) => v < dds[b] ? i : b, 0);
+  yaCh.dd = new Chart(dv, {type: 'line', plugins: [yaCross, yaMarks], data: {labels: P.map((_, i) => i), datasets: [{data: dds, borderColor: loss, borderWidth: 1.6, tension: 0.3, cubicInterpolationMode: 'monotone', pointRadius: 0, fill: {target: 'origin', below: loss + '30', above: 'transparent'}}]},
+    options: {...common, layout: {padding: {top: 4, right: 10}}, scales: {x: {grid: {display: false}, border: {color: line}, ticks: xTicks},
+      y: {max: 0, grid: {color: line}, border: {display: false}, afterFit: yFit, ticks: {color: muted, font, maxTicksLimit: 3, callback: v => yaFmt0(v, du, c)}}},
+      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: byDate ? bounds : [], dot: () => loss}, yaMarks: {mark: dds[wi] < 0 ? {i: wi, txt: `Pire · ${yaFmt(dds[wi], du, c)}`, color: loss, below: true} : null}}}});
+  charts.push(yaCh.dd);
+  // the mouse: same place on both charts, a card with the chosen details, drag to choose a period
+  const idx = (ch, e) => { const x = ch.scales.x, b = ch.canvas.getBoundingClientRect(); return Math.max(0, Math.min(P.length - 1, Math.round(x.getValueForPixel(e.clientX - b.left)))); };
+  const inside = (ch, e) => { const a = ch.chartArea, b = ch.canvas.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top; return x >= a.left - 6 && x <= a.right + 6 && y >= a.top - 6 && y <= a.bottom + 6; };
+  [yaCh.eq, yaCh.dd].forEach(ch => {
+    ch.canvas.addEventListener('mousemove', e => { if (!inside(ch, e) && !yaCh.eq.$drag) return yaHi(null); const i = idx(ch, e); if (yaCh.eq.$drag && ch === yaCh.eq) { yaCh.eq.$sel = [yaCh.eq.$drag.i, i]; } yaHi(i, ser, c); });
+    ch.canvas.addEventListener('mouseleave', () => { if (!yaCh.eq || !yaCh.eq.$drag) yaHi(null); });
+  });
+  const eq = yaCh.eq;
+  eq.canvas.addEventListener('mousedown', e => { if (e.button || !inside(eq, e)) return; e.preventDefault(); eq.$drag = {i: idx(eq, e)}; eq.$sel = null; });
+  eq.$P = P; eq.$idx = e => idx(eq, e);
+  if (!yaDrawEq.bound) { yaDrawEq.bound = true; window.addEventListener('mouseup', yaUp); }
+}
+// end of a drag on the curve: the selected stretch becomes the period
+function yaUp(e) {
+  const ch = yaCh.eq; if (!ch || !ch.$drag || !ch.canvas.isConnected) return;
+  const a = ch.$drag.i, b = ch.$idx(e), sel = ch.$sel, P = ch.$P; ch.$drag = null; ch.$sel = null; ch.update('none');
+  if (sel && Math.abs(b - a) >= 2) { const i1 = Math.max(1, Math.min(a, b)), i2 = Math.max(a, b); yaSetPeriod(P[i1].t.date, P[i2].t.date); }
+}
+// one place for the mouse: both charts show the same trade, and the little card shows what you chose to see
+function yaHi(i, ser, c) {
+  ['eq', 'dd'].forEach(k => { const ch = yaCh[k]; if (!ch || !ch.canvas.isConnected) return; if (ch.$hi !== i || ch.$sel) { ch.$hi = i; if (!ch.$raf) ch.$raf = requestAnimationFrame(() => { ch.$raf = 0; if (ch.canvas.isConnected) ch.update('none'); }); } });
+  const tip = $('#ya-tip'); if (!tip) return;
+  if (i == null || !ser) { tip.hidden = true; return; }
+  yaCh.tip = {i, ser, c}; yaTipFill();
+}
+function yaTipFill() {
+  const tip = $('#ya-tip'), T = yaCh.tip, ch = yaCh.eq; if (!tip || !T || !ch) return;
+  const {i, ser, c} = T, s = yaState(), h = s.hov, p = ser.pts[i], t = p.t, u = yaU(c, s.eqUnit), du = yaU(c, s.ddUnit);
+  const row = (ico, l, v, cls = '') => `<div class="ya-tr"><span>${ico} ${l}</span><b class="num ${cls}">${v}</b></div>`;
+  let html = '';
+  if (!t) html = `<div class="ya-th">Début de la période</div>${c.cur ? row('💰', 'Solde', money(p.bal, c.cur)) : ''}`;
+  else {
+    const top = [h.date ? `<span>${dLong(t.date)}${t.time ? ' · ' + t.time : ''}</span>` : '', h.asset ? `<span class="ya-ta">${classOf(t.asset_class).emoji} ${esc(t.asset)} <i class="${t.side === 'short' ? 'sh' : 'lg'}">${t.side === 'short' ? 'Short' : 'Long'}</i></span>` : ''].filter(Boolean).join('');
+    html = `<div class="ya-th">${top || `Trade n°${i}`}<small>Trade n°${i}</small></div>`;
+    if (h.bal && c.cur) html += row('💰', 'Solde', money(p.bal, c.cur));
+    if (h.tcur && c.cur) html += row('💵', 'Trade', money(t.net, c.cur, true), sgnCls(t.net));
+    if (h.tR) html += row('🎯', 'Trade', fR(t.rReal), sgnCls(t.rReal));
+    if (h.pct && c.cur) html += row('📈', 'Perf. période', yaFmt(p.pct, 'pct', c), sgnCls(p.pct));
+    if (h.cum) html += row('∑', 'Cumul', u === 'cur' ? money(p.cn, c.cur, true) : u === 'R' ? fR(p.cr) : yaFmt(p.pct, 'pct', c), sgnCls(u === 'cur' ? p.cn : u === 'R' ? p.cr : p.pct));
+    if (h.dd) { const v = yaDdVal(p, du); html += row('📉', 'Drawdown', v ? yaFmt(v, du, c) : 'au plus haut', v ? 'neg' : 'pos'); }
+    if (p.mov && c.cur) html += row(p.mov > 0 ? '🔷' : '🔶', p.mov > 0 ? 'Dépôt avant' : 'Retrait avant', money(p.mov, c.cur, true));
+  }
+  tip.innerHTML = html; tip.hidden = false;
+  const pt = ch.getDatasetMeta(0).data[i], box = tip.parentElement.getBoundingClientRect(), w = tip.offsetWidth, a = ch.chartArea;
+  if (!pt) return;
+  let x = pt.x + 18; if (x + w > box.width - 6) x = pt.x - w - 18;
+  const y = Math.max(a.top, Math.min(pt.y - tip.offsetHeight / 2, a.bottom - tip.offsetHeight));
+  tip.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+}
+function yaSetPeriod(from, to) {
+  const s = yaState(); if (from > to) [from, to] = [to, from];
+  const full = from === `${s.y}-01-01` && to === `${s.y}-12-31`;
+  yaSave({from: full ? null : from, to: full ? null : to}); state.yaAnchor = null;
+  yaRepaint(['hero', 'kpis', ...['eq', 'rec', 'mo', 'qt', 'pl'].filter(k => yaState().sync[k])]);
+}
+
+/* 🏆 records of the period */
+function yaRecCard(c) {
+  const s = yaState(), r = yaRange('rec'), list = yaTrades(c, r), ser = yaSeries(c, r), u = yaU(c, s.recUnit) === 'cur' ? 'cur' : 'R';
+  const head = `<div class="dm-card-head"><div><h3>🏆 Records</h3><p>${yaSub('rec')}</p></div><div class="ya-ctl">${yaUnits(c, 'recUnit', u, false)}${yaSyncBtn('rec')}</div></div>`;
+  if (!list.length) return head + `<div class="dm-box">${dmEmpty()}</div>`;
+  const v = t => u === 'cur' ? t.net : t.rReal || 0, f = x => yaFmt(x, u, c);
+  const best = list.reduce((a, t) => v(t) > v(a) ? t : a), worst = list.reduce((a, t) => v(t) < v(a) ? t : a);
+  const months = {}; list.forEach(t => { const k = t.date.slice(0, 7); (months[k] ||= []).push(t); });
+  const ms = Object.entries(months).map(([k, ts]) => ({k, v: ts.reduce((a, t) => a + v(t), 0), n: ts.length}));
+  const bm = ms.reduce((a, m) => m.v > a.v ? m : a), wm = ms.reduce((a, m) => m.v < a.v ? m : a);
+  let cw = 0, cl = 0, mw = {n: 0}, ml = {n: 0}, sw = null, sl = null;
+  list.forEach(t => { if (t.res === 'win') { if (!cw) sw = t; cw++; cl = 0; if (cw > mw.n) mw = {n: cw, a: sw, b: t}; } else if (t.res === 'loss') { if (!cl) sl = t; cl++; cw = 0; if (cl > ml.n) ml = {n: cl, a: sl, b: t}; } });
+  const du = c.cur ? 'pct' : 'R'; let wd = 0, wdI = 0; ser.pts.forEach((p, i) => { const d = yaDdVal(p, du); if (d < wd) { wd = d; wdI = i; } });
+  let pkI = 0; for (let i = wdI; i >= 0; i--) if (yaDdVal(ser.pts[i], du) === 0) { pkI = i; break; }
+  const mName = k => `${MONTHS_LONG[+k.slice(5, 7) - 1]}`;
+  const pos = ms.filter(m => m.v > 0).length;
+  const row = (ico, l, val, cls, sub) => `<div class="ya-rr"><span class="ya-ri">${ico}</span><div class="ya-rl"><small>${l}</small><span>${sub}</span></div><b class="num ${cls}">${val}</b></div>`;
+  const span = (a, b) => a && b ? (a.date === b.date ? `le ${dShort(a.date)}` : `du ${dShort(a.date)} au ${dShort(b.date)}`) : '';
+  return head + `<div class="ya-recs">
+    ${row('🚀', 'Meilleur trade', f(v(best)), sgnCls(v(best)), `${classOf(best.asset_class).emoji} ${esc(best.asset)} · ${dShort(best.date)}`)}
+    ${row('💥', 'Pire trade', f(v(worst)), sgnCls(v(worst)), `${classOf(worst.asset_class).emoji} ${esc(worst.asset)} · ${dShort(worst.date)}`)}
+    ${row('📅', 'Meilleur mois', f(bm.v), sgnCls(bm.v), `${mName(bm.k)} · ${bm.n} trade${bm.n > 1 ? 's' : ''}`)}
+    ${row('🥶', 'Pire mois', f(wm.v), sgnCls(wm.v), `${mName(wm.k)} · ${wm.n} trade${wm.n > 1 ? 's' : ''}`)}
+    ${row('🔥', 'Série gagnante', `${mw.n}`, 'pos', mw.n ? `trades gagnés d’affilée · ${span(mw.a, mw.b)}` : 'aucune')}
+    ${row('🧊', 'Série perdante', `${ml.n}`, ml.n ? 'neg' : '', ml.n ? `trades perdus d’affilée · ${span(ml.a, ml.b)}` : 'aucune')}
+    ${row('📉', 'Pire drawdown', wd ? yaFmt(wd, du, c) : '0', wd ? 'neg' : '', wd ? span(ser.pts[pkI].t || ser.pts[1].t, ser.pts[wdI].t) : 'jamais sous le plus haut')}
+    ${row('✅', 'Mois positifs', `${pos} / ${ms.length}`, pos >= ms.length / 2 ? 'pos' : 'neg', `${Math.round(pos / ms.length * 100)} % des mois tradés`)}
+  </div>`;
+}
+
+/* 📅 month by month · 🧭 quarters */
+function yaMonths(c, r, u) {
+  const ser = yaSeries(c, r), list = yaTrades(c, r), y = yaState().y;
+  const a = parseD(r.from).getMonth(), b = parseD(r.to).getMonth();
+  const out = []; for (let m = a; m <= b; m++) { const ts = list.filter(t => +t.date.slice(5, 7) - 1 === m); const S = yaSum(c, ts, ser); out.push({m, y, ...S, v: S[u]}); }
+  return out;
+}
+function yaMoCard(c) {
+  const s = yaState(), u = yaU(c, s.moUnit), r = yaRange('mo'), ms = yaMonths(c, r, u);
+  const tot = yaSum(c, yaTrades(c, r), yaSeries(c, r));
+  return `<div class="dm-card-head"><div><h3>📅 Mois par mois</h3><p>${yaSub('mo')} · total <b class="${sgnCls(tot[u])}">${yaFmt(tot[u], u, c)}</b> · clique un mois pour l’ouvrir</p></div><div class="ya-ctl">${yaUnits(c, 'moUnit', s.moUnit)}${yaSyncBtn('mo')}</div></div>
+    <div class="dm-box ya-mobox">${ms.some(m => m.n) ? '<canvas id="ya-mo-cv"></canvas>' : dmEmpty()}</div>`;
+}
+const yaBarVals = {id: 'yaBarVals', afterDatasetsDraw(ch, _a, op) {
+  if (!op) return; const g = ch.ctx, meta = ch.getDatasetMeta(0).data; g.save(); g.font = "700 11.5px 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif"; g.textAlign = 'center';
+  meta.forEach((b, i) => { const m = op.ms[i]; if (!m || !m.n) return; const up = m.v >= 0; g.fillStyle = up ? css('--win') : css('--loss'); g.globalAlpha = ch.$hi == null || ch.$hi === i ? 1 : .35; g.textBaseline = up ? 'bottom' : 'top'; g.fillText(op.fmt(m.v), b.x, up ? b.y - 5 : b.y + 5); });
+  g.restore(); }};
+function yaDrawMo(c) {
+  yaKill('mo'); const cv = $('#ya-mo-cv'); if (!cv) return;
+  const s = yaState(), u = yaU(c, s.moUnit), ms = yaMonths(c, yaRange('mo'), u);
+  const win = css('--win'), loss = css('--loss'), muted = css('--muted'), line = css('--line');
+  const o = baseOpts({...c, unit: u === 'R' ? 'R' : 'cur'});
+  o.scales.x.ticks = {...o.scales.x.ticks, maxTicksLimit: 12, autoSkip: false, callback: function (v, i) { const m = MONTHS_FR[ms[i].m].replace('.', ''); return this.chart.width < 560 && ms.length > 6 ? m.charAt(0) : m; }};
+  o.scales.y.ticks.callback = v => yaFmt0(v, u, c); o.scales.y.grace = '14%';
+  o.layout = {padding: {top: 6}};
+  o.plugins.tooltip.callbacks = {title: it => `${MONTHS_LONG[ms[it[0].dataIndex].m]} ${s.y}`, label: x => { const m = ms[x.dataIndex]; return m.n ? [` ${yaFmt(m.v, u, c)}`, ` ${m.n} trade${m.n > 1 ? 's' : ''} · ${m.wr == null ? '—' : Math.round(m.wr * 100) + ' %'} réussite`] : ' Pas de trade'; }};
+  o.plugins.yaBarVals = {ms, fmt: v => yaFmt0(v, u, c).replace(/^(?=\d)/, v > 0 ? '+' : '')};
+  o.onHover = (e, els, ch) => { const i = els.length ? els[0].index : null; ch.canvas.style.cursor = i != null && ms[i].n ? 'pointer' : ''; if (ch.$hi !== i) { ch.$hi = i; ch.update('none'); } };
+  o.onClick = (e, els) => { if (!els.length) return; const m = ms[els[0].index]; if (!m.n) return; setTimeout(() => { state.dm = {...dmState(), y: s.y, m: m.m}; lsSet('ttr-dm', state.dm); state.dtab = 'month'; lsSet('ttr-dtab', 'month'); render(); window.scrollTo({top: 0, behavior: 'smooth'}); }, 0); };
+  o.interaction = {mode: 'index', intersect: false};
+  yaCh.mo = new Chart(cv, {type: 'bar', plugins: [yaBarVals], data: {labels: ms.map(m => m.m), datasets: [{data: ms.map(m => round2(m.v)), borderRadius: 6, maxBarThickness: 46,
+    backgroundColor: x => { const m = ms[x.dataIndex] || {}, col = m.v >= 0 ? win : loss, hi = x.chart.$hi; return hi == null || hi === x.dataIndex ? col : col + '55'; }}]}, options: o});
+  yaCh.mo.canvas.addEventListener('mouseleave', () => { const ch = yaCh.mo; if (ch && ch.$hi != null) { ch.$hi = null; ch.update('none'); } });
+  charts.push(yaCh.mo);
+}
+function yaQtCard(c) {
+  const s = yaState(), u = yaU(c, s.qtUnit), r = yaRange('qt'), list = yaTrades(c, r), ser = yaSeries(c, r);
+  const a = parseD(r.from).getMonth(), b = parseD(r.to).getMonth();
+  const qs = [0, 1, 2, 3].map(q => {
+    const mIn = [0, 1, 2].map(k => q * 3 + k).filter(m => m >= a && m <= b);
+    const ts = list.filter(t => mIn.includes(+t.date.slice(5, 7) - 1));
+    const months = [0, 1, 2].map(k => { const m = q * 3 + k, mt = ts.filter(t => +t.date.slice(5, 7) - 1 === m); return {m, on: mIn.includes(m), n: mt.length, v: yaSum(c, mt, ser)[u]}; });
+    return {q, on: mIn.length > 0, months, ...yaSum(c, ts, ser)};
+  });
+  const big = Math.max(...qs.flatMap(q => q.months.map(m => Math.abs(m.v))), 1e-9);
+  return `<div class="dm-card-head"><div><h3>🧭 Trimestres</h3><p>${yaSub('qt')}</p></div><div class="ya-ctl">${yaUnits(c, 'qtUnit', s.qtUnit)}${yaSyncBtn('qt')}</div></div>
+    <div class="ya-qs">${qs.map(q => { const v = q[u];
+      return `<div class="ya-q ${q.on ? (q.n ? (v > 0 ? 'qpos' : v < 0 ? 'qneg' : '') : 'empty') : 'off'}">
+        <div class="ya-qh"><b>T${q.q + 1}</b><small>${MONTHS_FR[q.q * 3].replace('.', '')} – ${MONTHS_FR[q.q * 3 + 2].replace('.', '')}</small></div>
+        ${!q.on ? '<span class="ya-qv muted">Hors période</span>' : q.n ? `<span class="ya-qv num ${sgnCls(v)}">${yaFmt(v, u, c)}</span><span class="ya-qs-sub">${q.n} trade${q.n > 1 ? 's' : ''} · ${q.wr == null ? '—' : Math.round(q.wr * 100) + ' %'} réussite</span>` : '<span class="ya-qv muted">Pas de trade</span>'}
+        <div class="ya-qbars">${q.months.map(m => `<div class="ya-qb${m.on ? '' : ' off'}" data-tip="${MONTHS_LONG[m.m]} · ${m.n ? yaFmt(m.v, u, c) : 'pas de trade'}"><i class="${m.v >= 0 ? 'p' : 'n'}" style="height:${m.n ? Math.max(Math.abs(m.v) / big * 100, 6) : 0}%"></i><small>${MONTHS_FR[m.m].charAt(0)}</small></div>`).join('')}</div>
+      </div>`; }).join('')}</div>`;
+}
+
+/* 📊 every trade of the period */
+function yaPlCard(c) {
+  const s = yaState(), r = yaRange('pl'), list = yaTrades(c, r), inR = yaU(c, s.plUnit) === 'R';
+  return `<div class="dm-card-head"><div><h3>📊 P&L par trade</h3><p>${yaSub('pl')} · ${list.length} trade${list.length > 1 ? 's' : ''}</p>
+      <div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-yalg="${k}" aria-pressed="${!s.plHide[k]}"${k === 'rt' && !inR ? ' hidden' : ''}><i></i>${l}</button>`).join('')}</div></div>
+      <div class="ya-ctl">${yaUnits(c, 'plUnit', s.plUnit, false)}${yaSyncBtn('pl')}</div></div>
+    <div class="dm-box ya-plbox">${list.length ? '<canvas id="ya-pl-cv"></canvas>' : dmEmpty()}</div>`;
+}
+function yaDrawPl(c) {
+  yaKill('pl'); const cv = $('#ya-pl-cv'); if (!cv) return;
+  const s = yaState(); plDraw(cv, yaTrades(c, yaRange('pl')), yaU(c, s.plUnit) === 'R', s.plHide, c); yaCh.pl = Chart.getChart(cv);
+}
+
+/* redraw only what changed */
+function yaDraw(c, keys) {
+  if (keys.includes('kpis')) document.querySelectorAll('#ya-kpis .dm-g-viz canvas').forEach(cv => drawGauge(cv, cv.dataset.frac === '' ? null : +cv.dataset.frac));
+  if (keys.includes('eq')) yaDrawEq(c);
+  if (keys.includes('mo')) yaDrawMo(c);
+  if (keys.includes('pl')) yaDrawPl(c);
+}
+function yaRepaint(keys) {
+  const c = ctx(), box = {hero: ['.ya-hero', yaHero], kpis: ['#ya-kpis', yaKpis], eq: ['#ya-eq', yaEqCard], rec: ['#ya-rec', yaRecCard], mo: ['#ya-mo', yaMoCard], qt: ['#ya-qt', yaQtCard], pl: ['#ya-pl', yaPlCard]};
+  keys.forEach(k => { const b = box[k], el = b && document.querySelector(b[0]); if (el) el.innerHTML = b[1](c); });
+  yaDraw(c, keys);
+}
+function yaClick(e) {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  const ds = b.dataset, s = yaState();
+  if (ds.yaseg) { const [k, v] = ds.yaseg.split(':'); yaSave({[k]: v}); const card = {axis: 'eq', eqUnit: 'eq', ddUnit: 'eq', moUnit: 'mo', qtUnit: 'qt', recUnit: 'rec', plUnit: 'pl'}[k]; return yaRepaint([card]); }
+  if (ds.yasync) { yaSave({sync: {...s.sync, [ds.yasync]: !s.sync[ds.yasync]}}); return yaRepaint([ds.yasync]); }
+  if (ds.yahov) { yaSave({hov: {...s.hov, [ds.yahov]: !s.hov[ds.yahov]}}); b.setAttribute('aria-pressed', String(!!yaState().hov[ds.yahov])); return yaTipFill(); }
+  if (ds.yalg) { yaSave({plHide: {...s.plHide, [ds.yalg]: !s.plHide[ds.yalg]}}); return yaRepaint(['pl']); }
+  if (ds.yaper) { const f = yaPreset(ds.yaper, s.y); return yaSetPeriod(f.from, f.to); }
+  if (ds.yam != null) {
+    const m = +ds.yam, a = state.yaAnchor;
+    if (a != null && a !== m) { const lo = Math.min(a, m), hi = Math.max(a, m); state.yaAnchor = null; return yaSetPeriod(ymd(new Date(s.y, lo, 1)), ymd(new Date(s.y, hi + 1, 0))); }
+    yaSetPeriod(ymd(new Date(s.y, m, 1)), ymd(new Date(s.y, m + 1, 0))); state.yaAnchor = m; return yaRepaint(['hero']);
+  }
+  if (ds.yago) { yaSave({y: +ds.yago, from: null, to: null}); state.yaAnchor = null; return yaRepaint(['hero', 'kpis', 'eq', 'rec', 'mo', 'qt', 'pl']); }
+  if (b.id === 'ya-cam') { const y = s.y, P = yaPeriod(s); return snapMonth({node: $('#ya-cap'), cam: b, title: yaPartial(s) ? `${yaLabel(P)} ${y}` : `Année ${y}`, file: `track-record-${y}${yaPartial(s) ? '-' + P.from.slice(5, 7) + '-' + P.to.slice(5, 7) : ''}.png`}); }
+}
+
 /* 📷 a picture of the whole month, ready to send */
 let snapLib = null;
 function loadSnapLib() {
   if (window.htmlToImage) return Promise.resolve(window.htmlToImage);
   return snapLib ||= new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js'; s.onload = () => ok(window.htmlToImage); s.onerror = () => { snapLib = null; ko(new Error('outil de capture non chargé (connexion ?)')); }; document.head.appendChild(s); });
 }
-async function snapMonth() {
-  const node = $('#dm-cap'), cam = $('#dm-cam'); if (!node || !cam || cam.classList.contains('busy')) return;
+async function snapMonth(opt = {}) {
+  const node = opt.node || $('#dm-cap'), cam = opt.cam || $('#dm-cam'); if (!node || !cam || cam.classList.contains('busy')) return;
   cam.classList.add('busy');
   try {
     const lib = await loadSnapLib();
@@ -4337,19 +4819,19 @@ async function snapMonth() {
     await new Promise(r => setTimeout(r, 120));
     node.classList.add('snapping');
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const blob = await lib.toBlob(node, {pixelRatio: 2, backgroundColor: css('--bg'), cacheBust: true, filter: n => !(n.classList && (n.classList.contains('dm-tog') || n.classList.contains('dm-cam') || n.classList.contains('dm-pick') || n.classList.contains('dm-arrow') || n.classList.contains('mc-arr')))});
+    const blob = await lib.toBlob(node, {pixelRatio: 2, backgroundColor: css('--bg'), cacheBust: true, filter: n => !(n.classList && (n.classList.contains('dm-tog') || n.classList.contains('dm-cam') || n.classList.contains('dm-pick') || n.classList.contains('dm-arrow') || n.classList.contains('mc-arr') || n.classList.contains('ya-sync') || n.classList.contains('ya-hov') || n.classList.contains('ya-tip') || n.classList.contains('ya-pick')))});
     node.classList.remove('snapping');
     if (!blob) throw new Error('image vide');
-    const s = dmState(), name = `track-record-${MONTHS_LONG[s.m].toLowerCase()}-${s.y}.png`.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const s = dmState(), title = opt.title || `${MONTHS_LONG[s.m]} ${s.y}`, name = (opt.file || `track-record-${MONTHS_LONG[s.m].toLowerCase()}-${s.y}.png`).normalize('NFD').replace(/[̀-ͯ]/g, '');
     const url = URL.createObjectURL(blob), file = new File([blob], name, {type: 'image/png'});
     const canShare = !!(navigator.canShare && navigator.canShare({files: [file]}));
     const canCopy = !!(navigator.clipboard && window.ClipboardItem);
-    openConfirm({icon: '📷', title: `${MONTHS_LONG[s.m]} ${s.y}`, html: `<img class="snap-prev" src="${url}" alt="Capture du mois">`,
+    openConfirm({icon: '📷', title, html: `<img class="snap-prev" src="${url}" alt="Capture">`,
       buttons: [{id: 'dl', label: '⬇️ Télécharger', cls: 'primary'}, ...(canCopy ? [{id: 'copy', label: '📋 Copier'}] : []), ...(canShare ? [{id: 'share', label: '📤 Partager'}] : [])],
       onPick: async id => {
         if (id === 'dl') { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast('Capture téléchargée 📷'); }
         else if (id === 'copy') { try { await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]); toast('Capture copiée : colle-la où tu veux (Ctrl + V)'); } catch (e) { toast('Copie impossible ici, télécharge-la plutôt.'); } }
-        else if (id === 'share') { try { await navigator.share({files: [file], title: `Track-Record · ${MONTHS_LONG[s.m]} ${s.y}`}); } catch (e) {} }
+        else if (id === 'share') { try { await navigator.share({files: [file], title: `Track-Record · ${title}`}); } catch (e) {} }
       }});
   } catch (e) { node.classList.remove('snapping'); toast('Capture impossible : ' + errText(e)); }
   cam.classList.remove('busy');

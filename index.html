@@ -607,7 +607,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yh-pre > button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .yh-pre .ya-custom{margin-left:3px}
 .yh-cam{width:44px;height:44px;border-radius:13px;font-size:20px}
-.yh-stats{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.62fr) minmax(0,1.38fr) minmax(0,1.55fr) minmax(0,1.4fr) minmax(0,1.15fr)}
+.yh-stats{position:relative;display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.1fr) minmax(0,1.38fr) minmax(0,1.55fr) minmax(0,1.4fr) minmax(0,1.15fr)}
 .yh-b{display:flex;flex-direction:column;gap:6px;padding:18px 22px;min-width:0;position:relative}
 .yh-b + .yh-b::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:1px;background:var(--line)}
 .yh-b small{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
@@ -619,24 +619,29 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yh-r > div{display:flex;flex-direction:column;gap:6px;min-width:0}
 .yh-r > i{width:1px;background:var(--line)}
 .yh-r > div:last-child b{font-size:18px;opacity:.85;margin-top:6px}
-.yh-wr{flex-direction:row;align-items:center;gap:16px}
-.yh-donut{position:relative;width:96px;height:96px;flex:none}
+.yh-wr-in{display:flex;align-items:center;gap:16px}
+.yh-donut{position:relative;width:104px;height:104px;flex:none;margin:-4px 0 -6px -6px}
 .yh-donut > div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
 .yh-donut b{font-family:var(--font-display);font-size:22px;line-height:1}
-.yh-donut small{font-size:9.5px;letter-spacing:.04em}
+.yh-donut small{font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:600}
+.yh-mid.swap{animation:yhSwap .28s cubic-bezier(.2,.8,.3,1)}
+@keyframes yhSwap{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
+.yh-leg > span[data-seg]{cursor:default;transition:opacity .2s}
+.yh-leg > span.dim{opacity:.35}
 .yh-leg{display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
 .yh-leg > span{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .yh-leg i{width:9px;height:9px;border-radius:3px;flex:none}
 .yh-leg i.w,.yh-bar i.w,.yh-split i.w{background:var(--win)} .yh-leg i.l,.yh-bar i.l,.yh-split i.l{background:var(--loss)} .yh-leg i.b{background:var(--muted)}
 .yh-leg em{color:var(--muted);font-weight:500;font-size:11px}
-.yh-need{margin-top:3px;align-self:flex-start;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;cursor:help}
+.yh-need{margin-top:2px;align-self:flex-start;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;max-width:100%;white-space:normal}
 .yh-need.ok{color:var(--win);background:color-mix(in srgb,var(--win) 13%,transparent)}
 .yh-need.ko{color:var(--loss);background:color-mix(in srgb,var(--loss) 13%,transparent)}
 .yh-avg{justify-content:center}
 .yh-bar{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
 .yh-bar i{height:9px;border-radius:5px;display:block;min-width:3px;transition:width .5s cubic-bezier(.2,.8,.3,1)}
 .yh-bar b{font-size:13.5px;min-width:76px;text-align:right}
-.yh-split{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;margin:2px 0;cursor:help}
+.yh-split{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;margin:2px 0 0}
+.yh-ends{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
 .yh-split i{display:block;height:100%}
 @media (max-width:1400px){.m-desk .yh-stats{grid-template-columns:repeat(3,minmax(0,1fr))} .m-desk .yh-b:nth-child(4)::before{display:none}}
 .m-phone .yh-top{flex-wrap:wrap;padding:14px 16px;gap:12px}
@@ -4567,19 +4572,19 @@ function yaHero(c) {
       <button type="button" class="dm-cam yh-cam" id="ya-cam" data-tip="Capture de la page"><span>📷</span></button>
     </div>
     <div class="yh-stats">
-      <div class="yh-b yh-net"><small>💰 Résultat net</small><b class="num ${sgnCls(u === 'cur' ? sum.cur : sum.R)}">${f(u === 'cur' ? sum.cur : sum.R)}</b>${c.cur ? `<span><em class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</em> de performance</span>` : '<span>plusieurs devises : en R</span>'}</div>
       <div class="yh-b yh-n"><small>🔢 Trades</small><b class="num">${list.length}</b><span>${months ? `≈ ${Math.round(list.length / months)} par mois tradé` : 'aucun'}</span></div>
+      <div class="yh-b yh-net"><small>💰 Résultat net</small><b class="num ${sgnCls(u === 'cur' ? sum.cur : sum.R)}">${f(u === 'cur' ? sum.cur : sum.R)}</b>${c.cur ? `<span><em class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</em> de performance</span>` : '<span>plusieurs devises : en R</span>'}</div>
       <div class="yh-b yh-r"><div><small>🎯 R réel</small><b class="num ${sgnCls(sum.R)}">${fR(sum.R)}</b></div><i></i><div><small>📐 R / Trade</small><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
-      <div class="yh-b yh-wr"><div class="yh-donut"><canvas id="yh-wr-cv"></canvas><div><b class="num">${wr == null ? '—' : Math.round(wr * 100) + ' %'}</b><small>win rate</small></div></div>
-        <div class="yh-leg"><span><i class="w"></i>${S.wins} gagné${S.wins > 1 ? 's' : ''}</span><span><i class="l"></i>${S.losses} perdu${S.losses > 1 ? 's' : ''}</span><span><i class="b"></i>${S.be} BE <em>non comptés</em></span>
-          ${need != null ? `<span class="yh-need ${ok ? 'ok' : 'ko'}" data-tip="Avec un ratio de ${nf2.format(rr)}, il faut gagner au moins ${Math.round(need * 100)} % de tes trades pour être rentable">Seuil ${Math.round(need * 100)} % ${ok ? '✅' : '⚠️'}</span>` : ''}</div></div>
+      <div class="yh-b yh-wr"><small>🏆 Win rate</small><div class="yh-wr-in"><div class="yh-donut"><canvas id="yh-wr-cv"></canvas><div class="yh-mid" data-wr="${wr == null ? '—' : Math.round(wr * 100) + ' %'}"><b class="num">${wr == null ? '—' : Math.round(wr * 100) + ' %'}</b><small>des trades</small></div></div>
+        <div class="yh-leg"><span data-seg="0"><i class="w"></i>${S.wins} gagné${S.wins > 1 ? 's' : ''}</span><span data-seg="1"><i class="l"></i>${S.losses} perdu${S.losses > 1 ? 's' : ''}</span><span data-seg="2"><i class="b"></i>${S.be} BE <em>non comptés</em></span></div></div>
+        ${need != null ? `<span class="yh-need ${ok ? 'ok' : 'ko'}" data-tip="Avec ton ratio de ${nf2.format(rr)}, il faut gagner au moins ${Math.round(need * 100)} % de tes trades pour être rentable. Tu es à ${Math.round(wr * 100)} % : ${ok ? 'c’est bon' : 'en dessous'}.">${ok ? '✅' : '⚠️'} Minimum pour gagner : ${Math.round(need * 100)} %</span>` : ''}</div>
       <div class="yh-b yh-avg"><small>📏 Gain moyen · perte moyenne</small>
         <div class="yh-bar"><span>Gain</span><i class="w" style="width:${aw ? aw / big * 100 : 0}%"></i><b class="num pos">${aw == null ? '—' : f(aw)}</b></div>
         <div class="yh-bar"><span>Perte</span><i class="l" style="width:${al ? al / big * 100 : 0}%"></i><b class="num neg">${al == null ? '—' : f(-al)}</b></div>
         <span class="yh-sub">${rr == null ? 'Ratio —' : `Ratio <b>1 : ${nf2.format(rr)}</b> · un gain vaut ${nf2.format(rr)} pertes`}</span></div>
       <div class="yh-b yh-pf"><small>⚖️ Profit factor</small><b class="num ${S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg'}">${pf}</b>
         <div class="yh-split" data-tip="${S.pf == null ? '' : `Pour 1 ${u === 'cur' ? curSym(c.cur) : 'R'} perdu, tu as gagné ${pf} ${u === 'cur' ? curSym(c.cur) : 'R'}`}"><i class="w" style="flex:${gW || 0.0001}"></i><i class="l" style="flex:${gL || 0.0001}"></i></div>
-        <span class="yh-sub"><em class="pos">${f(gW)}</em> gagnés · <em class="neg">${f(-gL)}</em> perdus</span></div>
+        <div class="yh-ends"><em class="pos num">${f(gW)}</em><em class="neg num">${f(-gL)}</em></div></div>
     </div>`;
 }
 function yaPreset(k, y) {
@@ -4826,8 +4831,21 @@ function yaDrawWr(c) {
   yaKill('wr'); const cv = $('#yh-wr-cv'); if (!cv) return;
   const P = yaPeriod(yaState()), list = yaTrades(c, P), S = stats(list, {...c, unit: c.cur ? 'cur' : 'R'});
   const data = [S.wins, S.losses, S.be], col = [css('--win'), css('--loss'), css('--muted')];
-  yaCh.wr = new Chart(cv, {type: 'doughnut', data: {labels: ['Gagnés', 'Perdus', 'Break-even'], datasets: [{data: list.length ? data : [1], backgroundColor: list.length ? col : [css('--line')], borderWidth: 0, spacing: list.length ? 2 : 0, borderRadius: 3}]},
-    options: {cutout: '74%', maintainAspectRatio: false, animation: {duration: 600}, plugins: {legend: {display: false}, tooltip: {enabled: !!list.length, callbacks: {label: x => ` ${x.raw} trade${x.raw > 1 ? 's' : ''}`}}}}});
+  const names = [['gagné', 'gagnés'], ['perdu', 'perdus'], ['BE', 'BE']], box = cv.closest('.yh-wr'), mid = box.querySelector('.yh-mid');
+  const show = i => {
+    if (yaCh.wr.$i === i) return; yaCh.wr.$i = i;
+    box.querySelectorAll('[data-seg]').forEach(x => x.classList.toggle('dim', i != null && +x.dataset.seg !== i));
+    mid.classList.remove('swap'); void mid.offsetWidth; mid.classList.add('swap');
+    if (i == null) { mid.innerHTML = `<b class="num">${mid.dataset.wr}</b><small>des trades</small>`; mid.style.color = ''; }
+    else { const n = data[i], tot = data.reduce((a, x) => a + x, 0); mid.innerHTML = `<b class="num">${n}</b><small>${names[i][n > 1 ? 1 : 0]} · ${Math.round(n / tot * 100)} %</small>`; mid.style.color = col[i]; }
+    yaCh.wr.setActiveElements(i == null ? [] : [{datasetIndex: 0, index: i}]); yaCh.wr.update();
+  };
+  yaCh.wr = new Chart(cv, {type: 'doughnut', data: {labels: ['Gagnés', 'Perdus', 'Break-even'], datasets: [{data: list.length ? data : [1], backgroundColor: list.length ? x => { const i = x.chart.$i; return i == null || i === x.dataIndex ? col[x.dataIndex] : col[x.dataIndex] + '40'; } : [css('--line')], hoverBackgroundColor: list.length ? col : [css('--line')], borderWidth: 0, spacing: list.length ? 2 : 0, borderRadius: 3, hoverOffset: 7}]},
+    options: {cutout: '76%', layout: {padding: 7}, maintainAspectRatio: false, animation: {duration: 600}, transitions: {active: {animation: {duration: 260, easing: 'easeOutBack'}}},
+      onHover: (e, els) => { if (list.length) show(els.length ? els[0].index : null); }, plugins: {legend: {display: false}, tooltip: {enabled: false}}}});
+  yaCh.wr.$i = null;
+  cv.addEventListener('mouseleave', () => list.length && show(null));
+  box.querySelectorAll('[data-seg]').forEach(x => { x.addEventListener('mouseenter', () => list.length && data[+x.dataset.seg] && show(+x.dataset.seg)); x.addEventListener('mouseleave', () => list.length && show(null)); });
   charts.push(yaCh.wr);
 }
 /* redraw only what changed */

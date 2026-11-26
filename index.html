@@ -599,11 +599,11 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yh-col::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:1px;background:var(--line)}
 .yh-col .yh-b{padding:14px 22px}
 .yh-col .yh-b + .yh-b::before{left:22px;right:22px;top:0;bottom:auto;width:auto;height:1px}
-.yh-col .yh-pf{flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:14px;row-gap:6px}
-.yh-col .yh-pf > small{width:100%}
-.yh-col .yh-pf > b{font-size:24px}
-.yh-col .yh-pf .yh-split{flex:1;min-width:120px;margin:0}
-.yh-col .yh-pf .yh-ends{width:100%}
+.yh-col .yh-pf{gap:7px}
+.yh-pfrow{display:flex;align-items:center;gap:16px}
+.yh-pfrow > b{font-family:var(--font-display);font-size:26px;letter-spacing:-.02em;line-height:1}
+.yh-pfbar{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding-top:19px}
+.yh-pfbar .yh-split{margin:0}
 .yh{position:relative;display:flex;flex-direction:column;border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 70%,var(--surface)) 0%,var(--surface) 100%);overflow:hidden}
 .yh::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 120% at 100% 0%,color-mix(in srgb,var(--win) 9%,transparent),transparent 60%),radial-gradient(40% 90% at 0% 0%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 65%);pointer-events:none}
 .yh-top{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:14px 18px;padding:16px 20px;border-bottom:1px solid var(--line)}
@@ -4605,9 +4605,9 @@ function yaHero(c) {
         <div class="yh-bar"><span>Gain</span><i class="w" style="width:${aw ? aw / big * 100 : 0}%"></i><b class="num pos">${aw == null ? '—' : f(aw)}</b></div>
         <div class="yh-bar"><span>Perte</span><i class="l" style="width:${al ? al / big * 100 : 0}%"></i><b class="num neg">${al == null ? '—' : f(-al)}</b></div>
         <span class="yh-sub">${rr == null ? 'Ratio —' : `Ratio <b>1 : ${nf2.format(rr)}</b> · un gain vaut ${nf2.format(rr)} pertes`}</span></div>
-      <div class="yh-b yh-pf"><small>⚖️ Profit factor</small><b class="num ${S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg'}">${pf}</b>
-        <div class="yh-split" data-tip="${S.pf == null ? '' : `Pour 1 ${u === 'cur' ? curSym(c.cur) : 'R'} perdu, tu as gagné ${pf} ${u === 'cur' ? curSym(c.cur) : 'R'}`}"><i class="w" style="flex:${gW || 0.0001}"></i><i class="l" style="flex:${gL || 0.0001}"></i></div>
-        <div class="yh-ends"><em class="pos num">${f(gW)}</em><em class="neg num">${f(-gL)}</em></div></div></div>
+      <div class="yh-b yh-pf"><small>⚖️ Profit factor</small>
+        <div class="yh-pfrow"><b class="num ${S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg'}">${pf}</b><div class="yh-pfbar"><div class="yh-split" data-tip="${S.pf == null ? '' : `Pour 1 ${u === 'cur' ? curSym(c.cur) : 'R'} perdu, tu as gagné ${pf} ${u === 'cur' ? curSym(c.cur) : 'R'}`}"><i class="w" style="flex:${gW || 0.0001}"></i><i class="l" style="flex:${gL || 0.0001}"></i></div>
+        <div class="yh-ends"><em class="pos num">${f(gW)}</em><em class="neg num">${f(-gL)}</em></div></div></div></div></div>
     </div></section>`;
 }
 function yaPreset(k, y) {

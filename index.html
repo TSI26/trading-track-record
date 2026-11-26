@@ -593,16 +593,32 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .as-res small{font-size:10.5px;color:var(--muted)}
 .m-phone .as-row{grid-template-columns:96px minmax(0,1fr) 82px;gap:8px;padding:7px 8px}
 /* 📆 Dashboard annuel */
-.yh{position:relative;border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 70%,var(--surface)) 0%,var(--surface) 100%);overflow:hidden}
+.yh-wrap{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:14px}
+@media (max-width:1480px){.m-desk .yh-wrap{grid-template-columns:1fr}}
+.yh-col{display:flex;flex-direction:column;position:relative;min-width:0}
+.yh-col::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:1px;background:var(--line)}
+.yh-col .yh-b{padding:14px 22px}
+.yh-col .yh-b + .yh-b::before{left:22px;right:22px;top:0;bottom:auto;width:auto;height:1px}
+.yh-col .yh-pf{flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:14px;row-gap:6px}
+.yh-col .yh-pf > small{width:100%}
+.yh-col .yh-pf > b{font-size:24px}
+.yh-col .yh-pf .yh-split{flex:1;min-width:120px;margin:0}
+.yh-col .yh-pf .yh-ends{width:100%}
+.yh{position:relative;display:flex;flex-direction:column;border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 70%,var(--surface)) 0%,var(--surface) 100%);overflow:hidden}
 .yh::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 120% at 100% 0%,color-mix(in srgb,var(--win) 9%,transparent),transparent 60%),radial-gradient(40% 90% at 0% 0%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 65%);pointer-events:none}
-.yh-top{position:relative;display:flex;align-items:center;gap:22px;padding:18px 24px;border-bottom:1px solid var(--line)}
+.yh-top{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:14px 18px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.yh1 .yh-stats{grid-template-columns:minmax(0,.75fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);flex:1;align-items:center}
+.yh1 .yh-b{padding:16px 18px;align-self:stretch;justify-content:center}
+.yh1 .yh-b > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yh2 .yh-stats{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);flex:1;align-items:center}
+.yh2::before{background:radial-gradient(50% 110% at 0% 100%,color-mix(in srgb,var(--win) 8%,transparent),transparent 65%)}
 .yh-when{display:flex;align-items:center;gap:12px}
-.yh-when h1{margin:0;font-family:var(--font-display);font-size:28px;letter-spacing:-.02em;line-height:1}
+.yh-when h1{margin:0;font-family:var(--font-display);font-size:25px;white-space:nowrap;letter-spacing:-.02em;line-height:1}
 .yh-when h1 span{color:var(--accent)}
 .yh-arr{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--muted);display:grid;place-items:center;transition:color .15s,border-color .15s}
 .yh-arr:hover{color:var(--fg);border-color:var(--line-2)}
 .yh-pre{display:flex;align-items:center;gap:3px;padding:3px;border-radius:11px;background:var(--bg);border:1px solid var(--line);margin-left:auto}
-.yh-pre > button{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;transition:all .15s}
+.yh-pre > button{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:6px 9px;font-size:12.5px;font-weight:700;transition:all .15s}
 .yh-pre > button:hover{color:var(--fg)}
 .yh-pre > button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .yh-pre .ya-custom{margin-left:3px}
@@ -611,7 +627,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yh-b{display:flex;flex-direction:column;gap:6px;padding:18px 22px;min-width:0;position:relative}
 .yh-b + .yh-b::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:1px;background:var(--line)}
 .yh-b small{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-.yh-b > b,.yh-r b{font-family:var(--font-display);font-size:27px;letter-spacing:-.02em;line-height:1.1;white-space:nowrap}
+.yh-b > b,.yh-r b{font-family:var(--font-display);font-size:24px;letter-spacing:-.02em;line-height:1.1;white-space:nowrap}
 .yh-b > span,.yh-sub{font-size:12px;color:var(--muted)}
 .yh-b em{font-style:normal;font-weight:700}
 .yh-r{flex-direction:row;align-items:stretch;gap:14px}
@@ -620,15 +636,15 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yh-r > i{width:1px;background:var(--line)}
 .yh-r > div:last-child b{font-size:18px;opacity:.85;margin-top:6px}
 .yh-wr-in{display:flex;align-items:center;gap:16px}
-.yh-donut{position:relative;width:104px;height:104px;flex:none;margin:-4px 0 -6px -6px}
+.yh-donut{position:relative;width:132px;height:132px;flex:none;margin:-6px 0 -6px -8px}
 .yh-donut > div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.yh-donut b{font-family:var(--font-display);font-size:22px;line-height:1}
-.yh-donut small{font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:600}
+.yh-donut b{font-family:var(--font-display);font-size:27px;line-height:1}
+.yh-donut small{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:600}
 .yh-mid.swap{animation:yhSwap .28s cubic-bezier(.2,.8,.3,1)}
 @keyframes yhSwap{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
 .yh-leg > span[data-seg]{cursor:default;transition:opacity .2s}
 .yh-leg > span.dim{opacity:.35}
-.yh-leg{display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
+.yh-leg{display:flex;flex-direction:column;gap:7px;font-size:13px;min-width:0}
 .yh-leg > span{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .yh-leg i{width:9px;height:9px;border-radius:3px;flex:none}
 .yh-leg i.w,.yh-bar i.w,.yh-split i.w{background:var(--win)} .yh-leg i.l,.yh-bar i.l,.yh-split i.l{background:var(--loss)} .yh-leg i.b{background:var(--muted)}
@@ -637,20 +653,24 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yh-need.ok{color:var(--win);background:color-mix(in srgb,var(--win) 13%,transparent)}
 .yh-need.ko{color:var(--loss);background:color-mix(in srgb,var(--loss) 13%,transparent)}
 .yh-avg{justify-content:center}
-.yh-bar{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.yh-bar{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
+.yh-avg,.yh-pf{gap:10px}
+.yh-bar i{height:11px}
 .yh-bar i{height:9px;border-radius:5px;display:block;min-width:3px;transition:width .5s cubic-bezier(.2,.8,.3,1)}
 .yh-bar b{font-size:13.5px;min-width:76px;text-align:right}
 .yh-split{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;margin:2px 0 0}
 .yh-ends{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
 .yh-split i{display:block;height:100%}
-@media (max-width:1400px){.m-desk .yh-stats{grid-template-columns:repeat(3,minmax(0,1fr))} .m-desk .yh-b:nth-child(4)::before{display:none}}
 .m-phone .yh-top{flex-wrap:wrap;padding:14px 16px;gap:12px}
 .m-phone .yh-pre{margin-left:0;order:3;width:100%;overflow-x:auto}
-.m-phone .yh-stats{grid-template-columns:1fr 1fr}
+.m-phone .yh-wrap{grid-template-columns:1fr}
+.m-phone .yh1 .yh-stats,.m-phone .yh2 .yh-stats{grid-template-columns:1fr 1fr}
 .m-phone .yh-b{padding:14px 16px}
-.m-phone .yh-wr,.m-phone .yh-avg,.m-phone .yh-pf,.m-phone .yh-r{grid-column:span 2}
+.m-phone .yh-wr,.m-phone .yh-col{grid-column:span 2}
+.m-phone .yh-col::before{display:none}
+.m-phone .yh-donut{width:120px;height:120px}
 .m-phone .yh-b::before{display:none}
-.m-phone .yh-b{border-top:1px solid var(--line)}
+.m-phone .yh-b + .yh-b{border-top:1px solid var(--line)}
 .ya-per-txt{font-size:13px;color:var(--muted);margin-top:4px}
 .ya-per-txt b{color:var(--fg)} .ya-per-txt b.on{color:var(--accent)}
 .ya-pre{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
@@ -4535,7 +4555,7 @@ function renderYearDash(c, bar) {
   const el = $('#view'), s = yaState();
   el.innerHTML = `${demoFlag()}${bar}
   <div class="dm ya" id="ya-cap">
-    <section class="yh" id="ya-hero">${yaHero(c)}</section>
+    <div class="yh-wrap" id="ya-hero">${yaHero(c)}</div>
     <div class="ya-row ya-r1">
       <section class="dm-card ya-eq" id="ya-eq">${yaEqCard(c)}</section>
       <section class="dm-card ya-rec" id="ya-rec">${yaRecCard(c)}</section>
@@ -4562,7 +4582,7 @@ function yaHero(c) {
   const need = rr ? 1 / (1 + rr) : null, wr = S.winrate, ok = need != null && wr != null ? wr >= need : null;
   const big = Math.max(aw || 0, al || 0, 1e-9), gW = S.gW || 0, gL = Math.abs(S.gL || 0);
   const pf = S.pf === Infinity ? '∞' : S.pf == null ? '—' : nf2.format(S.pf);
-  return `<div class="yh-top">
+  return `<section class="yh yh1"><div class="yh-top">
       <div class="yh-when">
         <button type="button" class="yh-arr" data-yago="${s.y - 1}" aria-label="Année précédente"><svg width="15" height="15" viewBox="0 0 14 14"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
         <h1>Année <span>${s.y}</span></h1>
@@ -4572,20 +4592,23 @@ function yaHero(c) {
       <button type="button" class="dm-cam yh-cam" id="ya-cam" data-tip="Capture de la page"><span>📷</span></button>
     </div>
     <div class="yh-stats">
-      <div class="yh-b yh-n"><small>🔢 Trades</small><b class="num">${list.length}</b><span>${months ? `≈ ${Math.round(list.length / months)} par mois tradé` : 'aucun'}</span></div>
-      <div class="yh-b yh-net"><small>💰 Résultat net</small><b class="num ${sgnCls(u === 'cur' ? sum.cur : sum.R)}">${f(u === 'cur' ? sum.cur : sum.R)}</b>${c.cur ? `<span><em class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</em> de performance</span>` : '<span>plusieurs devises : en R</span>'}</div>
-      <div class="yh-b yh-r"><div><small>🎯 R réel</small><b class="num ${sgnCls(sum.R)}">${fR(sum.R)}</b></div><i></i><div><small>📐 R / Trade</small><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
-      <div class="yh-b yh-wr"><small>🏆 Win rate</small><div class="yh-wr-in"><div class="yh-donut"><canvas id="yh-wr-cv"></canvas><div class="yh-mid" data-wr="${wr == null ? '—' : Math.round(wr * 100) + ' %'}"><b class="num">${wr == null ? '—' : Math.round(wr * 100) + ' %'}</b><small>des trades</small></div></div>
+      <div class="yh-b yh-n"><small>🔢 Trades</small><b class="num">${list.length}</b><span>${months ? `≈ ${Math.round(list.length / months)} par mois` : 'aucun'}</span></div>
+      <div class="yh-b yh-net"><small>💰 Résultat net</small><b class="num ${sgnCls(u === 'cur' ? sum.cur : sum.R)}">${f(u === 'cur' ? sum.cur : sum.R)}</b>${c.cur ? `<span><em class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</em> de perf.</span>` : '<span>plusieurs devises : en R</span>'}</div>
+      <div class="yh-b"><small>🎯 R réel</small><b class="num ${sgnCls(sum.R)}">${fR(sum.R)}</b><span>sur ton R max</span></div>
+      <div class="yh-b"><small>📐 R / Trade</small><b class="num ${sgnCls(rT)}">${fR(rT)}</b><span>sur le risque pris</span></div>
+    </div></section>
+    <section class="yh yh2"><div class="yh-stats">
+      <div class="yh-b yh-wr"><small>🏆 Win rate</small><div class="yh-wr-in"><div class="yh-donut"><canvas id="yh-wr-cv"></canvas><div class="yh-mid" data-wr="${wr == null ? '—' : Math.round(wr * 100) + ' %'}"><b class="num">${wr == null ? '—' : Math.round(wr * 100) + ' %'}</b><small>win rate</small></div></div>
         <div class="yh-leg"><span data-seg="0"><i class="w"></i>${S.wins} gagné${S.wins > 1 ? 's' : ''}</span><span data-seg="1"><i class="l"></i>${S.losses} perdu${S.losses > 1 ? 's' : ''}</span><span data-seg="2"><i class="b"></i>${S.be} BE <em>non comptés</em></span></div></div>
-        ${need != null ? `<span class="yh-need ${ok ? 'ok' : 'ko'}" data-tip="Avec ton ratio de ${nf2.format(rr)}, il faut gagner au moins ${Math.round(need * 100)} % de tes trades pour être rentable. Tu es à ${Math.round(wr * 100)} % : ${ok ? 'c’est bon' : 'en dessous'}.">${ok ? '✅' : '⚠️'} Minimum pour gagner : ${Math.round(need * 100)} %</span>` : ''}</div>
-      <div class="yh-b yh-avg"><small>📏 Gain moyen · perte moyenne</small>
+</div>
+      <div class="yh-col"><div class="yh-b yh-avg"><small>📏 Gain moyen · perte moyenne</small>
         <div class="yh-bar"><span>Gain</span><i class="w" style="width:${aw ? aw / big * 100 : 0}%"></i><b class="num pos">${aw == null ? '—' : f(aw)}</b></div>
         <div class="yh-bar"><span>Perte</span><i class="l" style="width:${al ? al / big * 100 : 0}%"></i><b class="num neg">${al == null ? '—' : f(-al)}</b></div>
         <span class="yh-sub">${rr == null ? 'Ratio —' : `Ratio <b>1 : ${nf2.format(rr)}</b> · un gain vaut ${nf2.format(rr)} pertes`}</span></div>
       <div class="yh-b yh-pf"><small>⚖️ Profit factor</small><b class="num ${S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg'}">${pf}</b>
         <div class="yh-split" data-tip="${S.pf == null ? '' : `Pour 1 ${u === 'cur' ? curSym(c.cur) : 'R'} perdu, tu as gagné ${pf} ${u === 'cur' ? curSym(c.cur) : 'R'}`}"><i class="w" style="flex:${gW || 0.0001}"></i><i class="l" style="flex:${gL || 0.0001}"></i></div>
-        <div class="yh-ends"><em class="pos num">${f(gW)}</em><em class="neg num">${f(-gL)}</em></div></div>
-    </div>`;
+        <div class="yh-ends"><em class="pos num">${f(gW)}</em><em class="neg num">${f(-gL)}</em></div></div></div>
+    </div></section>`;
 }
 function yaPreset(k, y) {
   const m = {year: [0, 11], q1: [0, 2], q2: [3, 5], q3: [6, 8], q4: [9, 11], s1: [0, 5], s2: [6, 11]}[k] || [0, 11];
@@ -4836,8 +4859,8 @@ function yaDrawWr(c) {
     if (yaCh.wr.$i === i) return; yaCh.wr.$i = i;
     box.querySelectorAll('[data-seg]').forEach(x => x.classList.toggle('dim', i != null && +x.dataset.seg !== i));
     mid.classList.remove('swap'); void mid.offsetWidth; mid.classList.add('swap');
-    if (i == null) { mid.innerHTML = `<b class="num">${mid.dataset.wr}</b><small>des trades</small>`; mid.style.color = ''; }
-    else { const n = data[i], tot = data.reduce((a, x) => a + x, 0); mid.innerHTML = `<b class="num">${n}</b><small>${names[i][n > 1 ? 1 : 0]} · ${Math.round(n / tot * 100)} %</small>`; mid.style.color = col[i]; }
+    if (i == null) { mid.innerHTML = `<b class="num">${mid.dataset.wr}</b><small>win rate</small>`; mid.style.color = ''; }
+    else { const n = data[i], base = i < 2 ? data[0] + data[1] : data[0] + data[1] + data[2]; mid.innerHTML = `<b class="num">${base ? Math.round(n / base * 100) : 0} %</b><small>${n} ${names[i][n > 1 ? 1 : 0]}</small>`; mid.style.color = col[i]; }
     yaCh.wr.setActiveElements(i == null ? [] : [{datasetIndex: 0, index: i}]); yaCh.wr.update();
   };
   yaCh.wr = new Chart(cv, {type: 'doughnut', data: {labels: ['Gagnés', 'Perdus', 'Break-even'], datasets: [{data: list.length ? data : [1], backgroundColor: list.length ? x => { const i = x.chart.$i; return i == null || i === x.dataIndex ? col[x.dataIndex] : col[x.dataIndex] + '40'; } : [css('--line')], hoverBackgroundColor: list.length ? col : [css('--line')], borderWidth: 0, spacing: list.length ? 2 : 0, borderRadius: 3, hoverOffset: 7}]},

@@ -593,7 +593,59 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .as-res small{font-size:10.5px;color:var(--muted)}
 .m-phone .as-row{grid-template-columns:96px minmax(0,1fr) 82px;gap:8px;padding:7px 8px}
 /* 📆 Dashboard annuel */
-.ya-kpis{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,.85fr) minmax(0,.95fr) repeat(2,minmax(0,1.3fr))}
+.yh{position:relative;border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 70%,var(--surface)) 0%,var(--surface) 100%);overflow:hidden}
+.yh::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 120% at 100% 0%,color-mix(in srgb,var(--win) 9%,transparent),transparent 60%),radial-gradient(40% 90% at 0% 0%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 65%);pointer-events:none}
+.yh-top{position:relative;display:flex;align-items:center;gap:22px;padding:18px 24px;border-bottom:1px solid var(--line)}
+.yh-when{display:flex;align-items:center;gap:12px}
+.yh-when h1{margin:0;font-family:var(--font-display);font-size:28px;letter-spacing:-.02em;line-height:1}
+.yh-when h1 span{color:var(--accent)}
+.yh-arr{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--muted);display:grid;place-items:center;transition:color .15s,border-color .15s}
+.yh-arr:hover{color:var(--fg);border-color:var(--line-2)}
+.yh-pre{display:flex;align-items:center;gap:3px;padding:3px;border-radius:11px;background:var(--bg);border:1px solid var(--line);margin-left:auto}
+.yh-pre > button{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;transition:all .15s}
+.yh-pre > button:hover{color:var(--fg)}
+.yh-pre > button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.yh-pre .ya-custom{margin-left:3px}
+.yh-cam{width:44px;height:44px;border-radius:13px;font-size:20px}
+.yh-stats{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.62fr) minmax(0,1.38fr) minmax(0,1.55fr) minmax(0,1.4fr) minmax(0,1.15fr)}
+.yh-b{display:flex;flex-direction:column;gap:6px;padding:18px 22px;min-width:0;position:relative}
+.yh-b + .yh-b::before{content:"";position:absolute;left:0;top:20px;bottom:20px;width:1px;background:var(--line)}
+.yh-b small{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.yh-b > b,.yh-r b{font-family:var(--font-display);font-size:27px;letter-spacing:-.02em;line-height:1.1;white-space:nowrap}
+.yh-b > span,.yh-sub{font-size:12px;color:var(--muted)}
+.yh-b em{font-style:normal;font-weight:700}
+.yh-r{flex-direction:row;align-items:stretch;gap:14px}
+.yh-r b{font-size:24px}
+.yh-r > div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.yh-r > i{width:1px;background:var(--line)}
+.yh-r > div:last-child b{font-size:18px;opacity:.85;margin-top:6px}
+.yh-wr{flex-direction:row;align-items:center;gap:16px}
+.yh-donut{position:relative;width:96px;height:96px;flex:none}
+.yh-donut > div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.yh-donut b{font-family:var(--font-display);font-size:22px;line-height:1}
+.yh-donut small{font-size:9.5px;letter-spacing:.04em}
+.yh-leg{display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
+.yh-leg > span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.yh-leg i{width:9px;height:9px;border-radius:3px;flex:none}
+.yh-leg i.w,.yh-bar i.w,.yh-split i.w{background:var(--win)} .yh-leg i.l,.yh-bar i.l,.yh-split i.l{background:var(--loss)} .yh-leg i.b{background:var(--muted)}
+.yh-leg em{color:var(--muted);font-weight:500;font-size:11px}
+.yh-need{margin-top:3px;align-self:flex-start;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;cursor:help}
+.yh-need.ok{color:var(--win);background:color-mix(in srgb,var(--win) 13%,transparent)}
+.yh-need.ko{color:var(--loss);background:color-mix(in srgb,var(--loss) 13%,transparent)}
+.yh-avg{justify-content:center}
+.yh-bar{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.yh-bar i{height:9px;border-radius:5px;display:block;min-width:3px;transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.yh-bar b{font-size:13.5px;min-width:76px;text-align:right}
+.yh-split{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;margin:2px 0;cursor:help}
+.yh-split i{display:block;height:100%}
+@media (max-width:1400px){.m-desk .yh-stats{grid-template-columns:repeat(3,minmax(0,1fr))} .m-desk .yh-b:nth-child(4)::before{display:none}}
+.m-phone .yh-top{flex-wrap:wrap;padding:14px 16px;gap:12px}
+.m-phone .yh-pre{margin-left:0;order:3;width:100%;overflow-x:auto}
+.m-phone .yh-stats{grid-template-columns:1fr 1fr}
+.m-phone .yh-b{padding:14px 16px}
+.m-phone .yh-wr,.m-phone .yh-avg,.m-phone .yh-pf,.m-phone .yh-r{grid-column:span 2}
+.m-phone .yh-b::before{display:none}
+.m-phone .yh-b{border-top:1px solid var(--line)}
 .ya-per-txt{font-size:13px;color:var(--muted);margin-top:4px}
 .ya-per-txt b{color:var(--fg)} .ya-per-txt b.on{color:var(--accent)}
 .ya-pre{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
@@ -662,10 +714,8 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .ya-qb small{font-size:10px;color:var(--muted);line-height:1}
 .ya-qb.off{opacity:.3}
 .ya-plbox{height:320px}
-@media (max-width:1250px){.m-desk .ya-r1,.m-desk .ya-r2{grid-template-columns:1fr} .m-desk .ya-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1250px){.m-desk .ya-r1,.m-desk .ya-r2{grid-template-columns:1fr}}
 .m-phone .ya-r1,.m-phone .ya-r2{grid-template-columns:1fr}
-.m-phone .ya-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
-.m-phone .ya-kpis .dm-k2{grid-column:span 2}
 .m-phone .ya-eqbox{height:250px} .m-phone .ya-hint{display:none} .m-phone .ya-qs{grid-template-columns:1fr 1fr}
 .dm-row{display:grid;gap:14px}
 .dm-row.r2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
@@ -4480,8 +4530,7 @@ function renderYearDash(c, bar) {
   const el = $('#view'), s = yaState();
   el.innerHTML = `${demoFlag()}${bar}
   <div class="dm ya" id="ya-cap">
-    <section class="dm-hero ya-hero">${yaHero(c)}</section>
-    <section class="dm-kpis ya-kpis" id="ya-kpis">${yaKpis(c)}</section>
+    <section class="yh" id="ya-hero">${yaHero(c)}</section>
     <div class="ya-row ya-r1">
       <section class="dm-card ya-eq" id="ya-eq">${yaEqCard(c)}</section>
       <section class="dm-card ya-rec" id="ya-rec">${yaRecCard(c)}</section>
@@ -4495,50 +4544,48 @@ function renderYearDash(c, bar) {
   </div>`;
   const cap = $('#ya-cap');
   cap.addEventListener('click', yaClick);
-  yaDraw(c, ['kpis', 'eq', 'mo', 'pl']);
+  yaDraw(c, ['hero', 'eq', 'mo', 'pl']);
 }
 function yaHero(c) {
-  const s = yaState(), P = yaPeriod(s), n = new Date();
-  const yl = c.trades.filter(t => +t.date.slice(0, 4) === s.y), list = yaTrades(c, P);
-  const has = new Set(yl.map(t => +t.date.slice(5, 7) - 1));
-  const mA = parseD(P.from).getMonth(), mB = parseD(P.to).getMonth(), anchor = state.yaAnchor;
+  const s = yaState(), P = yaPeriod(s), list = yaTrades(c, P), ser = yaSeries(c, P), u = c.cur ? 'cur' : 'R';
   const pre = [['year', 'Année'], ['q1', 'T1'], ['q2', 'T2'], ['q3', 'T3'], ['q4', 'T4'], ['s1', 'S1'], ['s2', 'S2']];
-  const preOn = k => { const f = yaPreset(k, s.y); return f.from === P.from && f.to === P.to; };
-  const custom = yaPartial(s) && !(P.from.slice(8) === '01' && P.to === ymd(new Date(+P.to.slice(0, 4), +P.to.slice(5, 7), 0)));
-  return `<div class="dm-when">
-      <button type="button" class="dm-arrow" data-yago="${s.y - 1}" aria-label="Année précédente"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
-      <div class="dm-title"><h1>Année <span>${s.y}</span></h1><div class="ya-per-txt"><b class="${yaPartial(s) ? 'on' : ''}">${yaLabel(P)}</b> · ${list.length} trade${list.length > 1 ? 's' : ''}</div></div>
-      <button type="button" class="dm-arrow" data-yago="${s.y + 1}" aria-label="Année suivante"><svg width="16" height="16" viewBox="0 0 14 14"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+  const onPre = pre.find(([k]) => { const f = yaPreset(k, s.y); return f.from === P.from && f.to === P.to; });
+  const sum = yaSum(c, list, ser), S = stats(list, {...c, unit: u}), rT = list.reduce((a, t) => a + (t.rTrade || 0), 0);
+  const f = (v, signed = true) => u === 'cur' ? money(v, c.cur, signed) : fR(v, signed);
+  const months = new Set(list.map(t => t.date.slice(0, 7))).size;
+  const aw = S.avgW, al = S.avgL == null ? null : Math.abs(S.avgL), rr = aw != null && al ? aw / al : null;
+  const need = rr ? 1 / (1 + rr) : null, wr = S.winrate, ok = need != null && wr != null ? wr >= need : null;
+  const big = Math.max(aw || 0, al || 0, 1e-9), gW = S.gW || 0, gL = Math.abs(S.gL || 0);
+  const pf = S.pf === Infinity ? '∞' : S.pf == null ? '—' : nf2.format(S.pf);
+  return `<div class="yh-top">
+      <div class="yh-when">
+        <button type="button" class="yh-arr" data-yago="${s.y - 1}" aria-label="Année précédente"><svg width="15" height="15" viewBox="0 0 14 14"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+        <h1>Année <span>${s.y}</span></h1>
+        <button type="button" class="yh-arr" data-yago="${s.y + 1}" aria-label="Année suivante"><svg width="15" height="15" viewBox="0 0 14 14"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="yh-pre ya-pick">${pre.map(([k, l]) => `<button type="button" data-yaper="${k}" aria-pressed="${onPre && onPre[0] === k}">${l}</button>`).join('')}${yaPartial(s) && !onPre ? `<span class="ya-custom">${yaLabel(P)}<button type="button" data-yaper="year" aria-label="Revenir à toute l’année">✕</button></span>` : ''}</div>
+      <button type="button" class="dm-cam yh-cam" id="ya-cam" data-tip="Capture de la page"><span>📷</span></button>
     </div>
-    <div class="dm-pick ya-pick">
-      <div class="ya-pre">${pre.map(([k, l]) => `<button type="button" data-yaper="${k}" aria-pressed="${preOn(k)}">${l}</button>`).join('')}${custom ? `<span class="ya-custom">${yaLabel(P)}<button type="button" data-yaper="year" aria-label="Revenir à toute l’année">✕</button></span>` : ''}</div>
-      <div class="dm-months ya-months">${MONTHS_FR.map((m, i) => { const inR = !custom && yaPartial(s) && i >= mA && i <= mB;
-        return `<button type="button" data-yam="${i}" aria-pressed="${inR}" class="${has.has(i) ? 'has' : ''}${s.y === n.getFullYear() && i === n.getMonth() ? ' now' : ''}${inR && i === mA ? ' first' : ''}${inR && i === mB ? ' last' : ''}${anchor === i ? ' anchor' : ''}">${m.replace('.', '')}</button>`; }).join('')}</div>
-      <div class="ya-hint">Clique un mois, puis un autre pour une période · ou glisse la souris sur la courbe</div>
-    </div>
-    <button type="button" class="dm-cam" id="ya-cam" data-tip="Capture de la page"><span>📷</span></button>`;
+    <div class="yh-stats">
+      <div class="yh-b yh-net"><small>💰 Résultat net</small><b class="num ${sgnCls(u === 'cur' ? sum.cur : sum.R)}">${f(u === 'cur' ? sum.cur : sum.R)}</b>${c.cur ? `<span><em class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</em> de performance</span>` : '<span>plusieurs devises : en R</span>'}</div>
+      <div class="yh-b yh-n"><small>🔢 Trades</small><b class="num">${list.length}</b><span>${months ? `≈ ${Math.round(list.length / months)} par mois tradé` : 'aucun'}</span></div>
+      <div class="yh-b yh-r"><div><small>🎯 R réel</small><b class="num ${sgnCls(sum.R)}">${fR(sum.R)}</b></div><i></i><div><small>📐 R / Trade</small><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
+      <div class="yh-b yh-wr"><div class="yh-donut"><canvas id="yh-wr-cv"></canvas><div><b class="num">${wr == null ? '—' : Math.round(wr * 100) + ' %'}</b><small>win rate</small></div></div>
+        <div class="yh-leg"><span><i class="w"></i>${S.wins} gagné${S.wins > 1 ? 's' : ''}</span><span><i class="l"></i>${S.losses} perdu${S.losses > 1 ? 's' : ''}</span><span><i class="b"></i>${S.be} BE <em>non comptés</em></span>
+          ${need != null ? `<span class="yh-need ${ok ? 'ok' : 'ko'}" data-tip="Avec un ratio de ${nf2.format(rr)}, il faut gagner au moins ${Math.round(need * 100)} % de tes trades pour être rentable">Seuil ${Math.round(need * 100)} % ${ok ? '✅' : '⚠️'}</span>` : ''}</div></div>
+      <div class="yh-b yh-avg"><small>📏 Gain moyen · perte moyenne</small>
+        <div class="yh-bar"><span>Gain</span><i class="w" style="width:${aw ? aw / big * 100 : 0}%"></i><b class="num pos">${aw == null ? '—' : f(aw)}</b></div>
+        <div class="yh-bar"><span>Perte</span><i class="l" style="width:${al ? al / big * 100 : 0}%"></i><b class="num neg">${al == null ? '—' : f(-al)}</b></div>
+        <span class="yh-sub">${rr == null ? 'Ratio —' : `Ratio <b>1 : ${nf2.format(rr)}</b> · un gain vaut ${nf2.format(rr)} pertes`}</span></div>
+      <div class="yh-b yh-pf"><small>⚖️ Profit factor</small><b class="num ${S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg'}">${pf}</b>
+        <div class="yh-split" data-tip="${S.pf == null ? '' : `Pour 1 ${u === 'cur' ? curSym(c.cur) : 'R'} perdu, tu as gagné ${pf} ${u === 'cur' ? curSym(c.cur) : 'R'}`}"><i class="w" style="flex:${gW || 0.0001}"></i><i class="l" style="flex:${gL || 0.0001}"></i></div>
+        <span class="yh-sub"><em class="pos">${f(gW)}</em> gagnés · <em class="neg">${f(-gL)}</em> perdus</span></div>
+    </div>`;
 }
 function yaPreset(k, y) {
   const m = {year: [0, 11], q1: [0, 2], q2: [3, 5], q3: [6, 8], q4: [9, 11], s1: [0, 5], s2: [6, 11]}[k] || [0, 11];
   return {from: ymd(new Date(y, m[0], 1)), to: ymd(new Date(y, m[1] + 1, 0))};
 }
-function yaKpis(c) {
-  const P = yaPeriod(yaState()), list = yaTrades(c, P), ser = yaSeries(c, P);
-  const S = stats(list, {...c, unit: c.cur ? 'cur' : 'R'}), sum = yaSum(c, list, ser);
-  const rT = list.reduce((a, t) => a + (t.rTrade || 0), 0);
-  const mdd = ser.pts.reduce((a, p) => Math.min(a, c.cur ? p.ddP : p.ddR), 0);
-  const kpi = (icon, lbl, v, cls, sub) => `<div class="dm-k"><div class="dm-k-top"><span class="dm-k-ico">${icon}</span><small>${lbl}</small></div><b class="num ${cls || ''}">${v}</b><span class="dm-k-sub">${sub || ''}</span></div>`;
-  const wr = S.winrate, SS = c.cur ? S : stats(list, {...c, unit: 'R'}), aw = SS.avgW, al = SS.avgL == null ? null : Math.abs(SS.avgL), rr = aw != null && al ? aw / al : null, f = v => c.cur ? money(v, c.cur) : fR(v, false);
-  return `${kpi('💰', 'Résultat net', c.cur ? money(sum.cur, c.cur, true) : fR(sum.R), sgnCls(c.cur ? sum.cur : sum.R), c.cur ? `<span class="${sgnCls(sum.pct)}">${yaFmt(sum.pct, 'pct', c)}</span> de performance` : '')}
-    <div class="dm-k dm-k2"><div><div class="dm-k-top"><span class="dm-k-ico">🎯</span><small>R réel</small></div><b class="num ${sgnCls(sum.R)}">${fR(sum.R)}</b></div><i class="dm-k-sep"></i><div class="dm-k-rt"><div class="dm-k-top"><span class="dm-k-ico">📐</span><small>R / Trade</small></div><b class="num ${sgnCls(rT)}">${fR(rT)}</b></div></div>
-    ${kpi('⚖️', 'Profit factor', S.pf === Infinity ? '∞' : S.pf == null ? '—' : nf2.format(S.pf), S.pf == null ? '' : S.pf >= 1 ? 'pos' : 'neg', '')}
-    ${kpi('📉', 'Drawdown max', mdd ? (c.cur ? yaFmt(mdd, 'pct', c) : fR(mdd)) : '0', mdd ? 'neg' : '', 'sous le plus haut')}
-    <div class="dm-k dm-g"><div class="dm-g-txt"><div class="dm-k-top"><span class="dm-k-ico">🏆</span><small>Win rate</small></div><b class="num">${wr == null ? '—' : fPct(wr, 1)}</b><span class="dm-k-sub">sur ${list.length} trade${list.length > 1 ? 's' : ''}${S.be ? ` · ${S.be} BE` : ''}</span></div>
-      <div class="dm-g-viz"><canvas data-frac="${wr == null ? '' : wr}"></canvas><div class="dm-g-leg"><span class="pos">${S.wins} gagnés</span><span class="neg">${S.losses} perdus</span></div></div></div>
-    <div class="dm-k dm-g"><div class="dm-g-txt"><div class="dm-k-top"><span class="dm-k-ico">📏</span><small>Ratio gain / perte</small></div><b class="num">${rr == null ? '—' : '1 : ' + nf2.format(rr)}</b><span class="dm-k-sub">gain moyen ÷ perte moyenne</span></div>
-      <div class="dm-g-viz"><canvas data-frac="${aw != null && al ? aw / (aw + al) : ''}"></canvas><div class="dm-g-leg"><span class="pos">⊕ ${aw == null ? '—' : f(aw)}</span><span class="neg">⊖ ${al == null ? '—' : f(al)}</span></div></div></div>`;
-}
-
 /* 📈 equity curve + 📉 drawdown (one card: same axis, same mouse) */
 function yaEqCard(c) {
   const s = yaState(), r = yaRange('eq'), ser = yaSeries(c, r), u = yaU(c, s.eqUnit), du = yaU(c, s.ddUnit), n = ser.pts.length - 1;
@@ -4673,8 +4720,8 @@ function yaTipFill() {
 function yaSetPeriod(from, to) {
   const s = yaState(); if (from > to) [from, to] = [to, from];
   const full = from === `${s.y}-01-01` && to === `${s.y}-12-31`;
-  yaSave({from: full ? null : from, to: full ? null : to}); state.yaAnchor = null;
-  yaRepaint(['hero', 'kpis', ...['eq', 'rec', 'mo', 'qt', 'pl'].filter(k => yaState().sync[k])]);
+  yaSave({from: full ? null : from, to: full ? null : to});
+  yaRepaint(['hero', ...['eq', 'rec', 'mo', 'qt', 'pl'].filter(k => yaState().sync[k])]);
 }
 
 /* 🏆 records of the period */
@@ -4774,15 +4821,24 @@ function yaDrawPl(c) {
   const s = yaState(); plDraw(cv, yaTrades(c, yaRange('pl')), yaU(c, s.plUnit) === 'R', s.plHide, c); yaCh.pl = Chart.getChart(cv);
 }
 
+// the win-rate donut of the banner: won · lost · break-even
+function yaDrawWr(c) {
+  yaKill('wr'); const cv = $('#yh-wr-cv'); if (!cv) return;
+  const P = yaPeriod(yaState()), list = yaTrades(c, P), S = stats(list, {...c, unit: c.cur ? 'cur' : 'R'});
+  const data = [S.wins, S.losses, S.be], col = [css('--win'), css('--loss'), css('--muted')];
+  yaCh.wr = new Chart(cv, {type: 'doughnut', data: {labels: ['Gagnés', 'Perdus', 'Break-even'], datasets: [{data: list.length ? data : [1], backgroundColor: list.length ? col : [css('--line')], borderWidth: 0, spacing: list.length ? 2 : 0, borderRadius: 3}]},
+    options: {cutout: '74%', maintainAspectRatio: false, animation: {duration: 600}, plugins: {legend: {display: false}, tooltip: {enabled: !!list.length, callbacks: {label: x => ` ${x.raw} trade${x.raw > 1 ? 's' : ''}`}}}}});
+  charts.push(yaCh.wr);
+}
 /* redraw only what changed */
 function yaDraw(c, keys) {
-  if (keys.includes('kpis')) document.querySelectorAll('#ya-kpis .dm-g-viz canvas').forEach(cv => drawGauge(cv, cv.dataset.frac === '' ? null : +cv.dataset.frac));
+  if (keys.includes('hero')) yaDrawWr(c);
   if (keys.includes('eq')) yaDrawEq(c);
   if (keys.includes('mo')) yaDrawMo(c);
   if (keys.includes('pl')) yaDrawPl(c);
 }
 function yaRepaint(keys) {
-  const c = ctx(), box = {hero: ['.ya-hero', yaHero], kpis: ['#ya-kpis', yaKpis], eq: ['#ya-eq', yaEqCard], rec: ['#ya-rec', yaRecCard], mo: ['#ya-mo', yaMoCard], qt: ['#ya-qt', yaQtCard], pl: ['#ya-pl', yaPlCard]};
+  const c = ctx(), box = {hero: ['#ya-hero', yaHero], eq: ['#ya-eq', yaEqCard], rec: ['#ya-rec', yaRecCard], mo: ['#ya-mo', yaMoCard], qt: ['#ya-qt', yaQtCard], pl: ['#ya-pl', yaPlCard]};
   keys.forEach(k => { const b = box[k], el = b && document.querySelector(b[0]); if (el) el.innerHTML = b[1](c); });
   yaDraw(c, keys);
 }
@@ -4794,12 +4850,7 @@ function yaClick(e) {
   if (ds.yahov) { yaSave({hov: {...s.hov, [ds.yahov]: !s.hov[ds.yahov]}}); b.setAttribute('aria-pressed', String(!!yaState().hov[ds.yahov])); return yaTipFill(); }
   if (ds.yalg) { yaSave({plHide: {...s.plHide, [ds.yalg]: !s.plHide[ds.yalg]}}); return yaRepaint(['pl']); }
   if (ds.yaper) { const f = yaPreset(ds.yaper, s.y); return yaSetPeriod(f.from, f.to); }
-  if (ds.yam != null) {
-    const m = +ds.yam, a = state.yaAnchor;
-    if (a != null && a !== m) { const lo = Math.min(a, m), hi = Math.max(a, m); state.yaAnchor = null; return yaSetPeriod(ymd(new Date(s.y, lo, 1)), ymd(new Date(s.y, hi + 1, 0))); }
-    yaSetPeriod(ymd(new Date(s.y, m, 1)), ymd(new Date(s.y, m + 1, 0))); state.yaAnchor = m; return yaRepaint(['hero']);
-  }
-  if (ds.yago) { yaSave({y: +ds.yago, from: null, to: null}); state.yaAnchor = null; return yaRepaint(['hero', 'kpis', 'eq', 'rec', 'mo', 'qt', 'pl']); }
+  if (ds.yago) { yaSave({y: +ds.yago, from: null, to: null}); return yaRepaint(['hero', 'eq', 'rec', 'mo', 'qt', 'pl']); }
   if (b.id === 'ya-cam') { const y = s.y, P = yaPeriod(s); return snapMonth({node: $('#ya-cap'), cam: b, title: yaPartial(s) ? `${yaLabel(P)} ${y}` : `Année ${y}`, file: `track-record-${y}${yaPartial(s) ? '-' + P.from.slice(5, 7) + '-' + P.to.slice(5, 7) : ''}.png`}); }
 }
 

@@ -743,7 +743,9 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .ya-pabox{position:relative;height:200px;cursor:crosshair}
 .ya-exp{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--muted);transition:color .15s,border-color .15s,background .15s,transform .15s}
 .ya-exp:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 50%,var(--line));background:color-mix(in srgb,var(--accent) 10%,var(--bg));transform:scale(1.06)}
-.ya-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ya-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:14px}
+#ya-eq,#ya-rec{height:470px}
+#ya-rec .ya-rr{padding:6px 2px}
 .ya-mini{display:flex;flex-direction:column;height:380px;min-width:0}
 .ya-mini .dm-card-head p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ya-cbox{position:relative;flex:1;min-height:0;cursor:crosshair}
@@ -754,7 +756,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .yx.fit{flex:0 1 auto;width:min(1180px,100%);margin:auto;max-height:100%}
 .yx.fit .ya-q{min-height:170px}
 .yx .ya-qs{grid-template-columns:repeat(4,minmax(0,1fr))}
-@media (max-width:1250px){.m-desk .ya-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1250px){.m-desk .ya-grid{grid-template-columns:1fr}}
 .m-phone .ya-grid{grid-template-columns:1fr}
 .m-phone .ya-recs.all,.m-phone .yx .ya-qs{grid-template-columns:1fr}
 .yx-back{position:fixed;inset:0;z-index:70;display:flex;padding:18px;background:rgba(3,5,10,.62);backdrop-filter:blur(4px);animation:fadein .22s ease-out}
@@ -4579,7 +4581,8 @@ function yaSyncBtn(k) {
   const s = yaState(), on = !!s.sync[k];
   return `<button type="button" class="ya-sync" data-yasync="${k}" aria-pressed="${on}" data-tip="${on ? 'Suit la période choisie en haut · clic pour rester sur toute l’année' : 'Reste sur toute l’année · clic pour suivre la période choisie'}">${LINK}<span>${on ? 'Synchro' : 'Année'}</span></button>`;
 }
-const yaSub = k => { const s = yaState(), r = yaRange(k); return `<span class="ya-when${s.sync[k] && yaPartial(s) ? ' on' : ''}">${yaLabel(r)}</span>`; };
+// the period is written only when the card shows a part of the year (T1, a drag on the curve…)
+const yaSub = k => { const s = yaState(); return s.sync[k] && yaPartial(s) ? `<span class="ya-when on">${yaLabel(yaRange(k))}</span>` : ''; };
 
 /* the page */
 function renderYearDash(c, bar) {
@@ -4638,14 +4641,14 @@ function yaPreset(k, y) {
   return {from: ymd(new Date(y, m[0], 1)), to: ymd(new Date(y, m[1] + 1, 0))};
 }
 /* 📈 the cards of the yearly page: equity, drawdown, P&L par trade, months, quarters, records */
-const YA_CARDS = ['eq', 'dd', 'pa', 'mo', 'qt', 'rec'];
+const YA_CARDS = ['eq', 'rec', 'dd', 'pa', 'mo', 'qt'];
 const YA_PRE = {eq: '', dd: 'd', pa: 'p', mo: '', qt: '', rec: ''}; // prefix of the canvases of each card on the page ('x' when enlarged)
 // what the enlarged curve shows (switched on / off with the « Afficher » buttons)
 const YA_LAY = [['movs', '🔷 Dépôts / retraits'], ['peak', '🏔️ Plus haut'], ['base', '➖ Ligne de départ'], ['months', '┆ Séparateurs de mois']];
 const yaLayers = () => ({movs: true, peak: false, base: true, months: true, ...(yaState().layers || {})});
 const EXPAND = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
 // the head of a card: small = title + ⤢ ; enlarged = title + all the settings + ✕
-const yaHead = (k, title, sub, big, ctl = '') => `<div class="dm-card-head"><div><h3>${title}</h3><p>${sub}</p></div>${big ? `<div class="ya-ctl">${ctl}<button type="button" class="yx-x" data-yaexp="close" aria-label="Fermer">✕</button></div>` : `<button type="button" class="ya-exp" data-yaexp="${k}" data-tip="Agrandir">${EXPAND}</button>`}</div>`;
+const yaHead = (k, title, sub, big, ctl = '') => `<div class="dm-card-head"><div><h3>${title}</h3><p>${sub.replace(/^\s*·\s*/, '').replace(/^[a-zà-ÿ]/, x => x.toUpperCase())}</p></div>${big ? `<div class="ya-ctl">${ctl}<button type="button" class="yx-x" data-yaexp="close" aria-label="Fermer">✕</button></div>` : `<button type="button" class="ya-exp" data-yaexp="${k}" data-tip="Agrandir">${EXPAND}</button>`}</div>`;
 const yaAxisSeg = () => yaSeg('axis', yaState().axis, [{v: 'trade', l: 'Trades'}, {v: 'date', l: 'Dates'}]);
 const yaHovRow = c => { const s = yaState(); return `<div class="ya-hov"><span>Au survol :</span>${YA_HOV.map(([k, l]) => { const off = !c.cur && (k === 'bal' || k === 'pct' || k === 'tcur'); return `<button type="button" data-yahov="${k}" aria-pressed="${!!s.hov[k] && !off}"${off ? ` disabled data-tip="${MULTI_TIP}"` : ''}>${k === 'tcur' && c.cur ? `💵 Trade ${esc(curSym(c.cur))}` : l}</button>`; }).join('')}</div>`; };
 function yaCardHtml(c, k, big) {
@@ -4854,7 +4857,7 @@ function yaSetPeriod(from, to) {
 /* 🏆 records of the period */
 function yaRecCard(c, big) {
   const s = yaState(), r = yaRange('rec'), list = yaTrades(c, r), ser = yaSeries(c, r), u = yaU(c, s.recUnit) === 'cur' ? 'cur' : 'R';
-  const head = yaHead('rec', '🏆 Records', yaSub('rec') + (big ? '' : ' · les 4 principaux'), big, yaUnits(c, 'recUnit', u, false) + yaSyncBtn('rec'));
+  const head = yaHead('rec', '🏆 Records', yaSub('rec'), big, yaUnits(c, 'recUnit', u, false) + yaSyncBtn('rec'));
   if (!list.length) return head + `<div class="dm-box">${dmEmpty()}</div>`;
   const v = t => u === 'cur' ? t.net : t.rReal || 0, f = x => yaFmt(x, u, c);
   const best = list.reduce((a, t) => v(t) > v(a) ? t : a), worst = list.reduce((a, t) => v(t) < v(a) ? t : a);
@@ -4874,10 +4877,10 @@ function yaRecCard(c, big) {
     ${row('💥', 'Pire trade', f(v(worst)), sgnCls(v(worst)), `${classOf(worst.asset_class).emoji} ${esc(worst.asset)} · ${dShort(worst.date)}`)}
     ${row('📅', 'Meilleur mois', f(bm.v), sgnCls(bm.v), `${mName(bm.k)} · ${bm.n} trade${bm.n > 1 ? 's' : ''}`)}
     ${row('🥶', 'Pire mois', f(wm.v), sgnCls(wm.v), `${mName(wm.k)} · ${wm.n} trade${wm.n > 1 ? 's' : ''}`)}
-    ${big ? `${row('🔥', 'Série gagnante', `${mw.n}`, 'pos', mw.n ? `trades gagnés d’affilée · ${span(mw.a, mw.b)}` : 'aucune')}
+    ${`${row('🔥', 'Série gagnante', `${mw.n}`, 'pos', mw.n ? `trades gagnés d’affilée · ${span(mw.a, mw.b)}` : 'aucune')}
     ${row('🧊', 'Série perdante', `${ml.n}`, ml.n ? 'neg' : '', ml.n ? `trades perdus d’affilée · ${span(ml.a, ml.b)}` : 'aucune')}
     ${row('📉', 'Pire drawdown', wd ? yaFmt(wd, du, c) : '0', wd ? 'neg' : '', wd ? span(ser.pts[pkI].t || ser.pts[1].t, ser.pts[wdI].t) : 'jamais sous le plus haut')}
-    ${row('✅', 'Mois positifs', `${pos} / ${ms.length}`, pos >= ms.length / 2 ? 'pos' : 'neg', `${Math.round(pos / ms.length * 100)} % des mois tradés`)}` : ''}
+    ${row('✅', 'Mois positifs', `${pos} / ${ms.length}`, pos >= ms.length / 2 ? 'pos' : 'neg', `${Math.round(pos / ms.length * 100)} % des mois tradés`)}`}
   </div>`;
 }
 

@@ -714,7 +714,6 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .ya-tr{display:flex;justify-content:space-between;gap:16px;padding:2px 0;color:var(--muted)}
 .ya-tr b{color:var(--fg)} .ya-tr b.pos{color:var(--win)} .ya-tr b.neg{color:var(--loss)}
 .ya-recs{display:flex;flex-direction:column}
-.ya-r1 > .ya-rec{align-self:start}
 .ya-rr{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
 .ya-rr:last-child{border-bottom:0}
 .ya-ri{width:32px;height:32px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;font-size:16px}
@@ -741,6 +740,16 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .ya-qb small{font-size:10px;color:var(--muted);line-height:1}
 .ya-qb.off{opacity:.3}
 .ya-pabox{position:relative;height:200px;cursor:crosshair}
+.mv-bar{border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 70%,var(--surface)),var(--surface));padding:16px 22px}
+.mv-head{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.mv-head h1{margin:0;font-family:var(--font-display);font-size:25px;letter-spacing:-.02em}
+.mv-head p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.mv .ya-eqbox{height:clamp(320px,48vh,680px)}
+.mv .ya-ddbox{height:clamp(130px,17vh,260px)}
+.mv .ya-pabox{height:clamp(180px,24vh,330px)}
+.ya-rec-wide .ya-recs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+.ya-rec-wide .ya-rr:nth-last-child(2){border-bottom:0}
+.m-phone .ya-rec-wide .ya-recs{grid-template-columns:1fr}
 @media (max-width:1250px){.m-desk .ya-r1,.m-desk .ya-r2{grid-template-columns:1fr}}
 .m-phone .ya-r1,.m-phone .ya-r2{grid-template-columns:1fr}
 .m-phone .ya-eqbox{height:250px} .m-phone .ya-hint{display:none} .m-phone .ya-qs{grid-template-columns:1fr 1fr}
@@ -4056,7 +4065,7 @@ document.addEventListener('keydown', e => {
 }, true);
 
 /* ---------- the Dashboard page and its three sub-pages ---------- */
-const DTABS = [['overview', '🧭', 'Vue d’ensemble'], ['month', '📅', 'Mensuel'], ['year', '📆', 'Annuel']];
+const DTABS = [['overview', '🧭', 'Vue d’ensemble'], ['month', '📅', 'Mensuel'], ['year', '📆', 'Annuel'], ['macro', '📈', 'MacroView']];
 function renderDashboard(c) {
   const tab = DTABS.some(t => t[0] === state.dtab) ? state.dtab : (state.dtab = lsGet('ttr-dtab', 'overview'));
   const bar = `<div class="dtabs" role="tablist">${DTABS.map(([id, e, l]) => `<button type="button" role="tab" data-dtab="${id}" aria-selected="${tab === id}"><span>${e}</span>${l}</button>`).join('')}</div>`;
@@ -4065,6 +4074,7 @@ function renderDashboard(c) {
   const inPage = top ? '' : bar;
   if (tab === 'overview') { renderDash(c); if (inPage) el.insertAdjacentHTML('afterbegin', inPage); } // the first dashboard: a bit of everything
   else if (tab === 'month') renderMonthDash(c, inPage);
+  else if (tab === 'macro') renderMacro(c, inPage);
   else renderYearDash(c, inPage);
   document.querySelectorAll('[data-dtab]').forEach(b => b.addEventListener('click', () => { state.dtab = b.dataset.dtab; lsSet('ttr-dtab', state.dtab); render(); }));
 }
@@ -4496,7 +4506,14 @@ const yaSave = p => { state.ya = {...yaState(), ...p}; lsSet('ttr-ya', state.ya)
 const yaFull = s => ({from: `${s.y}-01-01`, to: `${s.y}-12-31`});
 const yaPartial = s => !!(s.from && s.to) && (s.from !== `${s.y}-01-01` || s.to !== `${s.y}-12-31`);
 const yaPeriod = s => yaPartial(s) ? {from: s.from, to: s.to} : yaFull(s);
-const yaRange = k => { const s = yaState(); return s.sync[k] ? yaPeriod(s) : yaFull(s); };
+const yaRange = k => { if (k === 'eq' && state.dtab === 'macro') return mvRange(); const s = yaState(); return s.sync[k] ? yaPeriod(s) : yaFull(s); };
+const mvRange = () => { const m = yaState().mv || {}; return m.from && m.to ? {from: m.from, to: m.to} : {from: '0000-01-01', to: '9999-12-31'}; };
+function mvLabel() {
+  const m = yaState().mv || {}; if (!m.from) return 'Tout l’historique';
+  if (m.from.slice(5) === '01-01' && m.to.slice(5) === '12-31' && m.from.slice(0, 4) === m.to.slice(0, 4)) return `Année ${m.from.slice(0, 4)}`;
+  const y1 = m.from.slice(0, 4), y2 = m.to.slice(0, 4);
+  return y1 === y2 ? `${yaLabel(m)} ${y1}` : `Du ${dShort(m.from)} ${y1} au ${dShort(m.to)} ${y2}`;
+}
 const yaTrades = (c, r) => c.trades.filter(t => t.date >= r.from && t.date <= r.to);
 // $ and % need one currency; with several currencies everything is in R
 const yaU = (c, u) => !c.cur && u !== 'R' ? 'R' : u;
@@ -4550,7 +4567,7 @@ function yaSyncBtn(k) {
   const s = yaState(), on = !!s.sync[k];
   return `<button type="button" class="ya-sync" data-yasync="${k}" aria-pressed="${on}" data-tip="${on ? 'Suit la période choisie en haut · clic pour rester sur toute l’année' : 'Reste sur toute l’année · clic pour suivre la période choisie'}">${LINK}<span>${on ? 'Synchro' : 'Année'}</span></button>`;
 }
-const yaSub = k => { const s = yaState(), r = yaRange(k); return `<span class="ya-when${s.sync[k] && yaPartial(s) ? ' on' : ''}">${yaLabel(r)}</span>`; };
+const yaSub = k => { if (k === 'eq' && state.dtab === 'macro') { const m = yaState().mv || {}; return `<span class="ya-when${m.from ? ' on' : ''}">${mvLabel()}</span>`; } const s = yaState(), r = yaRange(k); return `<span class="ya-when${s.sync[k] && yaPartial(s) ? ' on' : ''}">${yaLabel(r)}</span>`; };
 
 /* the page */
 function renderYearDash(c, bar) {
@@ -4558,19 +4575,16 @@ function renderYearDash(c, bar) {
   el.innerHTML = `${demoFlag()}${bar}
   <div class="dm ya" id="ya-cap">
     <div class="yh-wrap" id="ya-hero">${yaHero(c)}</div>
-    <div class="ya-row ya-r1">
-      <section class="dm-card ya-eq" id="ya-eq">${yaEqCard(c)}</section>
-      <section class="dm-card ya-rec" id="ya-rec">${yaRecCard(c)}</section>
-    </div>
     <div class="ya-row ya-r2">
       <section class="dm-card ya-mo" id="ya-mo">${yaMoCard(c)}</section>
       <section class="dm-card ya-qt" id="ya-qt">${yaQtCard(c)}</section>
     </div>
+    <section class="dm-card ya-rec ya-rec-wide" id="ya-rec">${yaRecCard(c)}</section>
     <p class="dm-foot">Trading Track-Record · Année ${s.y} · ${esc(c.accs.length === 1 ? c.accs[0].name : c.accs.length === c.d.accounts.filter(a => !a.archived).length ? 'Tous les comptes' : c.accs.map(a => a.name).join(' · '))}</p>
   </div>`;
   const cap = $('#ya-cap');
   cap.addEventListener('click', yaClick);
-  yaDraw(c, ['hero', 'eq', 'mo']);
+  yaDraw(c, ['hero', 'mo']);
 }
 function yaHero(c) {
   const s = yaState(), P = yaPeriod(s), list = yaTrades(c, P), ser = yaSeries(c, P), u = c.cur ? 'cur' : 'R';
@@ -4684,13 +4698,13 @@ function yaDrawEq(c) {
   const fg = css('--fg'), win = css('--win'), loss = css('--loss'), muted = css('--muted'), line = css('--line'), accent = css('--accent');
   const vals = P.map(p => yaEqVal(p, u)), dds = P.map(p => yaDdVal(p, du)), base = u === 'cur' ? ser.start : 0;
   const bounds = []; for (let k = 2; k < P.length; k++) if (P[k].t.date.slice(0, 7) !== P[k - 1].t.date.slice(0, 7)) bounds.push(k);
-  const byDate = s.axis === 'date';
+  const byDate = s.axis === 'date', multiY = P.length > 1 && P[1].t.date.slice(0, 4) !== P[P.length - 1].t.date.slice(0, 4);
   // dates: a month name where the month starts, skipped when it would touch the previous one
   const gap = Math.ceil(46 / Math.max(((cv.clientWidth || 800) - 90) / Math.max(P.length, 1), 0.01)), shown = new Set(); let lastK = -1e9;
   for (let k = 1; k < P.length; k++) if (k === 1 || P[k].t.date.slice(0, 7) !== P[k - 1].t.date.slice(0, 7)) { if (k - lastK >= gap) { shown.add(k); lastK = k; } }
   const font = {family: "'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif", size: 11.5};
   const xTicks = {color: muted, font, maxRotation: 0, autoSkip: !byDate, maxTicksLimit: byDate ? 400 : 14,
-    callback: v => byDate ? (shown.has(v) ? MONTHS_FR[+P[v].t.date.slice(5, 7) - 1] : '') : v === 0 ? 'Départ' : String(v)};
+    callback: v => byDate ? (shown.has(v) ? (multiY && (P[v].t.date.slice(5, 7) === '01' || v === 1) ? P[v].t.date.slice(0, 4) : MONTHS_FR[+P[v].t.date.slice(5, 7) - 1]) : '') : v === 0 ? 'Départ' : String(v)};
   // the same frame for the three charts: same width on the left, same slots for each trade
   const yFit = sc => { sc.width = 76; };
   const xHidden = {offset: true, grid: {display: false}, border: {display: false}, ticks: {...xTicks, display: false}};
@@ -4748,7 +4762,7 @@ function yaDrawEq(c) {
 function yaUp(e) {
   const ch = yaCh.eq; if (!ch || !ch.$drag || !ch.canvas || !ch.canvas.isConnected) return;
   const a = ch.$drag.i, b = ch.$idx(e), sel = ch.$sel, P = ch.$P; ch.$drag = null; ch.$sel = null; ch.update('none');
-  if (sel && Math.abs(b - a) >= 2) { const i1 = Math.max(1, Math.min(a, b)), i2 = Math.max(a, b); yaSetPeriod(P[i1].t.date, P[i2].t.date); }
+  if (sel && Math.abs(b - a) >= 2) { const i1 = Math.max(1, Math.min(a, b)), i2 = Math.max(a, b); if (state.dtab === 'macro') mvSet(P[i1].t.date, P[i2].t.date); else yaSetPeriod(P[i1].t.date, P[i2].t.date); }
 }
 // one place for the mouse: both charts show the same trade, and the little card shows what you chose to see
 function yaHi(i, ser, c) {
@@ -4894,6 +4908,24 @@ function yaDrawWr(c) {
   box.querySelectorAll('[data-seg]').forEach(x => { x.addEventListener('mouseenter', () => list.length && data[+x.dataset.seg] && show(+x.dataset.seg)); x.addEventListener('mouseleave', () => list.length && show(null)); });
   charts.push(yaCh.wr);
 }
+/* ---------- 📈 MacroView : the three big charts, alone on their page ---------- */
+function mvSet(from, to) { yaSave({mv: from ? {from, to} : null}); yaRepaint(['mvbar', 'eq']); }
+function mvBar(c) {
+  const m = yaState().mv || {}, years = [...new Set(c.trades.map(t => t.date.slice(0, 4)))].sort().reverse();
+  const isY = y => m.from === `${y}-01-01` && m.to === `${y}-12-31`, custom = m.from && !years.some(isY);
+  return `<div class="mv-head"><div><h1>MacroView</h1><p>Ton compte en grand : la courbe, le drawdown et chaque trade, sur le même axe</p></div>
+    <div class="yh-pre"><button type="button" data-mvper="all" aria-pressed="${!m.from}">Tout</button>${years.map(y => `<button type="button" data-mvper="${y}" aria-pressed="${isY(y)}">${y}</button>`).join('')}${custom ? `<span class="ya-custom">${mvLabel()}<button type="button" data-mvper="all" aria-label="Revenir à tout l’historique">✕</button></span>` : ''}</div>
+    <button type="button" class="dm-cam yh-cam" id="mv-cam" data-tip="Capture de la page"><span>📷</span></button></div>`;
+}
+function renderMacro(c, bar) {
+  $('#view').innerHTML = `${demoFlag()}${bar}
+  <div class="dm ya mv" id="ya-cap">
+    <section class="mv-bar" id="mv-bar">${mvBar(c)}</section>
+    <section class="dm-card ya-eq" id="ya-eq">${yaEqCard(c)}</section>
+  </div>`;
+  $('#ya-cap').addEventListener('click', yaClick);
+  yaDraw(c, ['eq']);
+}
 /* redraw only what changed */
 function yaDraw(c, keys) {
   if (keys.includes('hero')) yaDrawWr(c);
@@ -4901,7 +4933,7 @@ function yaDraw(c, keys) {
   if (keys.includes('mo')) yaDrawMo(c);
 }
 function yaRepaint(keys) {
-  const c = ctx(), box = {hero: ['#ya-hero', yaHero], eq: ['#ya-eq', yaEqCard], rec: ['#ya-rec', yaRecCard], mo: ['#ya-mo', yaMoCard], qt: ['#ya-qt', yaQtCard]};
+  const c = ctx(), box = {mvbar: ['#mv-bar', mvBar], hero: ['#ya-hero', yaHero], eq: ['#ya-eq', yaEqCard], rec: ['#ya-rec', yaRecCard], mo: ['#ya-mo', yaMoCard], qt: ['#ya-qt', yaQtCard]};
   keys.forEach(k => { const b = box[k], el = b && document.querySelector(b[0]); if (el) el.innerHTML = b[1](c); });
   yaDraw(c, keys);
 }
@@ -4912,6 +4944,8 @@ function yaClick(e) {
   if (ds.yasync) { yaSave({sync: {...s.sync, [ds.yasync]: !s.sync[ds.yasync]}}); return yaRepaint([ds.yasync]); }
   if (ds.yahov) { yaSave({hov: {...s.hov, [ds.yahov]: !s.hov[ds.yahov]}}); b.setAttribute('aria-pressed', String(!!yaState().hov[ds.yahov])); return yaTipFill(); }
   if (ds.yalg) { yaSave({plHide: {...s.plHide, [ds.yalg]: !s.plHide[ds.yalg]}}); return yaRepaint(['eq']); }
+  if (ds.mvper) { if (ds.mvper === 'all') return mvSet(null); return mvSet(`${ds.mvper}-01-01`, `${ds.mvper}-12-31`); }
+  if (b.id === 'mv-cam') return snapMonth({node: $('#ya-cap'), cam: b, title: `MacroView · ${mvLabel()}`, file: `track-record-macroview.png`});
   if (ds.yaper) { const f = yaPreset(ds.yaper, s.y); return yaSetPeriod(f.from, f.to); }
   if (ds.yago) { yaSave({y: +ds.yago, from: null, to: null}); return yaRepaint(['hero', 'eq', 'rec', 'mo', 'qt']); }
   if (b.id === 'ya-cam') { const y = s.y, P = yaPeriod(s); return snapMonth({node: $('#ya-cap'), cam: b, title: yaPartial(s) ? `${yaLabel(P)} ${y}` : `Année ${y}`, file: `track-record-${y}${yaPartial(s) ? '-' + P.from.slice(5, 7) + '-' + P.to.slice(5, 7) : ''}.png`}); }

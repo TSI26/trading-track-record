@@ -698,7 +698,7 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .ya-hov > span{font-size:11.5px;color:var(--muted);font-weight:600;margin-right:2px}
 .ya-hov button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;padding:4px 11px;font-size:11.5px;font-weight:600;transition:all .15s}
 .ya-hov button:hover:not(:disabled){color:var(--fg);border-color:var(--line-2)}
-.ya-hov button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--line-2)}
+.ya-hov button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 12%,var(--surface-2));color:var(--fg);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
 .ya-hov button:disabled{opacity:.4;cursor:not-allowed}
 .ya-eqbox{position:relative;height:320px;cursor:crosshair}
 .ya-ddbox{position:relative;height:130px;cursor:crosshair}
@@ -741,6 +741,22 @@ table.jt{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
 .ya-qb small{font-size:10px;color:var(--muted);line-height:1}
 .ya-qb.off{opacity:.3}
 .ya-pabox{position:relative;height:200px;cursor:crosshair}
+.ya-exp{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--muted);transition:color .15s,border-color .15s,background .15s,transform .15s}
+.ya-exp:hover{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 50%,var(--line));background:color-mix(in srgb,var(--accent) 10%,var(--bg));transform:scale(1.06)}
+.ya-r1 .ya-eq .ya-eqbox{height:400px}
+.yx-back{position:fixed;inset:0;z-index:70;display:flex;padding:18px;background:rgba(3,5,10,.62);backdrop-filter:blur(4px);animation:fadein .22s ease-out}
+.yx-back.out{animation:fadeout .3s ease-in forwards}
+@keyframes fadeout{to{opacity:0}}
+.yx{flex:1;display:flex;flex-direction:column;min-height:0;overflow:auto;box-shadow:0 30px 80px -20px rgba(0,0,0,.7);will-change:transform}
+.yx-charts{flex:1;display:flex;flex-direction:column;min-height:0}
+.yx .ya-eqbox{flex:1 1 0;min-height:240px;height:auto}
+.yx .ya-ddbox{flex:0 0 17%;min-height:110px;height:auto}
+.yx .ya-pabox{flex:0 0 24%;min-height:150px;height:auto}
+.yx-x{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:14px;transition:all .15s}
+.yx-x:hover{color:var(--fg);border-color:var(--line-2);background:var(--surface-2)}
+body.yx-open{overflow:hidden}
+.m-phone ~ .yx-back,.yx-back{}
+@media (max-width:700px){.yx-back{padding:0}.yx{border-radius:0}}
 @media (max-width:1250px){.m-desk .ya-r1,.m-desk .ya-r2{grid-template-columns:1fr}}
 .m-phone .ya-r1,.m-phone .ya-r2{grid-template-columns:1fr}
 .m-phone .ya-eqbox{height:250px} .m-phone .ya-hint{display:none} .m-phone .ya-qs{grid-template-columns:1fr 1fr}
@@ -4621,21 +4637,54 @@ function yaEqUnits(c) {
   const s = yaState(), on = s.sync.eq, e = yaU(c, s.eqUnit);
   return {eq: e, dd: on ? e : yaU(c, s.ddUnit), pl: on ? e : yaU(c, s.plUnit), on};
 }
-function yaEqCard(c) {
-  const s = yaState(), r = yaRange('eq'), ser = yaSeries(c, r), U = yaEqUnits(c), u = U.eq, du = U.dd, pu = U.pl, n = ser.pts.length - 1;
+// what the enlarged curve shows (switched on / off with the « Afficher » buttons)
+const YA_LAY = [['dd', '📉 Drawdown'], ['pa', '📊 P&L par trade'], ['movs', '🔷 Dépôts / retraits'], ['peak', '🏔️ Plus haut'], ['base', '➖ Ligne de départ'], ['months', '┆ Séparateurs de mois']];
+const yaLayers = () => ({dd: true, pa: true, movs: true, peak: false, base: true, months: true, ...(yaState().layers || {})});
+const EXPAND = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+function yaEqCard(c, big = false) {
+  const s = yaState(), r = yaRange('eq'), ser = yaSeries(c, r), U = yaEqUnits(c), u = U.eq, du = U.dd, pu = U.pl, n = ser.pts.length - 1, L = yaLayers(), pre = big ? 'x' : '';
   const last = ser.pts[n], first = ser.pts[0];
   const head = !n ? '' : u === 'cur' ? `${money(first.bal, c.cur)} → <b>${money(last.bal, c.cur)}</b> · <span class="${sgnCls(last.pct)}">${yaFmt(last.pct, 'pct', c)}</span>` : u === 'R' ? `<b class="${sgnCls(last.cr)}">${fR(last.cr)}</b> sur ${n} trades` : `<b class="${sgnCls(last.pct)}">${yaFmt(last.pct, 'pct', c)}</b> sur ${n} trades`;
+  if (!big) return `<div class="dm-card-head"><div><h3>📈 Equity curve</h3><p>${yaSub('eq')}${head ? ' · ' + head : ''}</p></div>
+      <button type="button" class="ya-exp" data-yaexp="open" data-tip="Agrandir · tous les réglages">${EXPAND}</button></div>
+    ${n ? `<div class="ya-eqbox"><canvas id="ya-eq-cv"></canvas><div class="ya-tip" id="ya-tip" hidden></div></div>` : `<div class="dm-box">${dmEmpty()}</div>`}`;
   const mdd = ser.pts.reduce((a, p) => Math.min(a, yaDdVal(p, du)), 0), now = yaDdVal(last, du);
   const ddSeg = yaSeg('ddUnit', du, [{v: 'pct', l: '%', off: !c.cur}, {v: 'cur', l: esc(curLabel(c)), off: !c.cur}, {v: 'R', l: 'R'}]);
   const plSeg = yaUnits(c, 'plUnit', pu);
   return `<div class="dm-card-head"><div><h3>📈 Equity curve</h3><p>${yaSub('eq')}${head ? ' · ' + head : ''}</p></div>
-      <div class="ya-ctl">${yaSeg('axis', s.axis, [{v: 'trade', l: 'Trades'}, {v: 'date', l: 'Dates'}])}${yaUnits(c, 'eqUnit', s.eqUnit)}<button type="button" class="ya-sync" data-yasync="eq" aria-pressed="${U.on}" data-tip="${U.on ? 'Les 3 graphiques se règlent ensemble ici et suivent la période du haut · clic pour régler chacun à part' : 'Chaque graphique a ses réglages, sur toute l’année · clic pour tout régler ensemble'}">${LINK}<span>${U.on ? 'Synchro' : 'Séparés'}</span></button></div></div>
+      <div class="ya-ctl">${yaSeg('axis', s.axis, [{v: 'trade', l: 'Trades'}, {v: 'date', l: 'Dates'}])}${yaUnits(c, 'eqUnit', s.eqUnit)}<button type="button" class="ya-sync" data-yasync="eq" aria-pressed="${U.on}" data-tip="${U.on ? 'Tout se règle ensemble ici et suit la période du haut · clic pour régler chaque graphique à part' : 'Chaque graphique a ses réglages, sur toute l’année · clic pour tout régler ensemble'}">${LINK}<span>${U.on ? 'Synchro' : 'Séparés'}</span></button>
+      <button type="button" class="yx-x" data-yaexp="close" aria-label="Fermer">✕</button></div></div>
+    <div class="ya-hov"><span>Afficher :</span>${YA_LAY.map(([k, l]) => `<button type="button" data-yalay="${k}" aria-pressed="${!!L[k]}"${k === 'movs' && u !== 'cur' ? ' disabled data-tip="Visible en $ seulement"' : ''}>${l}</button>`).join('')}</div>
     <div class="ya-hov"><span>Au survol :</span>${YA_HOV.map(([k, l]) => { const off = !c.cur && (k === 'bal' || k === 'pct' || k === 'tcur'); return `<button type="button" data-yahov="${k}" aria-pressed="${!!s.hov[k] && !off}"${off ? ` disabled data-tip="${MULTI_TIP}"` : ''}>${k === 'tcur' && c.cur ? `💵 Trade ${esc(curSym(c.cur))}` : l}</button>`; }).join('')}</div>
-    ${n ? `<div class="ya-eqbox"><canvas id="ya-eq-cv"></canvas><div class="ya-tip" id="ya-tip" hidden></div></div>
-    <div class="ya-sub-head"><div><h4>📉 Drawdown</h4><p>Sous le plus haut · aujourd’hui <b class="${now < 0 ? 'neg' : ''}">${yaFmt(now, du, c)}</b> · pire <b class="${mdd < 0 ? 'neg' : ''}">${yaFmt(mdd, du, c)}</b></p></div>${U.on ? '' : ddSeg}</div>
-    <div class="ya-ddbox"><canvas id="ya-dd-cv"></canvas></div>
-    <div class="ya-sub-head"><div><h4>📊 P&L par trade</h4><div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-yalg="${k}" aria-pressed="${!s.plHide[k]}"${k === 'rt' && pu !== 'R' ? ' hidden' : ''}><i></i>${l}</button>`).join('')}</div></div>${U.on ? '' : plSeg}</div>
-    <div class="ya-pabox"><canvas id="ya-pa-cv"></canvas></div>` : `<div class="dm-box">${dmEmpty()}</div>`}`;
+    ${n ? `<div class="yx-charts"><div class="ya-eqbox"><canvas id="xya-eq-cv"></canvas><div class="ya-tip" id="xya-tip" hidden></div></div>
+    ${L.dd ? `<div class="ya-sub-head"><div><h4>📉 Drawdown</h4><p>Sous le plus haut · aujourd’hui <b class="${now < 0 ? 'neg' : ''}">${yaFmt(now, du, c)}</b> · pire <b class="${mdd < 0 ? 'neg' : ''}">${yaFmt(mdd, du, c)}</b></p></div>${U.on ? '' : ddSeg}</div>
+    <div class="ya-ddbox"><canvas id="xya-dd-cv"></canvas></div>` : ''}
+    ${L.pa ? `<div class="ya-sub-head"><div><h4>📊 P&L par trade</h4><div class="dm-legend">${[['rt', 'R/Trade', 'w'], ['cum', 'Cumul', 'o']].map(([k, l, cl]) => `<button type="button" class="dm-lg ${cl}" data-yalg="${k}" aria-pressed="${!s.plHide[k]}"${k === 'rt' && pu !== 'R' ? ' hidden' : ''}><i></i>${l}</button>`).join('')}</div></div>${U.on ? '' : plSeg}</div>
+    <div class="ya-pabox"><canvas id="xya-pa-cv"></canvas></div>` : ''}</div>` : `<div class="dm-box">${dmEmpty()}</div>`}`;
+}
+// the enlarged view: the card grows from its place to (almost) the whole screen
+function yaOpenX() {
+  if ($('#yx-root')) return;
+  const c = ctx(), card = $('#ya-eq'), root = document.createElement('div');
+  root.id = 'yx-root'; root.className = 'yx-back';
+  root.innerHTML = `<section class="dm-card yx ya-eq" id="yx-eq">${yaEqCard(c, true)}</section>`;
+  document.body.appendChild(root); document.body.classList.add('yx-open');
+  const panel = root.firstElementChild;
+  if (card) { const a = card.getBoundingClientRect(), b = panel.getBoundingClientRect();
+    panel.style.transformOrigin = 'top left'; panel.style.transform = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`; panel.style.opacity = '.4';
+    void panel.offsetWidth; panel.style.transition = 'transform .42s cubic-bezier(.2,.85,.25,1), opacity .3s'; panel.style.transform = ''; panel.style.opacity = ''; }
+  root.addEventListener('click', e => { if (e.target === root) return yaCloseX(); yaClick(e); });
+  document.addEventListener('keydown', yaEsc);
+  setTimeout(() => { if ($('#yx-root')) yaDrawEq(ctx(), 'x'); }, card ? 300 : 0);
+}
+function yaEsc(e) { if (e.key === 'Escape') yaCloseX(); }
+function yaCloseX() {
+  const root = $('#yx-root'); if (!root || root.$closing) return; root.$closing = true;
+  document.removeEventListener('keydown', yaEsc);
+  const panel = root.firstElementChild, card = $('#ya-eq');
+  root.classList.add('out');
+  if (card) { const a = card.getBoundingClientRect(), b = panel.getBoundingClientRect(); panel.style.transition = 'transform .32s cubic-bezier(.4,0,.6,1), opacity .3s'; panel.style.transform = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`; panel.style.opacity = '0'; }
+  setTimeout(() => { ['xeq', 'xdd', 'xpa'].forEach(yaKill); root.remove(); document.body.classList.remove('yx-open'); }, 320);
 }
 // a thin line that follows the mouse, a soft band while selecting, and the month separators
 const yaCross = {id: 'yaCross',
@@ -4668,7 +4717,7 @@ const yaMarks = {id: 'yaMarks',
       let x0 = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x; x0 = Math.max(A.left + 2, Math.min(A.right - w - 2, x0)); const y0 = Math.max(A.top + 2, Math.min(A.bottom - h - 2, yy - h / 2));
       g.fillStyle = css('--surface'); g.globalAlpha = .9; g.beginPath(); g.roundRect(x0, y0, w, h, 6); g.fill(); g.globalAlpha = 1; g.strokeStyle = color + '66'; g.lineWidth = 1; g.stroke(); g.fillStyle = color; g.textBaseline = 'middle'; g.fillText(txt, x0 + 6, y0 + h / 2 + .5); };
     g.save();
-    if (op.base != null) { const py = y.getPixelForValue(op.base); g.strokeStyle = css('--muted') + 'aa'; g.setLineDash([5, 5]); g.lineWidth = 1; g.beginPath(); g.moveTo(A.left, py); g.lineTo(A.right, py); g.stroke(); g.setLineDash([]); if (op.baseTxt) pill(op.baseTxt, A.left + 6, py - 14, css('--muted')); }
+    if (op.base != null) { const py = y.getPixelForValue(op.base); g.strokeStyle = css('--muted') + 'aa'; g.setLineDash([5, 5]); g.lineWidth = 1; g.beginPath(); g.moveTo(A.left, py); g.lineTo(A.right, py); g.stroke(); g.setLineDash([]); }
     (op.movs || []).forEach(m => { const p = meta[m.i]; if (!p) return; const col = css(m.v > 0 ? '--dep' : '--ret'); g.fillStyle = col; g.save(); g.translate(p.x, p.y); g.rotate(Math.PI / 4); g.fillRect(-4, -4, 8, 8); g.restore(); });
     if (ch.$hi == null && op.mark) { const p = meta[op.mark.i]; if (p) { const col = op.mark.color; g.fillStyle = col; g.strokeStyle = css('--surface'); g.lineWidth = 2; g.beginPath(); g.arc(p.x, p.y, 4, 0, Math.PI * 2); g.fill(); g.stroke(); pill(op.mark.txt, p.x, op.mark.below ? p.y + 16 : p.y - 16, col, 'center'); } }
     if (op.end) { const p = meta[meta.length - 1]; if (p) { g.fillStyle = op.end + '30'; g.beginPath(); g.arc(p.x, p.y, 8, 0, Math.PI * 2); g.fill(); g.fillStyle = op.end; g.beginPath(); g.arc(p.x, p.y, 3.8, 0, Math.PI * 2); g.fill(); } }
@@ -4677,14 +4726,15 @@ const yaMarks = {id: 'yaMarks',
 };
 let yaCh = {};
 function yaKill(k) { const ch = yaCh[k]; if (ch) { const i = charts.indexOf(ch); if (i > -1) charts.splice(i, 1); ch.destroy(); } delete yaCh[k]; }
-function yaDrawEq(c) {
-  yaKill('eq'); yaKill('dd'); yaKill('pa');
-  const s = yaState(), cv = $('#ya-eq-cv'), dv = $('#ya-dd-cv'), pv = $('#ya-pa-cv'); if (!cv) return;
+function yaDrawEq(c, pre = '') {
+  yaKill(pre + 'eq'); yaKill(pre + 'dd'); yaKill(pre + 'pa');
+  const s = yaState(), cv = $('#' + pre + 'ya-eq-cv'), dv = $('#' + pre + 'ya-dd-cv'), pv = $('#' + pre + 'ya-pa-cv'); if (!cv) return;
+  const L = pre ? yaLayers() : {movs: true, base: true, months: true}, K = {eq: pre + 'eq', dd: pre + 'dd', pa: pre + 'pa'};
   const r = yaRange('eq'), ser = yaSeries(c, r), P = ser.pts, U = yaEqUnits(c), u = U.eq, du = U.dd, pu = U.pl;
   const fg = css('--fg'), win = css('--win'), loss = css('--loss'), muted = css('--muted'), line = css('--line'), accent = css('--accent');
   const vals = P.map(p => yaEqVal(p, u)), dds = P.map(p => yaDdVal(p, du)), base = u === 'cur' ? ser.start : 0;
   const bounds = []; for (let k = 2; k < P.length; k++) if (P[k].t.date.slice(0, 7) !== P[k - 1].t.date.slice(0, 7)) bounds.push(k);
-  const byDate = s.axis === 'date';
+  const byDate = s.axis === 'date', seps = byDate && L.months ? bounds : [];
   // dates: a month name where the month starts, skipped when it would touch the previous one
   const gap = Math.ceil(46 / Math.max(((cv.clientWidth || 800) - 90) / Math.max(P.length, 1), 0.01)), shown = new Set(); let lastK = -1e9;
   for (let k = 1; k < P.length; k++) if (k === 1 || P[k].t.date.slice(0, 7) !== P[k - 1].t.date.slice(0, 7)) { if (k - lastK >= gap) { shown.add(k); lastK = k; } }
@@ -4694,22 +4744,23 @@ function yaDrawEq(c) {
   // the same frame for the three charts: same width on the left, same slots for each trade
   const yFit = sc => { sc.width = 76; };
   const xHidden = {offset: true, grid: {display: false}, border: {display: false}, ticks: {...xTicks, display: false}};
+  const xShown = {offset: true, grid: {display: false}, border: {color: line}, ticks: xTicks};
   const common = {maintainAspectRatio: false, animation: {duration: 450, easing: 'easeOutQuart'}, events: [], layout: {padding: {top: 8, right: 12, left: 0}}};
   const labels = P.map((_, i) => i);
   const pk = vals.reduce((b, v, i) => v > vals[b] ? i : b, 0);
-  const movs = u === 'cur' ? P.map((p, i) => ({i, v: p.mov})).filter(m => m.v) : [];
-  yaCh.eq = new Chart(cv, {type: 'line', plugins: [yaCross, yaMarks], data: {labels, datasets: [{data: vals, borderColor: fg, borderWidth: 2.4, tension: 0.32, cubicInterpolationMode: 'monotone', pointRadius: 0,
+  const movs = u === 'cur' && L.movs ? P.map((p, i) => ({i, v: p.mov})).filter(m => m.v) : [];
+  yaCh[K.eq] = new Chart(cv, {type: 'line', plugins: [yaCross, yaMarks], data: {labels, datasets: [{data: vals, borderColor: fg, borderWidth: 2.4, tension: 0.32, cubicInterpolationMode: 'monotone', pointRadius: 0,
       fill: {target: {value: base}, above: win + '24', below: loss + '2e'}}]},
-    options: {...common, scales: {x: xHidden, y: {grid: {color: line}, border: {display: false}, afterFit: yFit, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => yaFmt0(v, u, c)}}},
-      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: byDate ? bounds : [], dot: i => vals[i] >= base ? win : loss},
-        yaMarks: {glow: fg + '40', base, baseTxt: `Départ · ${yaFmt(base, u, c, false)}`, movs, mark: pk > 0 && vals[pk] > base ? {i: pk, txt: `Plus haut · ${yaFmt(vals[pk], u, c, u !== 'cur')}`, color: win} : null, end: vals[vals.length - 1] >= base ? win : loss}}}});
-  charts.push(yaCh.eq);
+    options: {...common, scales: {x: dv || pv ? xHidden : xShown, y: {grid: {color: line}, border: {display: false}, afterFit: yFit, ticks: {color: muted, font, maxTicksLimit: 6, callback: v => yaFmt0(v, u, c)}}},
+      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: seps, dot: i => vals[i] >= base ? win : loss},
+        yaMarks: {glow: fg + '40', base: L.base ? base : null, movs, mark: L.peak && pk > 0 && vals[pk] > base ? {i: pk, txt: `Plus haut · ${yaFmt(vals[pk], u, c, u !== 'cur')}`, color: win} : null, end: vals[vals.length - 1] >= base ? win : loss}}}});
+  charts.push(yaCh[K.eq]);
   const wi = dds.reduce((b, v, i) => v < dds[b] ? i : b, 0);
-  yaCh.dd = new Chart(dv, {type: 'line', plugins: [yaCross, yaMarks], data: {labels, datasets: [{data: dds, borderColor: loss, borderWidth: 1.6, tension: 0.3, cubicInterpolationMode: 'monotone', pointRadius: 0, fill: {target: 'origin', below: loss + '30', above: 'transparent'}}]},
-    options: {...common, layout: {padding: {top: 4, right: 12, left: 0}}, scales: {x: xHidden,
+  if (dv) { yaCh[K.dd] = new Chart(dv, {type: 'line', plugins: [yaCross, yaMarks], data: {labels, datasets: [{data: dds, borderColor: loss, borderWidth: 1.6, tension: 0.3, cubicInterpolationMode: 'monotone', pointRadius: 0, fill: {target: 'origin', below: loss + '30', above: 'transparent'}}]},
+    options: {...common, layout: {padding: {top: 4, right: 12, left: 0}}, scales: {x: pv ? xHidden : xShown,
       y: {max: 0, grid: {color: line}, border: {display: false}, afterFit: yFit, ticks: {color: muted, font, maxTicksLimit: 3, callback: v => yaFmt0(v, du, c)}}},
-      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: byDate ? bounds : [], dot: () => loss}, yaMarks: {mark: dds[wi] < 0 ? {i: wi, txt: `Pire · ${yaFmt(dds[wi], du, c)}`, color: loss, below: true} : null}}}});
-  charts.push(yaCh.dd);
+      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: seps, dot: () => loss}, yaMarks: {mark: dds[wi] < 0 ? {i: wi, txt: `Pire · ${yaFmt(dds[wi], du, c)}`, color: loss, below: true} : null}}}});
+  charts.push(yaCh[K.dd]); }
   // P&L of each trade, in the slot of its point on the curve (slot 0 = the start, no bar)
   const colOf = t => t.res === 'win' ? win : t.res === 'loss' ? loss : muted;
   const barV = P.map(p => !p.t ? null : pu === 'cur' ? p.t.net : pu === 'R' ? (p.t.rReal || 0) : (p.bal - p.t.net > 0 ? p.t.net / (p.bal - p.t.net) * 100 : 0));
@@ -4723,42 +4774,42 @@ function yaDrawEq(c) {
   const lo = Math.floor(lo0 / step - 0.15) * step || 0, hi = Math.ceil(hi0 / step + 0.15) * step || 0, cLo = Math.min(0, ...cumV), cHi = Math.max(0, ...cumV);
   const kc = Math.max(hi > 0 ? cHi / hi : (cHi ? Infinity : 0), lo < 0 ? cLo / lo : (cLo ? Infinity : 0), 1e-9);
   const yc = isFinite(kc) ? {display: false, min: lo * kc, max: hi * kc} : {display: false};
-  yaCh.pa = new Chart(pv, {plugins: [yaCross], data: {labels, datasets: [
+  if (pv) { yaCh[K.pa] = new Chart(pv, {plugins: [yaCross], data: {labels, datasets: [
       {type: 'line', data: cumV, yAxisID: 'ycum', hidden: !!hide.cum, borderColor: accent, borderWidth: 2, tension: 0.25, pointRadius: 0, order: 0},
       {type: 'bar', data: barV, backgroundColor: x => { const p = P[x.dataIndex], h = x.chart.$hi, col = p && p.t ? colOf(p.t) : muted; return h == null || h === x.dataIndex ? col : col + '50'; }, borderRadius: P.length > 120 ? 1 : 3, maxBarThickness: 30, categoryPercentage: .82, barPercentage: .9, order: 2},
       {type: 'scatter', data: rts, hidden: !showRt, pointStyle: 'line', pointRadius: tick, borderColor: fg, borderWidth: 2.2, order: 1}]},
     options: {...common, layout: {padding: {top: 6, right: 12, left: 0}}, scales: {x: {offset: true, grid: {display: false}, border: {color: line}, ticks: xTicks},
       y: {min: lo, max: hi, grid: {color: line}, border: {display: false}, afterFit: yFit, ticks: {color: muted, font, stepSize: step, maxTicksLimit: 9, callback: v => yaFmt0(v, pu, c)}},
       ycum: yc},
-      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: byDate ? bounds : [], line: true}}}});
-  charts.push(yaCh.pa);
+      plugins: {legend: {display: false}, tooltip: {enabled: false}, yaCross: {bounds: seps, line: true}}}});
+  charts.push(yaCh[K.pa]); }
   // the mouse: same trade on the three charts, a card with the chosen details, drag on the curve to choose a period
   const idx = (ch, e) => { const x = ch.scales.x, b = ch.canvas.getBoundingClientRect(); return Math.max(0, Math.min(P.length - 1, Math.round(x.getValueForPixel(e.clientX - b.left)))); };
   const inside = (ch, e) => { const a = ch.chartArea, b = ch.canvas.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top; return x >= a.left - 6 && x <= a.right + 6 && y >= a.top - 6 && y <= a.bottom + 6; };
-  [yaCh.eq, yaCh.dd, yaCh.pa].forEach(ch => {
-    ch.canvas.addEventListener('mousemove', e => { if (!inside(ch, e) && !yaCh.eq.$drag) return yaHi(null); const i = idx(ch, e); if (yaCh.eq.$drag && ch === yaCh.eq) { yaCh.eq.$sel = [yaCh.eq.$drag.i, i]; } yaHi(i, ser, c); });
-    ch.canvas.addEventListener('mouseleave', () => { if (!yaCh.eq || !yaCh.eq.$drag) yaHi(null); });
+  [yaCh[K.eq], yaCh[K.dd], yaCh[K.pa]].filter(Boolean).forEach(ch => {
+    ch.canvas.addEventListener('mousemove', e => { if (!inside(ch, e) && !yaCh[K.eq].$drag) return yaHi(null, null, null, pre); const i = idx(ch, e); if (yaCh[K.eq].$drag && ch === yaCh[K.eq]) { yaCh[K.eq].$sel = [yaCh[K.eq].$drag.i, i]; } yaHi(i, ser, c, pre); });
+    ch.canvas.addEventListener('mouseleave', () => { if (!yaCh[K.eq] || !yaCh[K.eq].$drag) yaHi(null, null, null, pre); });
   });
-  const eq = yaCh.eq;
+  const eq = yaCh[K.eq];
   eq.canvas.addEventListener('mousedown', e => { if (e.button || !inside(eq, e)) return; e.preventDefault(); eq.$drag = {i: idx(eq, e)}; eq.$sel = null; });
   eq.$P = P; eq.$idx = e => idx(eq, e);
   if (!yaDrawEq.bound) { yaDrawEq.bound = true; window.addEventListener('mouseup', yaUp); }
 }
 // end of a drag on the curve: the selected stretch becomes the period
 function yaUp(e) {
-  const ch = yaCh.eq; if (!ch || !ch.$drag || !ch.canvas || !ch.canvas.isConnected) return;
+  const ch = ['eq', 'xeq'].map(k => yaCh[k]).find(x => x && x.$drag); if (!ch || !ch.canvas || !ch.canvas.isConnected) return;
   const a = ch.$drag.i, b = ch.$idx(e), sel = ch.$sel, P = ch.$P; ch.$drag = null; ch.$sel = null; ch.update('none');
   if (sel && Math.abs(b - a) >= 2) { const i1 = Math.max(1, Math.min(a, b)), i2 = Math.max(a, b); yaSetPeriod(P[i1].t.date, P[i2].t.date); }
 }
 // one place for the mouse: both charts show the same trade, and the little card shows what you chose to see
-function yaHi(i, ser, c) {
-  ['eq', 'dd', 'pa'].forEach(k => { const ch = yaCh[k]; if (!ch || !ch.canvas || !ch.canvas.isConnected) return; if (ch.$hi !== i || ch.$sel) { ch.$hi = i; if (!ch.$raf) ch.$raf = requestAnimationFrame(() => { ch.$raf = 0; if (ch.canvas && ch.canvas.isConnected) ch.update('none'); }); } });
-  const tip = $('#ya-tip'); if (!tip) return;
+function yaHi(i, ser, c, pre = '') {
+  ['eq', 'dd', 'pa'].forEach(k => { const ch = yaCh[pre + k]; if (!ch || !ch.canvas || !ch.canvas.isConnected) return; if (ch.$hi !== i || ch.$sel) { ch.$hi = i; if (!ch.$raf) ch.$raf = requestAnimationFrame(() => { ch.$raf = 0; if (ch.canvas && ch.canvas.isConnected) ch.update('none'); }); } });
+  const tip = $('#' + pre + 'ya-tip'); if (!tip) return;
   if (i == null || !ser) { tip.hidden = true; return; }
-  yaCh.tip = {i, ser, c}; yaTipFill();
+  yaCh[pre + 'tip'] = {i, ser, c}; tip.hidden = false; yaTipFill(pre);
 }
-function yaTipFill() {
-  const tip = $('#ya-tip'), T = yaCh.tip, ch = yaCh.eq; if (!tip || !T || !ch) return;
+function yaTipFill(pre = '') {
+  const tip = $('#' + pre + 'ya-tip'), T = yaCh[pre + 'tip'], ch = yaCh[pre + 'eq']; if (!tip || !T || !ch || tip.hidden) return;
   const {i, ser, c} = T, s = yaState(), h = s.hov, p = ser.pts[i], t = p.t, u = yaU(c, s.eqUnit), du = yaU(c, s.ddUnit);
   const row = (ico, l, v, cls = '') => `<div class="ya-tr"><span>${ico} ${l}</span><b class="num ${cls}">${v}</b></div>`;
   let html = '';
@@ -4774,7 +4825,7 @@ function yaTipFill() {
     if (h.dd) { const v = yaDdVal(p, du); html += row('📉', 'Drawdown', v ? yaFmt(v, du, c) : 'au plus haut', v ? 'neg' : 'pos'); }
     if (p.mov && c.cur) html += row(p.mov > 0 ? '🔷' : '🔶', p.mov > 0 ? 'Dépôt avant' : 'Retrait avant', money(p.mov, c.cur, true));
   }
-  tip.innerHTML = html; tip.hidden = false;
+  tip.innerHTML = html;
   const pt = ch.getDatasetMeta(0).data[i], box = tip.parentElement.getBoundingClientRect(), w = tip.offsetWidth, a = ch.chartArea;
   if (!pt) return;
   let x = pt.x + 18; if (x + w > box.width - 6) x = pt.x - w - 18;
@@ -4903,6 +4954,7 @@ function yaDraw(c, keys) {
 function yaRepaint(keys) {
   const c = ctx(), box = {hero: ['#ya-hero', yaHero], eq: ['#ya-eq', yaEqCard], rec: ['#ya-rec', yaRecCard], mo: ['#ya-mo', yaMoCard], qt: ['#ya-qt', yaQtCard]};
   keys.forEach(k => { const b = box[k], el = b && document.querySelector(b[0]); if (el) el.innerHTML = b[1](c); });
+  if (keys.includes('eq') && $('#yx-eq')) { $('#yx-eq').innerHTML = yaEqCard(c, true); yaDrawEq(c, 'x'); }
   yaDraw(c, keys);
 }
 function yaClick(e) {
@@ -4910,7 +4962,9 @@ function yaClick(e) {
   const ds = b.dataset, s = yaState();
   if (ds.yaseg) { const [k, v] = ds.yaseg.split(':'); yaSave({[k]: v}); const card = {axis: 'eq', eqUnit: 'eq', ddUnit: 'eq', moUnit: 'mo', qtUnit: 'qt', recUnit: 'rec', plUnit: 'eq'}[k]; return yaRepaint([card]); }
   if (ds.yasync) { yaSave({sync: {...s.sync, [ds.yasync]: !s.sync[ds.yasync]}}); return yaRepaint([ds.yasync]); }
-  if (ds.yahov) { yaSave({hov: {...s.hov, [ds.yahov]: !s.hov[ds.yahov]}}); b.setAttribute('aria-pressed', String(!!yaState().hov[ds.yahov])); return yaTipFill(); }
+  if (ds.yahov) { yaSave({hov: {...s.hov, [ds.yahov]: !s.hov[ds.yahov]}}); document.querySelectorAll(`[data-yahov="${ds.yahov}"]`).forEach(x => x.setAttribute('aria-pressed', String(!!yaState().hov[ds.yahov]))); yaTipFill(''); return yaTipFill('x'); }
+  if (ds.yalay) { const L = yaLayers(); yaSave({layers: {...L, [ds.yalay]: !L[ds.yalay]}}); return yaRepaint(['eq']); }
+  if (ds.yaexp) return ds.yaexp === 'open' ? yaOpenX() : yaCloseX();
   if (ds.yalg) { yaSave({plHide: {...s.plHide, [ds.yalg]: !s.plHide[ds.yalg]}}); return yaRepaint(['eq']); }
   if (ds.yaper) { const f = yaPreset(ds.yaper, s.y); return yaSetPeriod(f.from, f.to); }
   if (ds.yago) { yaSave({y: +ds.yago, from: null, to: null}); return yaRepaint(['hero', 'eq', 'rec', 'mo', 'qt']); }
